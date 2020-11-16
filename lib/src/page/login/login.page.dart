@@ -146,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 20.0),
                 _crearPassword(context, bloc),
                 SizedBox(height: 20.0),
-                _crearComboRutas(context),
+                _crearComboRutas(context, bloc),
                 SizedBox(height: 30.0),
                 _crearBoton(bloc, context),
                 SizedBox(height: 5.0),
@@ -259,8 +259,10 @@ class _LoginPageState extends State<LoginPage> {
     return lista;
   }
 
-  Widget _crearComboRutas(BuildContext context) {
-
+  Widget _crearComboRutas(BuildContext context, LoginBloc bloc) {
+return StreamBuilder(
+      stream: bloc.rutaStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
           child: DropdownButtonFormField(
@@ -272,30 +274,23 @@ class _LoginPageState extends State<LoginPage> {
               labelStyle: TextStyle(color: colorRojoBase()),
               labelText: 'Ruta',
               focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: colorRojoBase())),              
+                  borderSide: BorderSide(color: colorRojoBase())),       
+                  errorText: snapshot.error,       
             ),
             value: _rutaSeleccionada,
             items: getOpcionesDropDown(),
             onChanged: (opt) {
               setState(() {
                 _rutaSeleccionada = opt;
+                bloc.changeRuta(_rutaSeleccionada.codigo);
               });
+              
             },
           ),
     );
-    // return Container(
-    //   child: Expanded(
-    //     child: DropdownButton(
-    //       value: _rutaSeleccionada,
-    //       items: getOpcionesDropDown(),
-    //       onChanged: (opt) {
-    //         setState(() {
-    //           _rutaSeleccionada = opt;
-    //         });
-    //       },
-    //     ),
-    //   ),
-    // );
+          },
+    );
+   
   }
 
   Widget _crearBoton(LoginBloc bloc, BuildContext context) {

@@ -18,4 +18,14 @@ class Validators {
       sink.addError('La contraseña debe mayor a 6 caracteres.');
     }
   });
+
+   final validarRuta = StreamTransformer<String, String>.fromHandlers(
+      handleData: (ruta, sink) {
+    if (ruta.length >= 0) {
+      sink.add(ruta);
+    } else {
+      sink.addError('Debe seleccionar Ruta.');
+    }
+  });
+
 }
