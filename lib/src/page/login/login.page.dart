@@ -1,6 +1,9 @@
 import 'package:dipalza_movil/src/bloc/login_bloc.dart';
+import 'package:dipalza_movil/src/model/login_response_model.dart';
 import 'package:dipalza_movil/src/model/respuesta_model.dart';
+import 'package:dipalza_movil/src/model/rutas_model.dart';
 import 'package:dipalza_movil/src/provider/login_provider.dart';
+import 'package:dipalza_movil/src/provider/rutas_provider.dart';
 import 'package:dipalza_movil/src/provider/vendedor_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -22,11 +25,14 @@ class _LoginPageState extends State<LoginPage> {
   bool _blockBotton = true;
   final vendedorProvider = new VenderdorProvider();
   final prefs = new PreferenciasUsuario();
+  RutasModel _rutaSeleccionada;
+  List<RutasModel> _listaRutas = [];
 
   @override
   void initState() {
     super.initState();
-    _textUsuario = new TextEditingController(text: prefs.usuario);
+    this.getListaRutas();
+    _textUsuario = new TextEditingController(text: prefs.rut);
     _textPassword = new TextEditingController(text: prefs.password);
   }
 
@@ -92,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
   //     ],
   //   );
   // }
-
+  
   Widget _loginForm(BuildContext context) {
     final bloc = LoginProvider.of(context);
     final size = MediaQuery.of(context).size;
@@ -104,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
         children: <Widget>[
           SafeArea(
             child: Container(
-              height: 80.0,
+              height: (size.height - (size.height * 0.85)) / 2,
             ),
           ),
           Container(
@@ -127,29 +133,43 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 // Text('Ingreso' , style: TextStyle(fontSize: 20.0),),
                 Hero(
-                tag: 'logo_diplaza',
-                child: Image(
-                  image:
-                      AssetImage('assets/image/logo_dipalza_transparente.png'),
-                  width: 200.0,
-                  fit: BoxFit.cover,
+                  tag: 'logo_diplaza',
+                  child: Image(
+                    image: AssetImage(
+                        'assets/image/logo_dipalza_transparente.png'),
+                    width: 200.0,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
                 SizedBox(height: 10.0),
                 _crearUsuario(context, bloc),
                 SizedBox(height: 20.0),
                 _crearPassword(context, bloc),
+                SizedBox(height: 20.0),
+                _crearComboRutas(context),
                 SizedBox(height: 30.0),
                 _crearBoton(bloc, context),
                 SizedBox(height: 5.0),
-                FlatButton(onPressed: () {}, child: Text('¿Olvidó su Clave?', style: TextStyle(color: colorRojoBase()),)),
-                FlatButton(onPressed: () => Navigator.pushNamed(context, 'config'), child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.settings_applications, size: 30.0, color: colorRojoBase(),),
-                    Text('Configurar', style: TextStyle(color: colorRojoBase()))
-                  ],
-                )),
+                FlatButton(
+                    onPressed: () {},
+                    child: Text(
+                      '¿Olvidó su Clave?',
+                      style: TextStyle(color: colorRojoBase()),
+                    )),
+                FlatButton(
+                    onPressed: () => Navigator.pushNamed(context, 'config'),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.settings_applications,
+                          size: 30.0,
+                          color: colorRojoBase(),
+                        ),
+                        Text('Configurar',
+                            style: TextStyle(color: colorRojoBase()))
+                      ],
+                    )),
                 SizedBox(height: 15.0),
                 VersionWidget(),
               ],
@@ -172,7 +192,7 @@ class _LoginPageState extends State<LoginPage> {
           child: TextField(
             controller: _textUsuario,
             keyboardType: TextInputType.text,
-            enabled: _blockBotton,    
+            enabled: _blockBotton,
             decoration: InputDecoration(
               icon: Icon(
                 Icons.account_circle,
@@ -180,7 +200,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
               labelStyle: TextStyle(color: colorRojoBase()),
               labelText: 'Vendedor',
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: colorRojoBase())),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: colorRojoBase())),
               // counterText: snapshot.data,
               errorText: snapshot.error,
             ),
@@ -208,7 +229,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
               labelStyle: TextStyle(color: colorRojoBase()),
               labelText: 'Contraseña',
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: colorRojoBase())),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: colorRojoBase())),
               // counterText: snapshot.data,
               errorText: snapshot.error,
             ),
@@ -219,6 +241,63 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<Null> getListaRutas() async {
+    _listaRutas = await RutasProvider.rutasProvider.obtenerListaRutas();
+    setState(() {});
+  }
+
+  List<DropdownMenuItem<RutasModel>> getOpcionesDropDown() {
+    List<DropdownMenuItem<RutasModel>> lista = new List();
+
+    _listaRutas.forEach((ruta) {
+      lista.add(DropdownMenuItem(
+        child: Text(ruta.descripcion),
+        value: ruta,
+      ));
+    });
+
+    return lista;
+  }
+
+  Widget _crearComboRutas(BuildContext context) {
+
+    return Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: DropdownButtonFormField(
+            decoration: InputDecoration(
+              icon: Icon(
+                Icons.show_chart,
+                color: colorRojoBase(),
+              ),
+              labelStyle: TextStyle(color: colorRojoBase()),
+              labelText: 'Ruta',
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: colorRojoBase())),              
+            ),
+            value: _rutaSeleccionada,
+            items: getOpcionesDropDown(),
+            onChanged: (opt) {
+              setState(() {
+                _rutaSeleccionada = opt;
+              });
+            },
+          ),
+    );
+    // return Container(
+    //   child: Expanded(
+    //     child: DropdownButton(
+    //       value: _rutaSeleccionada,
+    //       items: getOpcionesDropDown(),
+    //       onChanged: (opt) {
+    //         setState(() {
+    //           _rutaSeleccionada = opt;
+    //         });
+    //       },
+    //     ),
+    //   ),
+    // );
+  }
+
   Widget _crearBoton(LoginBloc bloc, BuildContext context) {
     return StreamBuilder(
       stream: bloc.formValidStream,
@@ -226,7 +305,10 @@ class _LoginPageState extends State<LoginPage> {
         return RaisedButton(
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
-            child: Text('Ingresar', style: TextStyle(fontWeight: FontWeight.bold),),
+            child: Text(
+              'Ingresar',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
@@ -249,27 +331,29 @@ class _LoginPageState extends State<LoginPage> {
       _blockBotton = false;
     });
 
-    RespuestaModel resp = await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
+    RespuestaModel resp =
+        await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
     print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    print(resp);
+    print(resp.toString());
 
-    // if (resp.status == 200) {
-    //   // UsuarioModel user = usuarioModelFromJson(resp.detalle);
-    //   // prefs.nombreUsuario = user.name;
-    //   // prefs.email = user.email;
-    //   // prefs.organizacion = user.organizacion;
-    //   prefs.usuario = bloc.usuario;
-    //   prefs.password = bloc.password;
+    if (resp.status == 200) {
+      LoginResponseModel response = loginResponseModelFromJson(resp.detalle);
+      prefs.code = response.code;
+      prefs.name = response.name;
+      prefs.rut = bloc.usuario;
+      prefs.password = bloc.password;
+      prefs.token = response.token;
+      prefs.ruta = _rutaSeleccionada.codigo;
 
-    Navigator.of(context).pop();
-    Navigator.pushReplacementNamed(context, '/');
-    // } else {
-    //   setState(() {
-    //     _blockBotton = true;
-    //   });
-    //   Navigator.of(context).pop();
+      Navigator.of(context).pop();
+      Navigator.pushReplacementNamed(context, '/');
+    } else {
+      setState(() {
+        _blockBotton = true;
+      });
+      Navigator.of(context).pop();
 
-    //   alertUtil.showAlert(context, resp.detalle, Icons.error);
-    // }
+      alertUtil.showAlert(context, resp.detalle, Icons.error);
+    }
   }
 }

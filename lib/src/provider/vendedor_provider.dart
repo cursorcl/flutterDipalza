@@ -9,9 +9,8 @@ class VenderdorProvider {
     final prefs = new PreferenciasUsuario();
     Codec<String, String> stringToBase64 = utf8.fuse(base64);
 
-//  Uri.http("example.org", "/path", { "q" : "dart" });
     final url = Uri.http(prefs.urlServicio, '/login',
-        {"user": usuario, "password": stringToBase64.encode(password)});
+        {"rut": usuario, "password": stringToBase64.encode(password)});
 
         print(url);
     http.Response resp;

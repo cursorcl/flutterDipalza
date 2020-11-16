@@ -15,12 +15,28 @@ class PreferenciasUsuario {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  get usuario {
-    return _prefs.getString('usuario') ?? '';
+  get code {
+    return _prefs.getString('code') ?? '';
   }
 
-  set usuario(String value) {
-    _prefs.setString('usuario', value);
+  set code(String value) {
+    _prefs.setString('code', value);
+  }
+
+  get name {
+    return _prefs.getString('name') ?? '';
+  }
+
+  set name(String value) {
+    _prefs.setString('name', value);
+  }
+
+  get rut {
+    return _prefs.getString('rut') ?? '';
+  }
+
+  set rut(String value) {
+    _prefs.setString('rut', value);
   }
 
   get password {
@@ -45,5 +61,13 @@ class PreferenciasUsuario {
 
   set urlServicio(String value) {
     _prefs.setString('urlServicio', value);
+  }
+
+  get ruta {
+    return _prefs.getString('ruta') ?? '';
+  }
+
+  set ruta(String value) {
+    _prefs.setString('ruta', value);
   }
 }
