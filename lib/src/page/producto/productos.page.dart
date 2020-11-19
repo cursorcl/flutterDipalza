@@ -1,8 +1,7 @@
-import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
+// import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
-import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
@@ -14,7 +13,7 @@ class ProductosPage extends StatefulWidget {
 }
 
 class _ProductosPageState extends State<ProductosPage> {
-  final productosBloc = new ProductosBloc();
+  // final productosBloc = new ProductosBloc();
   TextEditingController controller = new TextEditingController();
   List<ProductosModel> _searchResult = [];
   List<ProductosModel> _listaProductos = [];
@@ -24,6 +23,11 @@ class _ProductosPageState extends State<ProductosPage> {
   Future<Null> getListaProductos() async {
      _listaProductos = await ProductosProvider.productosProvider.obtenerListaProductos();
      setState(() {});
+  }
+
+  Future<void> getListaProductosRefrescar() async {
+    getListaProductos();
+    onSearchTextChanged(controller.text);
   }
 
    @override
@@ -108,7 +112,7 @@ class _ProductosPageState extends State<ProductosPage> {
       return;
     }
 
-    productosBloc.listaProductos.forEach((producto) {
+    _listaProductos.forEach((producto) {
       if (producto.descripcion.contains(text))
         _searchResult.add(producto);
     });
@@ -117,13 +121,16 @@ class _ProductosPageState extends State<ProductosPage> {
   }
 
   Widget _creaListaProductos(BuildContext context, List<ProductosModel> listaProducto) {
-    return ListView.builder(
-              itemCount: listaProducto.length,
-              
-              itemBuilder: (context, i) {
-                return _creaCard(listaProducto[i]);
-              },
-            );
+    return RefreshIndicator(
+          onRefresh: getListaProductosRefrescar,
+          child: ListView.builder(
+                itemCount: listaProducto.length,
+                
+                itemBuilder: (context, i) {
+                  return _creaCard(listaProducto[i]);
+                },
+              ),
+    );
     // return StreamBuilder(
     //   stream: productosBloc.productosStream,
     //   builder:
@@ -178,7 +185,7 @@ class _ProductosPageState extends State<ProductosPage> {
   }
 
   Future<Null> _recargar() async {
-    productosBloc.obtenerListaProductos();
+    // productosBloc.obtenerListaProductos();
   }
 
   List<Widget> _listaProductosItems(
@@ -269,7 +276,7 @@ class _ProductosPageState extends State<ProductosPage> {
                 borderRadius: BorderRadius.circular(5.0),
                 side: BorderSide(color: Colors.grey)),
             padding: EdgeInsets.all(4.0),
-            onPressed: () => productosBloc.obtenerListaProductos(),
+            onPressed: () => getListaProductos(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[

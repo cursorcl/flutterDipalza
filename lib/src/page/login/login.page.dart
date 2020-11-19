@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
   //     ],
   //   );
   // }
-  
+
   Widget _loginForm(BuildContext context) {
     final bloc = LoginProvider.of(context);
     final size = MediaQuery.of(context).size;
@@ -260,11 +260,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _crearComboRutas(BuildContext context, LoginBloc bloc) {
-return StreamBuilder(
+    return StreamBuilder(
       stream: bloc.rutaStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
           child: DropdownButtonFormField(
             decoration: InputDecoration(
               icon: Icon(
@@ -274,8 +274,8 @@ return StreamBuilder(
               labelStyle: TextStyle(color: colorRojoBase()),
               labelText: 'Ruta',
               focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: colorRojoBase())),       
-                  errorText: snapshot.error,       
+                  borderSide: BorderSide(color: colorRojoBase())),
+              errorText: snapshot.error,
             ),
             value: _rutaSeleccionada,
             items: getOpcionesDropDown(),
@@ -284,13 +284,11 @@ return StreamBuilder(
                 _rutaSeleccionada = opt;
                 bloc.changeRuta(_rutaSeleccionada.codigo);
               });
-              
             },
           ),
+        );
+      },
     );
-          },
-    );
-   
   }
 
   Widget _crearBoton(LoginBloc bloc, BuildContext context) {

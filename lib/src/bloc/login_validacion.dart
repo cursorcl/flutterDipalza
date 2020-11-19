@@ -19,13 +19,12 @@ class Validators {
     }
   });
 
-   final validarRuta = StreamTransformer<String, String>.fromHandlers(
-      handleData: (ruta, sink) {
+  final validarRuta =
+      StreamTransformer<String, String>.fromHandlers(handleData: (ruta, sink) {
     if (ruta.length >= 0) {
       sink.add(ruta);
     } else {
       sink.addError('Debe seleccionar Ruta.');
     }
   });
-
 }
