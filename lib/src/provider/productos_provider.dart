@@ -1,3 +1,4 @@
+import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:http/http.dart' as http;
@@ -11,12 +12,22 @@ class ProductosProvider {
   }
 
   Future<List<ProductosModel>> obtenerListaProductos() async {
-    final prefs = new PreferenciasUsuario();
-    Uri url = Uri.http(prefs.urlServicio, '/products');
-    final resp = await http.get(url, headers: <String, String>{
-      HttpHeaders.authorizationHeader: prefs.token
-    });
-  print(resp.body);
-    return productosModelFromJson(resp.body);
+    try {
+      final prefs = new PreferenciasUsuario();
+      Uri url = Uri.http(prefs.urlServicio, '/products');
+      DBLogProvider.db.nuevoLog(
+          creaLogInfo('ProductosProvider', 'obtenerListaProductos', 'Inicio'));
+      print('URL Productos: ' + url.toString());
+
+      final resp = await http.get(url, headers: <String, String>{
+        HttpHeaders.authorizationHeader: prefs.token
+      });
+      print(resp.body);
+      return productosModelFromJson(resp.body);
+    } catch (error) {
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'ProductosProvider', 'obtenerListaProductos', error.toString()));
+      return [];
+    }
   }
 }

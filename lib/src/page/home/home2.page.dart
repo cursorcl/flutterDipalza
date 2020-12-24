@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
-
-import 'package:dipalza_movil/src/utils/utils.dart';
-import 'package:dipalza_movil/src/widget/cliente.widget.dart';
+import 'package:dipalza_movil/src/widget/cliente.select.widget.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 
@@ -172,7 +170,7 @@ class Homev2Page extends StatelessWidget {
   Padding creaBtnNuevaVenta(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 20.0, bottom: 0.0),
-      child: ClientesWidget(),
+      child: ClientesSelectWidget(),
     );
   }
 

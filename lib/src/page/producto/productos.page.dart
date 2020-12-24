@@ -1,4 +1,5 @@
 // import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
+import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -21,11 +22,13 @@ class _ProductosPageState extends State<ProductosPage> {
 
 
   Future<Null> getListaProductos() async {
-     _listaProductos = await ProductosProvider.productosProvider.obtenerListaProductos();
+    _listaProductos = ProductosBloc().listaProductos;
+    //  _listaProductos = await ProductosProvider.productosProvider.obtenerListaProductos();
      setState(() {});
   }
 
   Future<void> getListaProductosRefrescar() async {
+    ProductosBloc();
     getListaProductos();
     onSearchTextChanged(controller.text);
   }
@@ -113,7 +116,7 @@ class _ProductosPageState extends State<ProductosPage> {
     }
 
     _listaProductos.forEach((producto) {
-      if (producto.descripcion.contains(text))
+      if (producto.descripcion.toUpperCase().contains(text.toUpperCase()) || producto.articulo == text)
         _searchResult.add(producto);
     });
 
@@ -121,6 +124,13 @@ class _ProductosPageState extends State<ProductosPage> {
   }
 
   Widget _creaListaProductos(BuildContext context, List<ProductosModel> listaProducto) {
+
+     if (listaProducto.length == 0) {
+      return Center(
+        child: Text('No existen Productos a mostrar.'),
+      );
+    }
+
     return RefreshIndicator(
           onRefresh: getListaProductosRefrescar,
           child: ListView.builder(
@@ -131,30 +141,6 @@ class _ProductosPageState extends State<ProductosPage> {
                 },
               ),
     );
-    // return StreamBuilder(
-    //   stream: productosBloc.productosStream,
-    //   builder:
-    //       (BuildContext context, AsyncSnapshot<List<ProductosModel>> snapshot) {
-    //     if (snapshot.hasData) {
-    //       if (snapshot.data != null && snapshot.data.length > 0) {
-    //         return RefreshIndicator(
-    //           onRefresh: _recargar,
-    //           child: ListView(
-    //             children: _listaProductosItems(snapshot.data, context),
-    //           ),
-    //         );
-    //       } else {
-    //         return Center(
-    //           child: Text('No Existen Operaciones'),
-    //         );
-    //       }
-    //     } else {
-    //       return Center(
-    //         child: CircularProgressIndicator(),
-    //       );
-    //     }
-    //   },
-    // );
   }
 
   _creaCard(ProductosModel producto) {
@@ -184,72 +170,23 @@ class _ProductosPageState extends State<ProductosPage> {
           );
   }
 
-  Future<Null> _recargar() async {
-    // productosBloc.obtenerListaProductos();
-  }
-
-  List<Widget> _listaProductosItems(
-      List<ProductosModel> data, BuildContext context) {
-    final List<Widget> _listItem = [];
-
-    data?.forEach((producto) {
-      _listItem
-        ..add(
-          Card(
-            child: ListTile(
-              leading: CircleAvatar(
-                radius: 25,
-                child: Icon(Icons.card_giftcard),
-                backgroundColor: colorRojoBase(),
-                foregroundColor: Colors.white,
-              ),
-              title: Text(producto.descripcion,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.0,
-                      color: Colors.black)),
-              subtitle: Row(
-                children: <Widget>[
-                  detalleProducto(producto),
-                  Expanded(child: Container()),
-                  btnLoad(producto)
-                ],
-              ),
-              trailing: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios), onPressed: () {}),
-            ),
-          ),
-        );
-    });
-
-    return _listItem;
-  }
 
   Column detalleProducto(ProductosModel producto) {
-    FlutterMoneyFormatter fmf = FlutterMoneyFormatter(
-        amount: producto.ventaneto.toDouble(),
-        settings: MoneyFormatterSettings(
-            // symbol: 'IDR',
-            thousandSeparator: '.',
-            decimalSeparator: ',',
-            symbolAndNumberSeparator: ' ',
-            fractionDigits: 0,
-            compactFormatType: CompactFormatType.short));
-
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         SizedBox(
           height: 5.0,
         ),
-        Text(
-          fmf.output.symbolOnLeft + '.-',
+        Text('V. Neto: ' + 
+         getValorModena(producto.ventaneto.toDouble(), 0),
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.0),
         ),
         SizedBox(
           height: 2.0,
         ),
-        Text(unidadValuesDetalle.reverse[producto.unidad],
+        Text('Unidad: ' + producto.unidad,
             style: TextStyle(
                 fontWeight: FontWeight.w400,
                 fontSize: 14.0,
@@ -259,15 +196,7 @@ class _ProductosPageState extends State<ProductosPage> {
   }
 
   Column btnLoad(ProductosModel producto) {
-    FlutterMoneyFormatter fmf = FlutterMoneyFormatter(
-        amount: producto.stock,
-        settings: MoneyFormatterSettings(
-            symbol: '',
-            thousandSeparator: '.',
-            decimalSeparator: ',',
-            symbolAndNumberSeparator: ' ',
-            fractionDigits: 0,
-            compactFormatType: CompactFormatType.short));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
@@ -288,7 +217,7 @@ class _ProductosPageState extends State<ProductosPage> {
                   size: 18.0,
                 ),
                 Text(
-                  fmf.output.symbolOnLeft + ' Unidades',
+                  getValorNumero(producto.stock > 0 ? producto.stock : 0) + ' Unidades',
                   style: TextStyle(
                       color: producto.stock > 0 ? Colors.green : Colors.red,
                       fontSize: 12.0),

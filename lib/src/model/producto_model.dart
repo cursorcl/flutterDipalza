@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:dipalza_movil/src/model/registro_item_model.dart';
+import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 
 List<ProductosModel> productosModelFromJson(String str) => List<ProductosModel>.from(json.decode(str).map((x) => ProductosModel.fromJson(x)));
 
@@ -15,6 +17,8 @@ class ProductosModel {
         this.stock,
         this.pieces,
         this.numbered,
+        this.registroItem,
+        this.registroItemResp
     });
 
     String articulo;
@@ -22,33 +26,37 @@ class ProductosModel {
     int ventaneto;
     double porcila;
     double porccarne;
-    Unidad unidad;
+    String unidad;
     double stock;
     double pieces;
     bool numbered;
+    RegistroItemModel registroItem;
+    RegistroItemRespModel registroItemResp;
 
     factory ProductosModel.fromJson(Map<String, dynamic> json) => ProductosModel(
-        articulo: json["articulo"],
-        descripcion: json["descripcion"],
-        ventaneto: json["ventaneto"].toInt(),
-        porcila: json["porcila"].toDouble(),
-        porccarne: json["porccarne"].toDouble(),
-        unidad: unidadValues.map[json["unidad"].toUpperCase()],
-        stock: json["stock"].toDouble(),
-        pieces: json["pieces"].toDouble(),
-        numbered: json["numbered"],
+        articulo: json["Articulo"],
+        descripcion: json["Descripcion"],
+        ventaneto: json["VentaNeto"].toInt(),
+        porcila: json["PorcIla"].toDouble(),
+        porccarne: json["PorcCarne"].toDouble(),
+        // unidad: unidadValues.map[json["unidad"].toUpperCase()],
+        unidad: json["Unidad"].toUpperCase(),
+        stock: json["Stock"].toDouble(),
+        pieces: json["Pieces"].toDouble(),
+        numbered: json["Numbered"],
     );
 
     Map<String, dynamic> toJson() => {
-        "articulo": articulo,
-        "descripcion": descripcion,
-        "ventaneto": ventaneto,
-        "porcila": porcila,
-        "porccarne": porccarne,
-        "unidad": unidadValues.reverse[unidad],
-        "stock": stock,
-        "pieces": pieces,
-        "numbered": numbered,
+        "Articulo": articulo,
+        "Descripcion": descripcion,
+        "VentaNeto": ventaneto,
+        "PorcIla": porcila,
+        "PorcCarne": porccarne,
+        // "unidad": unidadValues.reverse[unidad],
+        "Unidad": unidad,
+        "Stock": stock,
+        "Pieces": pieces,
+        "Numbered": numbered,
     };
 }
 

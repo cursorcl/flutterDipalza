@@ -22,20 +22,20 @@ class ClientesModel {
     String ciudad;
 
     factory ClientesModel.fromJson(Map<String, dynamic> json) => ClientesModel(
-        rut: json["rut"],
-        codigo: json["codigo"],
-        razon: json["razon"],
-        direccion: json["direccion"],
-        telefono: json["telefono"],
-        ciudad: json["ciudad"],
+        rut: json["Rut"],
+        codigo: json["Codigo"],
+        razon: json["Razon"],
+        direccion: json["Direccion"],
+        telefono: json["Telefono"],
+        ciudad: json["Ciudad"],
     );
 
     Map<String, dynamic> toJson() => {
-        "rut": rut,
-        "codigo": codigo,
-        "razon": razon,
-        "direccion": direccion,
-        "telefono": telefono,
-        "ciudad": ciudad,
+        "Rut": rut,
+        "Codigo": codigo,
+        "Razon": razon,
+        "Direccion": direccion,
+        "Telefono": telefono,
+        "Ciudad": ciudad,
     };
 }

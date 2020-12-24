@@ -10,7 +10,7 @@ void main() async {
   await prefs.initPrefs();
   prefs.token = '';
   if (prefs.urlServicio == '') {
-    prefs.urlServicio = 'http://cursorcl.dynalias.com:8099/';
+    prefs.urlServicio = 'cursorcl.dynalias.com:8099';
   }
   runApp(MyApp());
 }

@@ -1,4 +1,7 @@
+import 'package:dart_rut_validator/dart_rut_validator.dart';
 import 'package:dipalza_movil/src/bloc/login_bloc.dart';
+import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
+import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/login_response_model.dart';
 import 'package:dipalza_movil/src/model/respuesta_model.dart';
 import 'package:dipalza_movil/src/model/rutas_model.dart';
@@ -27,18 +30,27 @@ class _LoginPageState extends State<LoginPage> {
   final prefs = new PreferenciasUsuario();
   RutasModel _rutaSeleccionada;
   List<RutasModel> _listaRutas = [];
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
-  void initState() {
-    super.initState();
-    this.getListaRutas();
+  void initState() { 
+    DBLogProvider.db.nuevoLog(creaLogInfo('LoginPage', 'initState', 'Inicio'));
+    _getListaRutas();
     _textUsuario = new TextEditingController(text: prefs.rut);
     _textPassword = new TextEditingController(text: prefs.password);
+    super.initState();
   }
+
+  void onChangedApplyFormat(String text, LoginBloc bloc){
+    RUTValidator.formatFromTextController(_textUsuario);
+    bloc.changeUsuario(_textUsuario.text);
+}
 
   @override
   Widget build(BuildContext context) {
+    DBLogProvider.db.nuevoLog(creaLogInfo('LoginPage', 'build', 'Inicio'));
     return Scaffold(
+      key: scaffoldKey,
       body: Stack(
         children: <Widget>[
           FondoWidget(),
@@ -158,6 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                     )),
                 FlatButton(
                     onPressed: () => Navigator.pushNamed(context, 'config'),
+                    onLongPress: () => Navigator.pushReplacementNamed(context, 'consoleLog'),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -205,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
               // counterText: snapshot.data,
               errorText: snapshot.error,
             ),
-            onChanged: (newValue) => bloc.changeUsuario(newValue),
+            onChanged: (newValue) => this.onChangedApplyFormat(newValue, bloc),
           ),
         );
       },
@@ -241,7 +254,8 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<Null> getListaRutas() async {
+  Future<Null> _getListaRutas() async {
+    DBLogProvider.db.nuevoLog(creaLogInfo('LoginPage', '_getListaRutas', 'Inicio'));
     _listaRutas = await RutasProvider.rutasProvider.obtenerListaRutas();
     setState(() {});
   }
@@ -326,8 +340,6 @@ class _LoginPageState extends State<LoginPage> {
 
     RespuestaModel resp =
         await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    print(resp.toString());
 
     if (resp.status == 200) {
       LoginResponseModel response = loginResponseModelFromJson(resp.detalle);
@@ -337,6 +349,7 @@ class _LoginPageState extends State<LoginPage> {
       prefs.password = bloc.password;
       prefs.token = response.token;
       prefs.ruta = _rutaSeleccionada.codigo;
+      ProductosBloc();
 
       Navigator.of(context).pop();
       Navigator.pushReplacementNamed(context, '/');
@@ -348,5 +361,15 @@ class _LoginPageState extends State<LoginPage> {
 
       alertUtil.showAlert(context, resp.detalle, Icons.error);
     }
+  }
+
+  void mostrarSnackbar(String mensaje) {
+
+    final snackbar = SnackBar(
+      content: Text( mensaje),
+      duration: Duration(milliseconds: 2500),
+      );
+
+      scaffoldKey.currentState.showSnackBar(snackbar);
   }
 }
