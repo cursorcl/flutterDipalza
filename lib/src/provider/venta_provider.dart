@@ -1,9 +1,14 @@
+import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
+import 'package:dipalza_movil/src/log/db_log_provider.dart';
+import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
+import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart';
+import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
@@ -46,7 +51,7 @@ class VentaProvider {
     return registroItemRespModelFromJson('{}');
   }
 
-  Future<void> removerItem(ProductosModel producto, BuildContext context,
+  Future<bool> removerItem(ProductosModel producto, BuildContext context,
       ProductosVentaBloc productoVentaBloc) async {
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio,
@@ -62,15 +67,115 @@ class VentaProvider {
       Navigator.of(context).pop();
       showAlert(context,
           'Problemas al eliminar un Producto, Vuelva a intentar.', Icons.error);
+      return false;
     }
 
     print(resp.body);
     if (resp.statusCode == 200 || resp.statusCode == 202) {
       productoVentaBloc.eliminarProducto(producto);
+      return true;
     } else if (resp.statusCode == 500) {
       Navigator.of(context).pop();
       showAlert(context, 'Problemas al elimar un Producto, Vuelva a intentar.',
           Icons.error);
+      return false;
     }
+    return false;
+  }
+
+  Future<List<VentaModel>> obtenerListaVentas() async {
+    try {
+      final prefs = new PreferenciasUsuario();
+      Uri url = Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.code}');
+      DBLogProvider.db.nuevoLog(
+          creaLogInfo('VentasProvider', 'obtenerListaVentas', 'Inicio'));
+      print('URL Lista Ventas: ' + url.toString());
+
+      final resp = await http.get(url, headers: <String, String>{
+        HttpHeaders.authorizationHeader: prefs.token
+      });
+      print(resp.body);
+
+      if (resp.statusCode == 200 || resp.statusCode == 202) {
+        List<VentaModel> listaVentas = ventaModelFromJson(resp.body);
+
+        listaVentas.sort((a, b) => b.fecha.compareTo(a.fecha));
+
+        List<ClientesModel> listaCliente;
+
+        Uri url = Uri.http(prefs.urlServicio,
+            '/clients/seller/${prefs.code}/route/${prefs.ruta}');
+
+        final respCliente = await http.get(url, headers: <String, String>{
+          HttpHeaders.authorizationHeader: prefs.token
+        });
+
+        if (respCliente.statusCode == 200 || respCliente.statusCode == 202) {
+          listaCliente = clientesModelFromJson(respCliente.body);
+
+          listaVentas.forEach((objVenta) {
+            ClientesModel cliente = listaCliente.firstWhere(
+                (objCliente) => objVenta.rut == objCliente.rut,
+                orElse: () => null);
+            if (cliente != null) {
+              objVenta.razon = cliente.razon;
+              objVenta.cliente = cliente;
+            } else {
+              objVenta.razon = getFormatRut(objVenta.rut);
+            }
+          });
+        }
+
+        return listaVentas;
+      }
+    } catch (error) {
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'VentasProvider', 'obtenerListaVentas', error.toString()));
+      return [];
+    }
+    return [];
+  }
+
+  Future<List<ProductosModel>> obtenerListaVentasItem(
+      String rutCliente, String codeCliente, int fecha) async {
+    try {
+      final prefs = new PreferenciasUsuario(); //RegistroItemRespModel
+      Uri url = Uri.http(prefs.urlServicio,
+          '/listsales/sale/${prefs.code}/rut/$rutCliente/code/$codeCliente/date/$fecha');
+      DBLogProvider.db.nuevoLog(
+          creaLogInfo('VentasProvider', 'obtenerListaVentasItem', 'Inicio'));
+      print('URL Lista Ventas Item: ' + url.toString());
+
+      final resp = await http.get(url, headers: <String, String>{
+        HttpHeaders.authorizationHeader: prefs.token
+      });
+      print(resp.body);
+
+      if (resp.statusCode == 200 || resp.statusCode == 202) {
+        List<RegistroItemRespModel> listaVentasItem =
+            listRegistroItemRespModelFromJson(resp.body);
+
+        List<ProductosModel> _listaProductos = ProductosBloc().listaProductos;
+        List<ProductosModel> _listaProductosFinal = [];
+
+        listaVentasItem.forEach((item) {
+          for (ProductosModel producto in _listaProductos) {
+            if (item.articulo == producto.articulo) {
+              ProductosModel newRegistro = producto;
+              newRegistro.registroItemResp = item;
+              _listaProductosFinal.add(newRegistro);
+              break;
+            }
+          }
+        });
+
+        return _listaProductosFinal;
+      }
+    } catch (error) {
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'VentasProvider', 'obtenerListaVentasItem', error.toString()));
+      return [];
+    }
+    return [];
   }
 }

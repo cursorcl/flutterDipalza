@@ -1,10 +1,9 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 import 'package:dipalza_movil/src/page/producto/productos.popup.page.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -27,9 +26,11 @@ class _VentasPageState extends State<VentasPage> {
   final productoVentaBloc = ProductosVentaBloc();
   String _fecha = '';
   Widget _widgetResumenVenta;
+  bool _primeraCarga = true;
 
   @override
   void initState() {
+    print('>>>>>>>>> INIT STATE >>>>>>>>>');
     super.initState();
     this.productoVentaBloc.limpiarProductos();
     this._fecha = DateTime.now().millisecondsSinceEpoch.toString();
@@ -38,7 +39,22 @@ class _VentasPageState extends State<VentasPage> {
 
   @override
   Widget build(BuildContext context) {
-    ClientesModel _cliente = ModalRoute.of(context).settings.arguments;
+    print('>>>>>>>>> BUILD STATE >>>>>>>>>');
+    // ClientesModel _cliente = ModalRoute.of(context).settings.arguments;
+    InicioVentaModel _inicioVenta = ModalRoute.of(context).settings.arguments;
+
+    if (this._primeraCarga && _inicioVenta.listaVentaItem != null &&
+        _inicioVenta.listaVentaItem.isNotEmpty) {
+      for (ProductosModel producto in _inicioVenta.listaVentaItem) {
+        this._fecha =
+            producto.registroItemResp.fecha.millisecondsSinceEpoch.toString();
+        this.productoVentaBloc.agregarProducto(producto);
+      }
+      this._primeraCarga = false;
+      //  this._fecha = _inicioVenta.listaVentaItem[0].registroItemResp.fecha.millisecondsSinceEpoch.toString();
+
+    }
+
     List<ProductosModel> _listaVenta = this.productoVentaBloc.listaProductos;
     this._widgetResumenVenta = this.loadResumenVenta();
 
@@ -61,8 +77,8 @@ class _VentasPageState extends State<VentasPage> {
         height: double.infinity,
         child: Column(
           children: <Widget>[
-            _creaCabeceraCliente(context, _cliente),
-            _creaCabeceraResumen(context, _cliente),
+            _creaCabeceraCliente(context, _inicioVenta.cliente),
+            _creaCabeceraResumen(context, _inicioVenta.cliente),
             Expanded(
               child: _creaListaProductos(context, _listaVenta),
             )
@@ -327,17 +343,17 @@ class _VentasPageState extends State<VentasPage> {
         SizedBox(
           height: 5.0,
         ),
-        Text(
-          producto.numbered
-              ? 'Piezas Solicitadas: ' +
-                  producto.registroItem.cantidad.toString()
-              : 'Cantidad Solicitada: ' +
-                  producto.registroItem.cantidad.toString(),
-          style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13.0),
-        ),
-        SizedBox(
-          height: 2.0,
-        ),
+        // Text(
+        //   producto.numbered
+        //       ? 'Piezas Solicitadas: ' +
+        //           producto.registroItem.cantidad.toString()
+        //       : 'Cantidad Solicitada: ' +
+        //           producto.registroItem.cantidad.toString(),
+        //   style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13.0),
+        // ),
+        // SizedBox(
+        //   height: 2.0,
+        // ),
         Text(
           producto.numbered
               ? 'Kilos Confirmados: ' +
@@ -351,7 +367,12 @@ class _VentasPageState extends State<VentasPage> {
   }
 
   void _removerItem(ProductosModel producto) async {
-    await VentaProvider.ventaProvider
+    bool resp = await VentaProvider.ventaProvider
         .removerItem(producto, context, productoVentaBloc);
+
+    if (resp) {
+      this.loadResumenVenta();
+      setState(() {});
+    }
   }
 }

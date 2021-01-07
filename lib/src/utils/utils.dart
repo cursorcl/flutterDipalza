@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:dart_rut_validator/dart_rut_validator.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
@@ -80,4 +82,20 @@ String getFormatRutToService(String usuario) {
     rut = '0' + rut;
   }
   return rut;
+}
+
+DateFormat formatoFecha() {
+  return new DateFormat("dd MMM yyyy");
+}
+
+DateFormat formatoFechaCorta() {
+  return new DateFormat("dd/MM/yyyy");
+}
+
+DateFormat formatoFechaCortaHora() {
+  return new DateFormat("dd/MM/yyyy HH:mm");
+}
+
+DateFormat formatHora() {
+  return new DateFormat('HH:mm');
 }

@@ -1,4 +1,5 @@
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/provider/cliente_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -131,7 +132,6 @@ class _ClientesPageState extends State<ClientesPage> {
 
   Widget _creaListaClientes(
       BuildContext context, List<ClientesModel> listaCliente) {
-    
     if (listaCliente.length == 0) {
       return Center(
         child: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
@@ -161,8 +161,9 @@ class _ClientesPageState extends State<ClientesPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(cliente.razon, style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(getFormatRut(cliente.rut)),
+            Text(cliente.razon, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.0, )),
+            SizedBox(height: 2.0,),
+            Text(getFormatRut(cliente.rut), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0, )),
             SizedBox(
               height: 5.0,
             )
@@ -170,53 +171,15 @@ class _ClientesPageState extends State<ClientesPage> {
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[Text(cliente.direccion), Text(cliente.telefono)],
+          children: <Widget>[Text(cliente.direccion, style: TextStyle(fontSize: 12.0)), Text(cliente.telefono, style: TextStyle(fontSize: 12.0))],
         ),
-        trailing:
-            IconButton(icon: Icon(Icons.arrow_forward_ios), onPressed: () {Navigator.pushNamed(context, 'venta', arguments: cliente);}),
+        trailing: IconButton(
+            icon: Icon(Icons.arrow_forward_ios),
+            onPressed: () {
+              Navigator.pushNamed(context, 'venta',
+                  arguments: new InicioVentaModel(cliente: cliente));
+            }),
       ),
     );
   }
-
-  // List<Widget> _clienteItems(BuildContext context) {
-  //   final List<Widget> _listItem = [];
-
-  //   for (var i = 0; i < 10; i++) {
-  //     _listItem
-  //       ..add(
-  //         Card(
-  //           child: ListTile(
-  //             leading: CircleAvatar(
-  //               radius: 25,
-  //               child: Icon(Icons.account_box),
-  //               backgroundColor: colorRojoBase(),
-  //               foregroundColor: Colors.white,
-  //             ),
-  //             title: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: <Widget>[
-  //                 Text('Juan Pérez Guzmán',
-  //                     style: TextStyle(fontWeight: FontWeight.bold)),
-  //                 Text('999.999.999-9'),
-  //                 SizedBox(
-  //                   height: 5.0,
-  //                 )
-  //               ],
-  //             ),
-  //             subtitle: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: <Widget>[
-  //                 Text('Marinero Fuentealba 614 Quilpué'),
-  //                 Text('+56996568959 - 322821789')
-  //               ],
-  //             ),
-  //             trailing: IconButton(
-  //                 icon: Icon(Icons.arrow_forward_ios), onPressed: () {}),
-  //           ),
-  //         ),
-  //       );
-  //   }
-
-  //   return _listItem;
-  // }
 }

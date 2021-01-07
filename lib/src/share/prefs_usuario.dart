@@ -70,4 +70,12 @@ class PreferenciasUsuario {
   set ruta(String value) {
     _prefs.setString('ruta', value);
   }
+
+  get reporte {
+    return _prefs.getInt('reporte') ?? 300000;
+  }
+
+  set reporte(int value) {
+    _prefs.setInt('reporte', value);
+  }
 }

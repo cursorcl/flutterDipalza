@@ -15,15 +15,15 @@ class RutasProvider {
     try {
       final prefs = new PreferenciasUsuario();
       Uri url = Uri.http(prefs.urlServicio, '/routes');
-      DBLogProvider.db.nuevoLog(
-          creaLogInfo('RutasProvider', 'obtenerListaRutas', 'Inicio'));
+      // DBLogProvider.db.nuevoLog(
+      //     creaLogInfo('RutasProvider', 'obtenerListaRutas', 'Inicio'));
       print('URL RUTAS: ' + url.toString());
 
       final resp = await http.get(url, headers: <String, String>{
         HttpHeaders.authorizationHeader: prefs.token
       });
-      DBLogProvider.db.nuevoLog(creaLogInfo('RutasProvider',
-          'obtenerListaRutas', '[Status Code: ${resp.statusCode}]'));
+      // DBLogProvider.db.nuevoLog(creaLogInfo('RutasProvider',
+      //     'obtenerListaRutas', '[Status Code: ${resp.statusCode}]'));
       print(resp.body);
       return rutasModelFromJson(resp.body);
     } catch (error) {

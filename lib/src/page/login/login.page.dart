@@ -343,6 +343,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (resp.status == 200) {
       LoginResponseModel response = loginResponseModelFromJson(resp.detalle);
+      print(resp.detalle);
       prefs.code = response.code;
       prefs.name = response.name;
       prefs.rut = bloc.usuario;

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+List<RegistroItemRespModel> listRegistroItemRespModelFromJson(String str) => List<RegistroItemRespModel>.from(json.decode(str).map((x) => RegistroItemRespModel.fromJson(x)));
+
 RegistroItemRespModel registroItemRespModelFromJson(String str) => RegistroItemRespModel.fromJson(json.decode(str));
 
 String registroItemRespModelToJson(RegistroItemRespModel data) => json.encode(data.toJson());

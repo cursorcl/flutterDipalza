@@ -1,14 +1,21 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+import 'package:dipalza_movil/src/model/position_model.dart';
+import 'package:dipalza_movil/src/provider/parametros_provider.dart';
+import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/widget/cliente.select.widget.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Homev2Page extends StatelessWidget {
   const Homev2Page({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    _notificaUbicacion();
+
     return Scaffold(
       body: Stack(children: [
         FondoWidget(),
@@ -26,8 +33,6 @@ class Homev2Page extends StatelessWidget {
     );
   }
 
-  
-
   Widget title() {
     return SafeArea(
       child: Container(
@@ -39,46 +44,24 @@ class Homev2Page extends StatelessWidget {
               image: AssetImage('assets/image/logo_dipalza_transparente.png'),
               width: 200.0,
               fit: BoxFit.cover,
-              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  // Widget bottomNavigationBar(BuildContext context) {
-  //   return new Theme(
-  //       data: Theme.of(context).copyWith(
-  //         canvasColor: Color.fromRGBO(0, 0, 14, 1.0),
-  //         primaryColor: Colors.blueAccent,
-  //         textTheme: Theme.of(context).textTheme.copyWith(
-  //             caption: TextStyle(color: Color.fromRGBO(116, 117, 152, 1.0))),
-  //       ),
-  //       child: buttomNavigationBar());
-  // }
-
-  // Widget buttomNavigationBar() {
-  //   return BottomNavigationBar(items: <BottomNavigationBarItem>[
-  //     BottomNavigationBarItem(
-  //         icon: Icon(Icons.calendar_today), title: Container()),
-  //     BottomNavigationBarItem(
-  //         icon: Icon(Icons.pie_chart_outlined), title: Container()),
-  //     BottomNavigationBarItem(
-  //         icon: Icon(Icons.supervised_user_circle), title: Container()),
-  //   ]);
-  // }
-
   Widget buttonsRounded(BuildContext context) {
     return Table(
       children: <TableRow>[
         TableRow(children: [
+          makeRoundedButton(Colors.green, Icons.shopping_cart, "Ventas",
+              context, 'listaVentas'),
           makeRoundedButton(
-              Colors.green, Icons.shopping_cart, "Ventas", context, 'listaVentas'),
-           makeRoundedButton(
-              Colors.yellow, Icons.receipt, "Productos", context, 'productos'),          
+              Colors.yellow, Icons.receipt, "Productos", context, 'productos'),
         ]),
         TableRow(children: [
-         makeRoundedButton(Colors.blue, Icons.person_outline, "Clientes",
+          makeRoundedButton(Colors.blue, Icons.person_outline, "Clientes",
               context, 'clientes'),
           makeRoundedButton(
               Colors.red, Icons.history, "Historia", context, 'estadistica'),
@@ -97,7 +80,7 @@ class Homev2Page extends StatelessWidget {
       BuildContext context, String route) {
     return ClipRect(
       // child: GestureDetector(
-        child: InkWell(
+      child: InkWell(
         onTap: () {
           Navigator.pushNamed(context, route);
         },
@@ -131,11 +114,11 @@ class Homev2Page extends StatelessWidget {
     );
   }
 
-  Widget makeRoundedButtonExit(Color color, IconData icon, String text,
-      BuildContext context) {
+  Widget makeRoundedButtonExit(
+      Color color, IconData icon, String text, BuildContext context) {
     return ClipRect(
       // child: GestureDetector(
-        child: InkWell(
+      child: InkWell(
         onTap: () => validaCierre(context),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
@@ -175,65 +158,80 @@ class Homev2Page extends StatelessWidget {
   }
 
   Future<bool> validaCierre(BuildContext context) async {
-  return showDialog<bool>(
-    context: context,
-    // barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-        title: Center(
-          child: Text(
-            'Salir',
-            style: TextStyle(color: Theme.of(context).primaryColor),
+    return showDialog<bool>(
+      context: context,
+      // barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          title: Center(
+            child: Text(
+              'Salir',
+              style: TextStyle(color: Theme.of(context).primaryColor),
+            ),
           ),
-        ),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Center(child: Text('¿Deseas Salir de la aplicación Móvil?')),
-              Container(
-                padding: EdgeInsets.only(top: 30.0, left: 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Container(
-                      width: 100.0,
-                      child: RaisedButton(
-                        child: Container(
-                          child: Text('Cancelar'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Center(child: Text('¿Deseas Salir de la aplicación Móvil?')),
+                Container(
+                  padding: EdgeInsets.only(top: 30.0, left: 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Container(
+                        width: 100.0,
+                        child: RaisedButton(
+                          child: Container(
+                            child: Text('Cancelar'),
+                          ),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                          elevation: 0.0,
+                          color: Theme.of(context).primaryColor,
+                          textColor: Colors.white,
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        elevation: 0.0,
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        onPressed: () => Navigator.of(context).pop(),
                       ),
-                    ),
-                    Container(
-                      width: 100.0,
-                      child: RaisedButton(
-                        child: Container(
-                          child: Text('Salir'),
+                      Container(
+                        width: 100.0,
+                        child: RaisedButton(
+                          child: Container(
+                            child: Text('Salir'),
+                          ),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                          elevation: 0.0,
+                          color: Theme.of(context).primaryColor,
+                          textColor: Colors.white,
+                          onPressed: () => exit(0),
                         ),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        elevation: 0.0,
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        onPressed: ()=> exit(0),                        
                       ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
   }
 
+  _notificaUbicacion() {
+    final prefs = new PreferenciasUsuario();
+
+    Timer.periodic(Duration(milliseconds: prefs.reporte), (timer) async {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      PositionModel ubicacion = new PositionModel();
+      ubicacion.latitude = position.latitude;
+      ubicacion.longitude = position.longitude;
+      ubicacion.velocidad = position.speed;
+      ubicacion.fecha = DateTime.now();
+      ubicacion.vendedor = prefs.code;
+      ParametrosProvider.parametrosProvider.registrarUbicacion(ubicacion);
+    });
+  }
 }

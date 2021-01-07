@@ -25,8 +25,6 @@ class ClientesProvider {
     final resp = await http.get(url, headers: <String, String>{
       HttpHeaders.authorizationHeader: prefs.token
     });
-    print(resp.statusCode);
-    print(resp.body);
     
     if (resp.statusCode == 200 || resp.statusCode == 202) {
       return clientesModelFromJson(resp.body);
@@ -38,4 +36,22 @@ class ClientesProvider {
      return clientesModelFromJson('[]');
     
   }
+
+  Future<List<ClientesModel>> obtenerListaClientesv2() async {
+    final prefs = new PreferenciasUsuario();
+
+    Uri url = Uri.http(
+        prefs.urlServicio, '/clients/seller/${prefs.code}/route/${prefs.ruta}');
+        
+    final resp = await http.get(url, headers: <String, String>{
+      HttpHeaders.authorizationHeader: prefs.token
+    });
+    
+    if (resp.statusCode == 200 || resp.statusCode == 202) {
+      return clientesModelFromJson(resp.body);
+    }
+     return clientesModelFromJson('[]');
+    
+  }
+
 }

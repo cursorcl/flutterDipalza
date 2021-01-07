@@ -1,5 +1,3 @@
-import 'package:dipalza_movil/src/share/prefs_usuario.dart';
-import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 

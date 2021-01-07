@@ -1,4 +1,5 @@
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/provider/cliente_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -137,7 +138,7 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
         trailing: IconButton(
             icon: Icon(Icons.arrow_forward_ios),
             onPressed: () {
-              Navigator.pushNamed(context, 'venta', arguments: cliente);
+              Navigator.pushNamed(context, 'venta', arguments: new InicioVentaModel(cliente: cliente));
             }),
       ),
     );

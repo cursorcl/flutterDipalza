@@ -1,10 +1,8 @@
 // import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 class ProductosPage extends StatefulWidget {
   const ProductosPage({Key key}) : super(key: key);
@@ -155,7 +153,7 @@ class _ProductosPageState extends State<ProductosPage> {
               title: Text(producto.descripcion,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 12.0,
+                      fontSize: 13.0,
                       color: Colors.black)),
               subtitle: Row(
                 children: <Widget>[
