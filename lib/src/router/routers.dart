@@ -1,6 +1,5 @@
 import 'package:dipalza_movil/src/log/console_log.page.dart';
 import 'package:dipalza_movil/src/page/cliente/clientes.page.dart';
-import 'package:dipalza_movil/src/page/estadistica/estadistica.page.dart';
 import 'package:dipalza_movil/src/page/home/home2.page.dart';
 import 'package:dipalza_movil/src/page/login/config.page.dart';
 import 'package:dipalza_movil/src/page/login/login.page.dart';
@@ -15,7 +14,7 @@ Map<String, WidgetBuilder> getApplicationRoutes() {
     'config': (BuildContext context) => ConfiguracionPage(),
     '/': (BuildContext context) => Homev2Page(),
     'clientes': (BuildContext context) => ClientesPage(),
-    'estadistica': (BuildContext context) => EstadisticaPage(),
+    // 'estadistica': (BuildContext context) => EstadisticaPage(),
     'home': (BuildContext context) => Homev2Page(),
     'productos': (BuildContext context) => ProductosPage(),
     'venta': (BuildContext context) => VentasPage(),

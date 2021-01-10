@@ -162,12 +162,12 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 30.0),
                 _crearBoton(bloc, context),
                 SizedBox(height: 5.0),
-                FlatButton(
-                    onPressed: () {},
-                    child: Text(
-                      '¿Olvidó su Clave?',
-                      style: TextStyle(color: colorRojoBase()),
-                    )),
+                // FlatButton(
+                //     onPressed: () {},
+                //     child: Text(
+                //       '¿Olvidó su Clave?',
+                //       style: TextStyle(color: colorRojoBase()),
+                //     )),
                 FlatButton(
                     onPressed: () => Navigator.pushNamed(context, 'config'),
                     onLongPress: () => Navigator.pushReplacementNamed(context, 'consoleLog'),
@@ -344,7 +344,7 @@ class _LoginPageState extends State<LoginPage> {
     if (resp.status == 200) {
       LoginResponseModel response = loginResponseModelFromJson(resp.detalle);
       print(resp.detalle);
-      prefs.code = response.code;
+      prefs.vendedor = response.code;
       prefs.name = response.name;
       prefs.rut = bloc.usuario;
       prefs.password = bloc.password;

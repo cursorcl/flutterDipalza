@@ -20,7 +20,7 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
   Future<Null> getListaClientes() async {
     final prefs = new PreferenciasUsuario();
     _listaClientes = await ClientesProvider.clientesProvider
-        .obtenerListaClientes(prefs.code, prefs.ruta, context);
+        .obtenerListaClientes(prefs.vendedor, prefs.ruta, context);
     setState(() {});
   }
 

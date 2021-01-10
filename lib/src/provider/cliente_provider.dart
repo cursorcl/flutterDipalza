@@ -41,7 +41,7 @@ class ClientesProvider {
     final prefs = new PreferenciasUsuario();
 
     Uri url = Uri.http(
-        prefs.urlServicio, '/clients/seller/${prefs.code}/route/${prefs.ruta}');
+        prefs.urlServicio, '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
         
     final resp = await http.get(url, headers: <String, String>{
       HttpHeaders.authorizationHeader: prefs.token

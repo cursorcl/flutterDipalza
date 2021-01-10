@@ -5,6 +5,7 @@ import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
+import 'package:dipalza_movil/src/model/registro_venta_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart';
@@ -20,6 +21,9 @@ class VentaProvider {
     //
   }
 
+  /*
+  * Metodo Encargado de realizar la llamada al Servicio para registrar un Item(Producto) a una futura venta de un cliente.
+  */
   Future<RegistroItemRespModel> registrarItem(
       RegistroItemModel registro, BuildContext context) async {
     final prefs = new PreferenciasUsuario();
@@ -51,6 +55,9 @@ class VentaProvider {
     return registroItemRespModelFromJson('{}');
   }
 
+  /*
+  * Metodo Encargado de realizar la llamada al Servicio para remover un Item(Producto) a una futura venta de un cliente.
+  */
   Future<bool> removerItem(ProductosModel producto, BuildContext context,
       ProductosVentaBloc productoVentaBloc) async {
     final prefs = new PreferenciasUsuario();
@@ -83,10 +90,13 @@ class VentaProvider {
     return false;
   }
 
+  /*
+  * Metodo Encargado de realizar la llamada al Servicio para otener las futuras ventas ingresadas por el vendedor.
+  */
   Future<List<VentaModel>> obtenerListaVentas() async {
     try {
       final prefs = new PreferenciasUsuario();
-      Uri url = Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.code}');
+      Uri url = Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.vendedor}');
       DBLogProvider.db.nuevoLog(
           creaLogInfo('VentasProvider', 'obtenerListaVentas', 'Inicio'));
       print('URL Lista Ventas: ' + url.toString());
@@ -104,7 +114,7 @@ class VentaProvider {
         List<ClientesModel> listaCliente;
 
         Uri url = Uri.http(prefs.urlServicio,
-            '/clients/seller/${prefs.code}/route/${prefs.ruta}');
+            '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
 
         final respCliente = await http.get(url, headers: <String, String>{
           HttpHeaders.authorizationHeader: prefs.token
@@ -136,12 +146,15 @@ class VentaProvider {
     return [];
   }
 
+  /*
+  * Metodo Encargado de realizar la llamada al Servicio para otener la lista de Items(Productos) que contempla una futura venta realizada por el Vendedor.
+  */
   Future<List<ProductosModel>> obtenerListaVentasItem(
       String rutCliente, String codeCliente, int fecha) async {
     try {
       final prefs = new PreferenciasUsuario(); //RegistroItemRespModel
       Uri url = Uri.http(prefs.urlServicio,
-          '/listsales/sale/${prefs.code}/rut/$rutCliente/code/$codeCliente/date/$fecha');
+          '/listsales/sale/${prefs.vendedor}/rut/$rutCliente/code/$codeCliente/date/$fecha');
       DBLogProvider.db.nuevoLog(
           creaLogInfo('VentasProvider', 'obtenerListaVentasItem', 'Inicio'));
       print('URL Lista Ventas Item: ' + url.toString());
@@ -177,5 +190,44 @@ class VentaProvider {
       return [];
     }
     return [];
+  }
+
+  /*
+  * Metodo Encargado de realizar la llamada al Servicio para realizar la confirmación final de una futura venta que pasa a ser una Venta Finalizada.
+  */
+  Future<bool> confirmarVenta(
+      RegistroVentaModel registro, BuildContext context) async {
+    final prefs = new PreferenciasUsuario();
+    Uri url = Uri.http(prefs.urlServicio, '/registersale');
+    print('URL Confirmar Venta: ' + url.toString());
+
+    http.Response resp;
+    try {
+      resp = await http.post(url,
+          body: registroVentaModelToJson(registro),
+          headers: <String, String>{
+            HttpHeaders.authorizationHeader: prefs.token
+          });
+    } catch (error) {
+      Navigator.of(context).pop();
+      showAlert(
+          context,
+          'Problemas con la Confirmacion de la Venta, Vuelva a intentar.',
+          Icons.error);
+    }
+
+    print(resp.body);
+    if (resp.statusCode == 200 || resp.statusCode == 202) {
+      return true;
+      // return resp.body == 'true' ? true : false;
+    } else if (resp.statusCode == 500) {
+      Navigator.of(context).pop();
+      showAlert(
+          context,
+          'Problemas con la Confirmacion de la Venta, Vuelva a intentar.',
+          Icons.error);
+    }
+
+    return false;
   }
 }

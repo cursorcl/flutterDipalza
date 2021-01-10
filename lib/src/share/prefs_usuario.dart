@@ -15,12 +15,12 @@ class PreferenciasUsuario {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  get code {
-    return _prefs.getString('code') ?? '';
+  get vendedor {
+    return _prefs.getString('vendedor') ?? '';
   }
 
-  set code(String value) {
-    _prefs.setString('code', value);
+  set vendedor(String value) {
+    _prefs.setString('vendedor', value);
   }
 
   get name {

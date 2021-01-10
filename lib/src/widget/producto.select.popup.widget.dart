@@ -155,7 +155,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
     registro.fila = 0;
     registro.rut = cliente.rut;
     registro.codigo = cliente.codigo;
-    registro.vendedor = prefs.code;
+    registro.vendedor = prefs.vendedor;
     registro.articulo = producto.articulo;
     registro.cantidad = cantidad;
     registro.descuento = 0;

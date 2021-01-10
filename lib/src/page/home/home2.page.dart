@@ -63,12 +63,13 @@ class Homev2Page extends StatelessWidget {
         TableRow(children: [
           makeRoundedButton(Colors.blue, Icons.person_outline, "Clientes",
               context, 'clientes'),
-          makeRoundedButton(
-              Colors.red, Icons.history, "Historia", context, 'estadistica'),
-        ]),
-        TableRow(children: [
           makeRoundedButton(Colors.grey, Icons.phonelink_setup, "Configuración",
               context, 'config'),
+          // makeRoundedButton(
+          //     Colors.red, Icons.history, "Historia", context, 'estadistica'),
+        ]),
+        TableRow(children: [
+         Container(),
           makeRoundedButtonExit(
               Colors.grey, Icons.exit_to_app, "Salir", context),
         ]),
@@ -230,7 +231,7 @@ class Homev2Page extends StatelessWidget {
       ubicacion.longitude = position.longitude;
       ubicacion.velocidad = position.speed;
       ubicacion.fecha = DateTime.now();
-      ubicacion.vendedor = prefs.code;
+      ubicacion.vendedor = prefs.vendedor;
       ParametrosProvider.parametrosProvider.registrarUbicacion(ubicacion);
     });
   }

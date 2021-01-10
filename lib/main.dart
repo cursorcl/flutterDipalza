@@ -5,6 +5,7 @@ import 'package:dipalza_movil/src/provider/parametros_provider.dart';
 import 'package:dipalza_movil/src/router/routers.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,8 @@ void main() async {
        prefs.reporte = int.parse(element.valor);
     }
   });
+
+  validaPermisos();
 
   runApp(MyApp());
 }
@@ -52,6 +55,18 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+validaPermisos() async {
+
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  if (permission.toString() != LocationPermission.always.toString()) {
+    permission = await Geolocator.requestPermission();
+    if (permission.toString() != LocationPermission.always.toString()) {
+    permission = await Geolocator.requestPermission();
+  }
   }
 }
 
