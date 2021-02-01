@@ -6,6 +6,7 @@ import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 import 'package:dipalza_movil/src/model/registro_venta_model.dart';
+import 'package:dipalza_movil/src/model/transmitir_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart';
@@ -96,7 +97,8 @@ class VentaProvider {
   Future<List<VentaModel>> obtenerListaVentas() async {
     try {
       final prefs = new PreferenciasUsuario();
-      Uri url = Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.vendedor}');
+      Uri url =
+          Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.vendedor}');
       DBLogProvider.db.nuevoLog(
           creaLogInfo('VentasProvider', 'obtenerListaVentas', 'Inicio'));
       print('URL Lista Ventas: ' + url.toString());
@@ -192,27 +194,29 @@ class VentaProvider {
     return [];
   }
 
-  /*
-  * Metodo Encargado de realizar la llamada al Servicio para realizar la confirmación final de una futura venta que pasa a ser una Venta Finalizada.
+/*
+  * Metodo Encargado de realizar la llamada al Servicio para realizar la transmisión final de una futura venta que pasa a ser una Venta Finalizada.
   */
-  Future<bool> confirmarVenta(
-      RegistroVentaModel registro, BuildContext context) async {
+  Future<bool> transmitirVentas(
+      BuildContext context, TransmitirModel transmitir) async {
     final prefs = new PreferenciasUsuario();
-    Uri url = Uri.http(prefs.urlServicio, '/registersale');
-    print('URL Confirmar Venta: ' + url.toString());
+    Uri url = Uri.http(prefs.urlServicio, '/registersale/');
+    print('URL Transmitir Venta: ' + url.toString());
 
     http.Response resp;
     try {
       resp = await http.post(url,
-          body: registroVentaModelToJson(registro),
+          body: transmitirModelToJson(transmitir),
           headers: <String, String>{
             HttpHeaders.authorizationHeader: prefs.token
           });
     } catch (error) {
       Navigator.of(context).pop();
+      DBLogProvider.db.nuevoLog(
+          creaLogError('VentaProvider', 'transmitirVentas', error.toString()));
       showAlert(
           context,
-          'Problemas con la Confirmacion de la Venta, Vuelva a intentar.',
+          'Problemas con al transmisión las Ventas, Vuelva a intentar.',
           Icons.error);
     }
 
@@ -222,9 +226,11 @@ class VentaProvider {
       // return resp.body == 'true' ? true : false;
     } else if (resp.statusCode == 500) {
       Navigator.of(context).pop();
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'VentaProvider', 'transmitirVentas', resp.body.toString()));
       showAlert(
           context,
-          'Problemas con la Confirmacion de la Venta, Vuelva a intentar.',
+          'Problemas con la transmisión las Ventas, Vuelva a intentar.',
           Icons.error);
     }
 

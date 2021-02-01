@@ -8,12 +8,14 @@ import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
 class ProductosPopUpPage extends StatefulWidget {
-
   ClientesModel cliente;
   String fecha;
   ProductosVentaBloc productosVentaBloc;
-  
-  ProductosPopUpPage({@required this.cliente, @required this.fecha, @required this.productosVentaBloc});
+
+  ProductosPopUpPage(
+      {@required this.cliente,
+      @required this.fecha,
+      @required this.productosVentaBloc});
 
   @override
   _ProductosPopUpPageState createState() => _ProductosPopUpPageState();
@@ -37,7 +39,7 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
   }
 
   @override
-  void initState() {    
+  void initState() {
     getListaProductos();
     super.initState();
   }
@@ -45,11 +47,12 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> lista = [];
+    final size = MediaQuery.of(context).size;
 
     lista.addAll(_creaListaProductos(context, _searchResult));
 
     return Column(children: [
-      _creaInputBuscar(context),
+      Container(width: size.width * 0.9, child: _creaInputBuscar(context)),
       Column(
         children: lista,
       ),
@@ -91,8 +94,8 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
     }
 
     _listaProductos.forEach((producto) {
-      if (producto.descripcion.toUpperCase().contains(text.toUpperCase()) || producto.articulo == text )
-        _searchResult.add(producto);
+      if (producto.descripcion.toUpperCase().contains(text.toUpperCase()) ||
+          producto.articulo == text) _searchResult.add(producto);
     });
 
     setState(() {});
@@ -101,6 +104,14 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
   List<Widget> _creaListaProductos(
       BuildContext context, List<ProductosModel> listaProductos) {
     final List<Widget> _listItem = [];
+
+    if (listaProductos.length == 0) {
+      _listItem.add(Container(
+        height: 50.0,
+        child: Center(child: Text('Sin Resultados')),
+      ));
+      return _listItem;
+    }
 
     listaProductos.forEach((producto) {
       _listItem.add(_creaCard(context, producto));
@@ -134,13 +145,20 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
         ),
         trailing: IconButton(
             icon: Icon(Icons.arrow_forward_ios),
-            onPressed: () {            
+            onPressed: () {
               return showDialog<void>(
                   context: context,
                   // barrierDismissible: false, // user must tap button!
                   builder: (BuildContext context) {
-                    return ProductoSelectPopUpWidget(producto: producto, productosVentaBloc: widget.productosVentaBloc, cliente: widget.cliente, fecha: widget.fecha,);
-                  }).then((value) => setState(() {}));
+                    return ProductoSelectPopUpWidget(
+                      producto: producto,
+                      productosVentaBloc: widget.productosVentaBloc,
+                      cliente: widget.cliente,
+                      fecha: widget.fecha,
+                    );
+                  }).then((value) => setState(() {
+                    Navigator.of(context).pop();
+                  }));
             }),
       ),
     );

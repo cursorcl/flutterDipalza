@@ -33,7 +33,14 @@ class _LoginPageState extends State<LoginPage> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
+  void dispose() { 
+    // print('>>>>>>>>>>> DISPOSE <<<<<<<<<<<');
+    super.dispose();
+  }
+
+  @override
   void initState() { 
+    // print('>>>>>>>>>>> INIT <<<<<<<<<<<');
     DBLogProvider.db.nuevoLog(creaLogInfo('LoginPage', 'initState', 'Inicio'));
     _getListaRutas();
     _textUsuario = new TextEditingController(text: prefs.rut);
@@ -48,6 +55,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // print('>>>>>>>>>>> BUILD <<<<<<<<<<<');
     DBLogProvider.db.nuevoLog(creaLogInfo('LoginPage', 'build', 'Inicio'));
     return Scaffold(
       key: scaffoldKey,
@@ -62,54 +70,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Widget _crearColorFondo(BuildContext context) {
-  //   return Container(
-  //     height: double.infinity,
-  //     width: double.infinity,
-  //     color: Theme.of(context).primaryColor,
-  //   );
-  // }
-
-  // Widget _crearColorFondo2(BuildContext context) {
-  //   final size = MediaQuery.of(context).size;
-
-  //   final _fondo = Container(
-  //     height: size.height * 0.4,
-  //     width: double.infinity,
-  //     decoration: BoxDecoration(
-  //         gradient: LinearGradient(colors: [
-  //       Theme.of(context).primaryColorDark,
-  //       Theme.of(context).primaryColorLight
-  //     ])),
-  //   );
-
-  //   return Stack(
-  //     children: <Widget>[
-  //       _fondo,
-  //       Container(
-  //         padding: EdgeInsets.only(top: 80.0),
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.center,
-  //           children: <Widget>[
-  //             Hero(
-  //               tag: 'logo_diplaza',
-  //               child: Image(
-  //                 image:
-  //                     AssetImage('assets/image/logo_dipalza_transparente.png'),
-  //                 width: 200.0,
-  //                 fit: BoxFit.cover,
-  //               ),
-  //             ),
-  //             SizedBox(
-  //               height: 1.0,
-  //               width: double.infinity,
-  //             )
-  //           ],
-  //         ),
-  //       )
-  //     ],
-  //   );
-  // }
 
   Widget _loginForm(BuildContext context) {
     final bloc = LoginProvider.of(context);
@@ -360,7 +320,7 @@ class _LoginPageState extends State<LoginPage> {
       });
       Navigator.of(context).pop();
 
-      alertUtil.showAlert(context, resp.detalle, Icons.error);
+      alertUtil.showAlert(context, 'Problemas con el servicio de autenticación (${resp.detalle})', Icons.error);
     }
   }
 

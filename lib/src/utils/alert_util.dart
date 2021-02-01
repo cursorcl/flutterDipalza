@@ -1,3 +1,4 @@
+import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 void showAlert(BuildContext context, String mensaje, IconData icono) {
@@ -10,13 +11,13 @@ void showAlert(BuildContext context, String mensaje, IconData icono) {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
         title: Icon(
           icono != null ? icono : Icons.error_outline,
-          color: Theme.of(context).primaryColor,
+          color: colorRojoBase(),
           size: 60.0,
         ),
         content: Text(mensaje),
         actions: <Widget>[
           FlatButton(
-            child: Text('Cerrar'),
+            child: Text('Cerrar', style: TextStyle(color: colorRojoBase()),),
             onPressed: () => Navigator.of(context).pop(),
           )
         ],

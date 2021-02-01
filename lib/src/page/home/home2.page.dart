@@ -69,9 +69,9 @@ class Homev2Page extends StatelessWidget {
           //     Colors.red, Icons.history, "Historia", context, 'estadistica'),
         ]),
         TableRow(children: [
-         Container(),
           makeRoundedButtonExit(
               Colors.grey, Icons.exit_to_app, "Salir", context),
+          Container(),
         ]),
       ],
     );

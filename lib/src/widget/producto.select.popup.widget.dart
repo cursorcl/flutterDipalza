@@ -178,8 +178,8 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
     RegistroItemRespModel registrado =
         await VentaProvider.ventaProvider.registrarItem(registro, context);
 
-    print('respuesta');
-    print(registroItemRespModelToJson(registrado));
+    // print('respuesta');
+    // print(registroItemRespModelToJson(registrado));
 
     producto.registroItemResp = registrado;
     _cantidad.text = '';

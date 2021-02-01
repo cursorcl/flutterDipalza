@@ -1,6 +1,7 @@
 import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_venta_model.dart';
+import 'package:dipalza_movil/src/model/transmitir_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -17,6 +18,8 @@ class ListaVentasPage extends StatefulWidget {
 }
 
 class _ListaVentasPageState extends State<ListaVentasPage> {
+  int cantidadVentas = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,17 +33,10 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             ),
           ),
         ),
-        actions: <Widget>[
-          Container()
-          // IconButton(
-          //   icon: const Icon(Icons.search),
-          //   tooltip: 'Buscar',
-          //   onPressed: () {},
-          // ),
-        ],
       ),
       body: _creaListaVentas(context),
-      floatingActionButton: creaBtnNuevaVenta(context),
+      // floatingActionButton: creaBtnNuevaVenta(context),
+      floatingActionButton: creaBtnTramitar(context),
     );
   }
 
@@ -51,17 +47,9 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
           (BuildContext context, AsyncSnapshot<List<VentaModel>> snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data != null && snapshot.data.length > 0) {
+            this.cantidadVentas = snapshot.data.length;
             return Column(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5.0),
-                  child: Container(
-                    child: Text(
-                      'Mantener presionada para Confirmar Venta.',
-                      style: TextStyle(fontSize: 12.0, color: Colors.grey[600]),
-                    ),
-                  ),
-                ),
                 Expanded(
                     child: ListView(
                         children: _ventasItems(context, snapshot.data))),
@@ -143,10 +131,6 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
                   onPressed: () {
                     cargaDetalleVenta(context, itemVenta);
                   }),
-              onLongPress: () {
-                print('CONFIRMAR VENTA');
-                _confirmarDialog(itemVenta);
-              },
             ),
           ),
         );
@@ -165,6 +149,17 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             cliente: itemVenta.cliente, listaVentaItem: listaVentaItem));
   }
 
+  Widget creaBtnTramitar(BuildContext context) {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        _transmitirDialog();
+      },
+      backgroundColor: HexColor('#ff7043'),
+      tooltip: 'Transmitir Ventas',
+      label: Text('Transmitir Ventas'),
+    );
+  }
+
   Padding creaBtnNuevaVenta(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 20.0, bottom: 0.0),
@@ -172,135 +167,130 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
     );
   }
 
-  Future<void> _confirmarDialog(VentaModel venta) async {
+  Future<void> _transmitirDialog() async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-          title: Center(
-            child: Text(
-              'Confirmación de Venta',
-              style: TextStyle(color: Colors.black, fontSize: 20),
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Se realizará la confirmación de la venta para el cliente:',
-                  textAlign: TextAlign.justify,
-                ),
-                SizedBox(
-                  height: 15.0,
-                ),
-                Text(venta.razon,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                Text('(' + getFormatRut(venta.rut) + ')',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Text('Por un monto de:', textAlign: TextAlign.justify),
-                SizedBox(
-                  height: 4.0,
-                ),
-                Text(
-                  getValorModena(
-                      venta.neto +
-                          venta.totalila +
-                          venta.carne +
-                          venta.iva -
-                          venta.descuento,
-                      0),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-               
-                Container(
-                  padding: EdgeInsets.only(top: 30.0, left: 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Container(
-                        width: 100.0,
-                        child: RaisedButton(
-                          child: Container(
-                            child: Text('Cancelar'),
-                          ),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0)),
-                          elevation: 0.0,
-                          color: Colors.grey,
-                          textColor: Colors.white,
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ),
-                      Container(
-                        width: 100.0,
-                        child: RaisedButton(
-                          child: Container(
-                            child: Text('Confirmar'),
-                          ),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0)),
-                          elevation: 0.0,
-                          color: Colors.green,
-                          textColor: Colors.white,
-                          onPressed: () {
-                            setState(() {
-                              print('acepto confirmacion de venta');
-                              _callServiceConfirm(
-                                  context, venta);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
+        return MyDialog(cantidadVentas: this.cantidadVentas);
       },
     );
   }
+}
 
-  void _callServiceConfirm(
-      BuildContext context, VentaModel venta) async {
+// ignore: must_be_immutable
+class MyDialog extends StatefulWidget {
+  int cantidadVentas;
+  MyDialog({@required this.cantidadVentas});
+
+  @override
+  _MyDialogState createState() => new _MyDialogState();
+}
+
+class _MyDialogState extends State<MyDialog> {
+  Color _c = Colors.redAccent;
+  bool _loading = false;
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+      title: Center(
+        child: Text(
+          'Transmitir Ventas',
+          style: TextStyle(color: Colors.black, fontSize: 20),
+        ),
+      ),
+      content: SingleChildScrollView(
+        child: _loading
+            ? _loadingProcess()
+            : ListBody(
+                children: <Widget>[
+                  Text(
+                    'Se realizará la Transmisión de ${widget.cantidadVentas} ventas registradas.',
+                    textAlign: TextAlign.justify,
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(top: 30.0, left: 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Container(
+                          width: 100.0,
+                          child: RaisedButton(
+                            child: Container(
+                              child: Text('Cancelar'),
+                            ),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            elevation: 0.0,
+                            color: Colors.grey,
+                            textColor: Colors.white,
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ),
+                        Container(
+                          width: 100.0,
+                          child: RaisedButton(
+                            child: Container(
+                              child: Text('Transmitir'),
+                            ),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            elevation: 0.0,
+                            color: Colors.green,
+                            textColor: Colors.white,
+                            onPressed: () {
+                              setState(() {
+                                _loading = true;
+                                print('acepto transmicion de venta');
+                                _callServiceTransmit(context);
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+      ),
+    );
+  }
+
+  void _callServiceTransmit(BuildContext context) async {
     final prefs = new PreferenciasUsuario();
 
-    print('-------------');
-    print(venta.rut);
-    print(venta.codigo);
-    print(prefs.vendedor);
-    print(venta.fecha);
-    print('-------------');
+    bool resp = await VentaProvider.ventaProvider
+        .transmitirVentas(context, new TransmitirModel(codigo: prefs.vendedor));
 
-    bool resp = await VentaProvider.ventaProvider.confirmarVenta(
-        new RegistroVentaModel(
-            rut: venta.rut,
-            codigo: venta.codigo,
-            vendedor: prefs.vendedor,
-            condicionVenta: '0',
-            fecha: venta.fecha),
-        context);
-
-Navigator.of(context).pop();
+    Navigator.of(context).pop();
     if (resp) {
-      showAlert(context, 'Confirmación de Venta realizada con exito.',
+      showAlert(context, 'Transmisión de Ventas realizada con exito.',
           Icons.check_circle_outline);
     } else {
       showAlert(
-          context, 'No se realizo la Confirmación de la Venta', Icons.error);
+          context, 'No se realizo la Transmisión de las Ventas', Icons.error);
     }
     setState(() {});
-    
+  }
+
+  _loadingProcess() {
+    return ListBody(children: <Widget>[
+      Container(
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(colorRojoBase()),
+          ),
+        ),
+        height: 50.0,
+      ),
+      SizedBox(
+        height: 10.0,
+      ),
+      Container(
+        child: Center(
+          child: Text('Procesando ...', textAlign: TextAlign.justify),
+        ),
+      )
+    ]);
   }
 }
