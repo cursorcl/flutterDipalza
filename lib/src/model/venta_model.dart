@@ -35,11 +35,11 @@ class VentaModel {
         rut: json["rut"],
         codigo: json["codigo"],
         fecha: DateTime.parse(json["fecha"]),
-        neto: json["neto"].toDouble(),
-        descuento: json["descuento"].toDouble(),
+        neto: json["neto"] == null ? 0 : json["neto"].toDouble(),
+        descuento: json["descuento"] == null ? 0 : json["descuento"].toDouble(),
         totalila: json["totalila"] == null ? 0 : json["totalila"].toDouble(),
-        carne: json["carne"].toDouble(),
-        iva: json["iva"].toDouble(),
+        carne: json["carne"] == null ? 0 : json["carne"].toDouble(),
+        iva: json["iva"] == null ? 0 : json["iva"].toDouble(),
     );
 
     Map<String, dynamic> toJson() => {

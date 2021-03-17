@@ -36,13 +36,13 @@ class ProductosModel {
     factory ProductosModel.fromJson(Map<String, dynamic> json) => ProductosModel(
         articulo: json["Articulo"],
         descripcion: json["Descripcion"],
-        ventaneto: json["VentaNeto"].toInt(),
-        porcila: json["PorcIla"].toDouble(),
-        porccarne: json["PorcCarne"].toDouble(),
+        ventaneto: json["VentaNeto"] == null ? 0 : json["VentaNeto"].toInt(),
+        porcila: json["PorcIla"] == null ? 0 : json["PorcIla"].toDouble(),
+        porccarne: json["PorcCarne"] == null ? 0 : json["PorcCarne"].toDouble(),
         // unidad: unidadValues.map[json["unidad"].toUpperCase()],
         unidad: json["Unidad"].toUpperCase(),
-        stock: json["Stock"].toDouble(),
-        pieces: json["Pieces"].toDouble(),
+        stock: json["Stock"] == null ? 0 : json["Stock"].toDouble(),
+        pieces: json["Pieces"] == null ? 0 : json["Pieces"].toDouble(),
         numbered: json["Numbered"],
     );
 
