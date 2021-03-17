@@ -1,6 +1,6 @@
-# dipalza_movil
+# DIPALZA MOVIL
 
-A new Flutter project.
+Proyecto de la empresa DIPALZA Ltda. que permite relaizar venta en línea.
 
 ## Getting Started
 
