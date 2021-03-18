@@ -30,4 +30,25 @@ class ProductosProvider {
       return [];
     }
   }
+
+  /**
+   * Método que obtiene un producto con sus atributos.
+   * code corresponde al código del producto buscado.
+   */
+  Future<ProductosModel> obtenerProducto(String code) async {
+    try {
+      final prefs = new PreferenciasUsuario();
+      Uri url = Uri.http(prefs.urlServicio, '/product/code/' + code);
+      DBLogProvider.db.nuevoLog(creaLogInfo('ProductosProvider', 'obtenerProducto', 'Inicio'));
+      print('URL Productos: ' + url.toString());
+
+      final resp = await http.get(url, headers: <String, String>{HttpHeaders.authorizationHeader: prefs.token});
+      print(resp.body);
+
+      return productoModelFromJson(resp.body);
+    } catch (error) {
+      DBLogProvider.db.nuevoLog(creaLogError('ProductosProvider', 'obtenerProducto', error.toString()));
+      return null;
+    }
+  }
 }

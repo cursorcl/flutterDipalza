@@ -3,6 +3,8 @@ import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 
 List<ProductosModel> productosModelFromJson(String str) => List<ProductosModel>.from(json.decode(str).map((x) => ProductosModel.fromJson(x)));
+// EOS Decodificador de string tipo JSON a ProductsModel
+ProductosModel productoModelFromJson(String str) => json.decode(str).map((x) => ProductosModel.fromJson(x));
 
 String productosModelToJson(List<ProductosModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 

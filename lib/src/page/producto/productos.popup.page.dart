@@ -2,6 +2,7 @@ import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
+import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/producto.select.popup.widget.dart';
 import 'package:flutter/material.dart';
@@ -146,21 +147,32 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
         trailing: IconButton(
             icon: Icon(Icons.arrow_forward_ios),
             onPressed: () {
-              return showDialog<void>(
-                  context: context,
-                  // barrierDismissible: false, // user must tap button!
-                  builder: (BuildContext context) {
-                    return ProductoSelectPopUpWidget(
-                      producto: producto,
-                      productosVentaBloc: widget.productosVentaBloc,
-                      cliente: widget.cliente,
-                      fecha: widget.fecha,
-                    );
-                  }).then((value) => setState(() {
-                    Navigator.of(context).pop();
-                  }));
+              return  
+                FutureBuilder(
+                  future: ProductosProvider.productosProvider.obtenerProducto(producto.articulo),
+                  builder: (context, snapshot) {
+                  return showDialog<void>(
+                    context: context,
+                    // barrierDismissible: false, // user must tap button!
+                    builder: (BuildContext context)  {
+                      return ProductoSelectPopUpWidget(
+                        // producto: producto,
+                        producto: snapshot.data, // EOS como lo hago para esperar un future
+                        productosVentaBloc: widget.productosVentaBloc,
+                        cliente: widget.cliente,
+                        fecha: widget.fecha,
+                      );
+                    }).then((value) => setState(() {
+                      Navigator.of(context).pop();
+                    }));
+                  } ,
+
+                )
+              
+              
             }),
       ),
     );
   }
-}
+
+
