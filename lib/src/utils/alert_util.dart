@@ -2,13 +2,13 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 void showAlert(BuildContext context, String mensaje, IconData icono) {
-
   showDialog<String>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
         title: Icon(
           icono != null ? icono : Icons.error_outline,
           color: colorRojoBase(),
@@ -17,7 +17,10 @@ void showAlert(BuildContext context, String mensaje, IconData icono) {
         content: Text(mensaje),
         actions: <Widget>[
           FlatButton(
-            child: Text('Cerrar', style: TextStyle(color: colorRojoBase()),),
+            child: Text(
+              'Cerrar',
+              style: TextStyle(color: colorRojoBase()),
+            ),
             onPressed: () => Navigator.of(context).pop(),
           )
         ],
@@ -47,5 +50,26 @@ void showBlock(BuildContext context, String mensaje) {
         ],
       );
     },
+  );
+}
+
+Widget showAlertDialog(BuildContext context, String mensaje, IconData icono) {
+  return AlertDialog(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+    title: Icon(
+      icono != null ? icono : Icons.error_outline,
+      color: colorRojoBase(),
+      size: 60.0,
+    ),
+    content: Text(mensaje),
+    actions: <Widget>[
+      FlatButton(
+        child: Text(
+          'Cerrar',
+          style: TextStyle(color: colorRojoBase()),
+        ),
+        onPressed: () => Navigator.of(context).pop(),
+      )
+    ],
   );
 }

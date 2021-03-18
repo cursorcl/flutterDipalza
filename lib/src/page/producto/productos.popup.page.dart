@@ -6,6 +6,7 @@ import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/producto.select.popup.widget.dart';
 import 'package:flutter/material.dart';
+import 'package:dipalza_movil/src/utils/alert_util.dart' as alertUtil;
 
 // ignore: must_be_immutable
 class ProductosPopUpPage extends StatefulWidget {
@@ -147,32 +148,44 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
         trailing: IconButton(
             icon: Icon(Icons.arrow_forward_ios),
             onPressed: () {
-              return  
-                FutureBuilder(
-                  future: ProductosProvider.productosProvider.obtenerProducto(producto.articulo),
-                  builder: (context, snapshot) {
-                  return showDialog<void>(
-                    context: context,
-                    // barrierDismissible: false, // user must tap button!
-                    builder: (BuildContext context)  {
-                      return ProductoSelectPopUpWidget(
-                        // producto: producto,
-                        producto: snapshot.data, // EOS como lo hago para esperar un future
-                        productosVentaBloc: widget.productosVentaBloc,
-                        cliente: widget.cliente,
-                        fecha: widget.fecha,
-                      );
-                    }).then((value) => setState(() {
-                      Navigator.of(context).pop();
-                    }));
-                  } ,
-
-                )
-              
-              
+              return showDialog<void>(
+                  context: context,
+                  // barrierDismissible: false, // user must tap button!
+                  builder: (BuildContext context) {
+                    // return ProductoSelectPopUpWidget(
+                    //   producto: producto,
+                    //   productosVentaBloc: widget.productosVentaBloc,
+                    //   cliente: widget.cliente,
+                    //   fecha: widget.fecha,
+                    // );
+                    return _obtenerProductoFull(producto);
+                  }).then((value) => setState(() {
+                    Navigator.of(context).pop();
+                  }));
             }),
       ),
     );
   }
 
-
+  Widget _obtenerProductoFull(ProductosModel producto) {
+    return FutureBuilder(
+      future: ProductosProvider.productosProvider
+          .obtenerProducto(producto.articulo),
+      builder: (BuildContext context, AsyncSnapshot<ProductosModel> snapshot) {
+        if (snapshot.hasData) {
+          return ProductoSelectPopUpWidget(
+            producto: snapshot.data,
+            productosVentaBloc: widget.productosVentaBloc,
+            cliente: widget.cliente,
+            fecha: widget.fecha,
+          );
+        } else {
+          return alertUtil.showAlertDialog(
+              context,
+              'Problemas al obtener el detalle del producto (${producto.descripcion})',
+              Icons.error);
+        }
+      },
+    );
+  }
+}
