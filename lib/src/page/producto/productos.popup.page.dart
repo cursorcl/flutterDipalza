@@ -180,10 +180,11 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
             fecha: widget.fecha,
           );
         } else {
-          return alertUtil.showAlertDialog(
-              context,
-              'Problemas al obtener el detalle del producto (${producto.descripcion})',
-              Icons.error);
+          // return alertUtil.showAlertDialog(
+          //     context,
+          //     'Problemas al obtener el detalle del producto (${producto.descripcion})',
+          //     Icons.error);
+          return Center(child: CircularProgressIndicator());
         }
       },
     );

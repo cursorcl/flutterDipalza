@@ -43,7 +43,8 @@ class _VentasPageState extends State<VentasPage> {
     // ClientesModel _cliente = ModalRoute.of(context).settings.arguments;
     InicioVentaModel _inicioVenta = ModalRoute.of(context).settings.arguments;
 
-    if (this._primeraCarga && _inicioVenta.listaVentaItem != null &&
+    if (this._primeraCarga &&
+        _inicioVenta.listaVentaItem != null &&
         _inicioVenta.listaVentaItem.isNotEmpty) {
       for (ProductosModel producto in _inicioVenta.listaVentaItem) {
         this._fecha =

@@ -1,37 +1,39 @@
 import 'dart:convert';
 
-RegistroItemModel registroItemModelFromJson(String str) => RegistroItemModel.fromJson(json.decode(str));
+RegistroItemModel registroItemModelFromJson(String str) =>
+    RegistroItemModel.fromJson(json.decode(str));
 
-String registroItemModelToJson(RegistroItemModel data) => json.encode(data.toJson());
+String registroItemModelToJson(RegistroItemModel data) =>
+    json.encode(data.toJson());
 
 class RegistroItemModel {
-    RegistroItemModel({
-        this.indice,
-        this.fila,
-        this.rut,
-        this.codigo,
-        this.vendedor,
-        this.articulo,
-        this.cantidad,
-        this.descuento,
-        this.esnumerado,
-        this.sobrestock,
-        this.fecha
-    });
+  RegistroItemModel(
+      {this.indice,
+      this.fila,
+      this.rut,
+      this.codigo,
+      this.vendedor,
+      this.articulo,
+      this.cantidad,
+      this.descuento,
+      this.esnumerado,
+      this.sobrestock,
+      this.fecha});
 
-    int indice;
-    int fila;
-    String rut;
-    String codigo;
-    String vendedor;
-    String articulo;
-    int cantidad;
-    int descuento;
-    bool esnumerado;
-    bool sobrestock;
-    String fecha;
+  int indice;
+  int fila;
+  String rut;
+  String codigo;
+  String vendedor;
+  String articulo;
+  int cantidad;
+  int descuento;
+  bool esnumerado;
+  bool sobrestock;
+  String fecha;
 
-    factory RegistroItemModel.fromJson(Map<String, dynamic> json) => RegistroItemModel(
+  factory RegistroItemModel.fromJson(Map<String, dynamic> json) =>
+      RegistroItemModel(
         indice: json["indice"],
         fila: json["fila"],
         rut: json["rut"],
@@ -43,9 +45,9 @@ class RegistroItemModel {
         esnumerado: json["esnumerado"],
         sobrestock: json["sobrestock"],
         fecha: json["fecha"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "indice": indice,
         "fila": fila,
         "rut": rut,
@@ -57,5 +59,5 @@ class RegistroItemModel {
         "esnumerado": esnumerado,
         "sobrestock": sobrestock,
         "fecha": fecha,
-    };
+      };
 }

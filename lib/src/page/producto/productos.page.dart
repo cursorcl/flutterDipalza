@@ -18,11 +18,11 @@ class _ProductosPageState extends State<ProductosPage> {
   List<ProductosModel> _listaProductos = [];
   bool _verBuscar = false;
 
-
   Future<Null> getListaProductos() async {
+    ProductosBloc().obtenerListaProductos();
     _listaProductos = ProductosBloc().listaProductos;
     //  _listaProductos = await ProductosProvider.productosProvider.obtenerListaProductos();
-     setState(() {});
+    setState(() {});
   }
 
   Future<void> getListaProductosRefrescar() async {
@@ -31,7 +31,7 @@ class _ProductosPageState extends State<ProductosPage> {
     onSearchTextChanged(controller.text);
   }
 
-   @override
+  @override
   void initState() {
     super.initState();
     getListaProductos();
@@ -54,9 +54,11 @@ class _ProductosPageState extends State<ProductosPage> {
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: 'Buscar',
-            onPressed: () {setState(() {
-              _verBuscar = true;
-            });},
+            onPressed: () {
+              setState(() {
+                _verBuscar = true;
+              });
+            },
           ),
         ],
       ),
@@ -69,7 +71,10 @@ class _ProductosPageState extends State<ProductosPage> {
       body: Column(
         children: <Widget>[
           _verBuscar ? _creaInputBuscar(context) : Container(),
-          Expanded(child: _searchResult.length != 0 || controller.text.isNotEmpty ? _creaListaProductos(context, _searchResult) : _creaListaProductos(context, _listaProductos)),
+          Expanded(
+              child: _searchResult.length != 0 || controller.text.isNotEmpty
+                  ? _creaListaProductos(context, _searchResult)
+                  : _creaListaProductos(context, _listaProductos)),
         ],
       ),
     );
@@ -79,30 +84,33 @@ class _ProductosPageState extends State<ProductosPage> {
     return AnimatedOpacity(
       opacity: _verBuscar ? 1.0 : 0.0,
       duration: Duration(milliseconds: 500),
-          child: Container(
-              color: colorRojoBase(),
-              child: new Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: new Card(
-                  child: new ListTile(
-                    leading: new Icon(Icons.search),
-                    title: new TextField(
-                      controller: controller,
-                      decoration: new InputDecoration(
-                          hintText: 'Buscar', border: InputBorder.none),
-                      onChanged: onSearchTextChanged,
-                    ),
-                    trailing: new IconButton(icon: new Icon(Icons.cancel), onPressed: () {
-                      controller.clear();
-                      onSearchTextChanged('');
-                      setState(() {
-                        _verBuscar = false;
-                      });
-                    },),
-                  ),
-                ),
+      child: Container(
+        color: colorRojoBase(),
+        child: new Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: new Card(
+            child: new ListTile(
+              leading: new Icon(Icons.search),
+              title: new TextField(
+                controller: controller,
+                decoration: new InputDecoration(
+                    hintText: 'Buscar', border: InputBorder.none),
+                onChanged: onSearchTextChanged,
+              ),
+              trailing: new IconButton(
+                icon: new Icon(Icons.cancel),
+                onPressed: () {
+                  controller.clear();
+                  onSearchTextChanged('');
+                  setState(() {
+                    _verBuscar = false;
+                  });
+                },
               ),
             ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -114,71 +122,68 @@ class _ProductosPageState extends State<ProductosPage> {
     }
 
     _listaProductos.forEach((producto) {
-      if (producto.descripcion.toUpperCase().contains(text.toUpperCase()) || producto.articulo == text)
-        _searchResult.add(producto);
+      if (producto.descripcion.toUpperCase().contains(text.toUpperCase()) ||
+          producto.articulo == text) _searchResult.add(producto);
     });
 
     setState(() {});
   }
 
-  Widget _creaListaProductos(BuildContext context, List<ProductosModel> listaProducto) {
-
-     if (listaProducto.length == 0) {
+  Widget _creaListaProductos(
+      BuildContext context, List<ProductosModel> listaProducto) {
+    if (listaProducto.length == 0) {
       return Center(
         child: Text('No existen Productos a mostrar.'),
       );
     }
 
     return RefreshIndicator(
-          onRefresh: getListaProductosRefrescar,
-          child: ListView.builder(
-                itemCount: listaProducto.length,
-                
-                itemBuilder: (context, i) {
-                  return _creaCard(listaProducto[i]);
-                },
-              ),
+      onRefresh: getListaProductosRefrescar,
+      child: ListView.builder(
+        itemCount: listaProducto.length,
+        itemBuilder: (context, i) {
+          return _creaCard(listaProducto[i]);
+        },
+      ),
     );
   }
 
   _creaCard(ProductosModel producto) {
     return Card(
-            child: ListTile(
-              leading: CircleAvatar(
-                radius: 25,
-                child: Icon(Icons.card_giftcard),
-                backgroundColor: colorRojoBase(),
-                foregroundColor: Colors.white,
-              ),
-              title: Text(producto.descripcion,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13.0,
-                      color: Colors.black)),
-              subtitle: Row(
-                children: <Widget>[
-                  detalleProducto(producto),
-                  Expanded(child: Container()),
-                  btnLoad(producto)
-                ],
-              ),
-              trailing: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios), onPressed: () {}),
-            ),
-          );
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 25,
+          child: Icon(Icons.card_giftcard),
+          backgroundColor: colorRojoBase(),
+          foregroundColor: Colors.white,
+        ),
+        title: Text(producto.descripcion,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13.0,
+                color: Colors.black)),
+        subtitle: Row(
+          children: <Widget>[
+            detalleProducto(producto),
+            Expanded(child: Container()),
+            btnLoad(producto)
+          ],
+        ),
+        trailing:
+            IconButton(icon: Icon(Icons.arrow_forward_ios), onPressed: () {}),
+      ),
+    );
   }
 
-
   Column detalleProducto(ProductosModel producto) {
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         SizedBox(
           height: 5.0,
         ),
-        Text('V. Neto: ' + 
-         getValorModena(producto.ventaneto.toDouble(), 0),
+        Text(
+          'V. Neto: ' + getValorModena(producto.ventaneto.toDouble(), 0),
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.0),
         ),
         SizedBox(
@@ -194,7 +199,6 @@ class _ProductosPageState extends State<ProductosPage> {
   }
 
   Column btnLoad(ProductosModel producto) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
@@ -215,7 +219,8 @@ class _ProductosPageState extends State<ProductosPage> {
                   size: 18.0,
                 ),
                 Text(
-                  getValorNumero(producto.stock > 0 ? producto.stock : 0) + ' Unidades',
+                  getValorNumero(producto.stock > 0 ? producto.stock : 0) +
+                      ' Unidades',
                   style: TextStyle(
                       color: producto.stock > 0 ? Colors.green : Colors.red,
                       fontSize: 12.0),

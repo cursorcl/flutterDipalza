@@ -3,6 +3,7 @@ import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
+import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -32,52 +33,60 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // return FutureBuilder(
+    //   future: ProductosProvider.productosProvider
+    //       .obtenerProducto(widget.producto.articulo),
+    //   builder: (BuildContext context, AsyncSnapshot<ProductosModel> snapshot) {
+    //     print('snapshot.hasData' + snapshot.hasData.toString());
+    //     if (snapshot.hasData) {
+    //       return _createPopUp(context, snapshot.data);
+    //     } else {
+    //       return Center(child: CircularProgressIndicator());
+    //     }
+    //   },
+    // );
+    return _createPopUp(context, widget.producto);
+  }
+
+  AlertDialog _createPopUp(BuildContext context, ProductosModel producto) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      title: Text('Código: ' + widget.producto.articulo,
-          style: TextStyle(
-              color: widget.producto.stock > 0 ? Colors.green : Colors.red)),
+      title: Text('Código: ' + producto.articulo,
+          style:
+              TextStyle(color: producto.stock > 0 ? Colors.green : Colors.red)),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
             Text(
-              widget.producto.descripcion,
+              producto.descripcion,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(
               height: 10.0,
             ),
             Text('Valor Neto: ' +
-                getValorModena(widget.producto.ventaneto.toDouble(), 0)),
+                getValorModena(producto.ventaneto.toDouble(), 0)),
             SizedBox(
               height: 10.0,
             ),
-            widget.producto.numbered
+            producto.numbered
                 ? Row(
                     children: <Widget>[
                       Expanded(
                           child: Text('Piezas: ' +
-                              getValorNumero(widget.producto.pieces > 0
-                                  ? widget.producto.pieces
-                                  : 0))),
+                              getValorNumero(
+                                  producto.pieces > 0 ? producto.pieces : 0))),
                       Expanded(
                           child: Text('Kilos: ' +
                               getValorNumeroDecimal(
-                                  widget.producto.stock > 0
-                                      ? widget.producto.stock
-                                      : 0,
-                                  2))),
+                                  producto.stock > 0 ? producto.stock : 0, 2))),
                     ],
                   )
                 : Text(
                     'Stock: ' +
-                        getValorNumero(widget.producto.stock > 0
-                            ? widget.producto.stock
-                            : 0),
+                        getValorNumero(producto.stock > 0 ? producto.stock : 0),
                     style: TextStyle(
-                        color: widget.producto.stock > 0
-                            ? Colors.black
-                            : Colors.red)),
+                        color: producto.stock > 0 ? Colors.black : Colors.red)),
             SizedBox(
               height: 10.0,
             ),
@@ -95,7 +104,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                   },
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: widget.producto.numbered ? 'Piezas' : 'Cantidad',
+                    labelText: producto.numbered ? 'Piezas' : 'Cantidad',
                   ),
                 ))
           ],
@@ -136,7 +145,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                 ? null
                 : () {
                     setState(() {
-                      _registrarItem(widget.producto, widget.cliente,
+                      _registrarItem(producto, widget.cliente,
                           int.parse(_cantidad.text), context);
                     });
                   },
@@ -162,7 +171,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
     registro.esnumerado = producto.numbered;
     registro.fecha = widget.fecha;
 
-    if (!producto.numbered && cantidad > producto.stock){
+    if (!producto.numbered && cantidad > producto.stock) {
       registro.sobrestock = true;
     } else if (producto.numbered && cantidad > producto.pieces) {
       registro.sobrestock = true;
@@ -179,14 +188,12 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
         await VentaProvider.ventaProvider.registrarItem(registro, context);
 
     // print('respuesta');
-    // print(registroItemRespModelToJson(registrado));
+    print(registroItemRespModelToJson(registrado));
 
     producto.registroItemResp = registrado;
     _cantidad.text = '';
     widget.productosVentaBloc.agregarProducto(producto);
-    setState(() {
-      
-    });
+    setState(() {});
     Navigator.of(context).pop();
   }
 }

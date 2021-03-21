@@ -39,15 +39,20 @@ class ProductosProvider {
     try {
       final prefs = new PreferenciasUsuario();
       Uri url = Uri.http(prefs.urlServicio, '/product/code/' + code);
-      DBLogProvider.db.nuevoLog(creaLogInfo('ProductosProvider', 'obtenerProducto', 'Inicio'));
+      DBLogProvider.db.nuevoLog(
+          creaLogInfo('ProductosProvider', 'obtenerProducto', 'Inicio'));
       print('URL Productos: ' + url.toString());
 
-      final resp = await http.get(url, headers: <String, String>{HttpHeaders.authorizationHeader: prefs.token});
+      final resp = await http.get(url, headers: <String, String>{
+        HttpHeaders.authorizationHeader: prefs.token
+      });
       print(resp.body);
+      print(productoModelFromJson(resp.body));
 
       return productoModelFromJson(resp.body);
     } catch (error) {
-      DBLogProvider.db.nuevoLog(creaLogError('ProductosProvider', 'obtenerProducto', error.toString()));
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'ProductosProvider', 'obtenerProducto', error.toString()));
       return null;
     }
   }
