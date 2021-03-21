@@ -5,7 +5,6 @@ import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
-import 'package:dipalza_movil/src/model/registro_venta_model.dart';
 import 'package:dipalza_movil/src/model/transmitir_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -176,7 +175,7 @@ class VentaProvider {
         listaVentasItem.forEach((item) {
           for (ProductosModel producto in _listaProductos) {
             if (item.articulo == producto.articulo) {
-              ProductosModel newRegistro = producto;
+              ProductosModel newRegistro = producto.clone();
               newRegistro.registroItemResp = item;
               _listaProductosFinal.add(newRegistro);
               break;

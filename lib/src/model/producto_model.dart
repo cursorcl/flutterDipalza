@@ -10,6 +10,8 @@ List<ProductosModel> productosModelFromJson(String str) =>
 ProductosModel productoModelFromJson(String str) =>
     ProductosModel.fromJson(json.decode(str));
 
+String productoModelToJson(ProductosModel data) => json.encode(data.toJson());
+
 String productosModelToJson(List<ProductosModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
@@ -49,7 +51,7 @@ class ProductosModel {
         unidad: json["Unidad"].toUpperCase(),
         stock: json["Stock"] == null ? 0 : json["Stock"].toDouble(),
         pieces: json["Pieces"] == null ? 0 : json["Pieces"].toDouble(),
-        numbered: json["Numbered"],
+        numbered: json["Numbered"] == null ? false : json["Numbered"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -64,6 +66,12 @@ class ProductosModel {
         "Pieces": pieces,
         "Numbered": numbered,
       };
+
+  ProductosModel clone() {
+    final String jsonString = json.encode(this);
+    final jsonResponse = json.decode(jsonString);
+    return ProductosModel.fromJson(jsonResponse as Map<String, dynamic>);
+  }
 }
 
 enum Unidad {

@@ -1,6 +1,5 @@
 import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/model/registro_venta_model.dart';
 import 'package:dipalza_movil/src/model/transmitir_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
@@ -187,7 +186,6 @@ class MyDialog extends StatefulWidget {
 }
 
 class _MyDialogState extends State<MyDialog> {
-  Color _c = Colors.redAccent;
   bool _loading = false;
   @override
   Widget build(BuildContext context) {

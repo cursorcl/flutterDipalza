@@ -31,10 +31,9 @@ class ProductosProvider {
     }
   }
 
-  /**
-   * Método que obtiene un producto con sus atributos.
-   * code corresponde al código del producto buscado.
-   */
+  /// Método que obtiene un producto con sus atributos.
+  /// code corresponde al código del producto buscado.
+
   Future<ProductosModel> obtenerProducto(String code) async {
     try {
       final prefs = new PreferenciasUsuario();

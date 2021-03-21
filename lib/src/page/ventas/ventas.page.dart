@@ -214,7 +214,9 @@ class _VentasPageState extends State<VentasPage> {
 
     lista.forEach((prod) {
       Widget widgetTemp = Dismissible(
-          key: Key(prod.articulo + Random().nextInt(10000).toString()),
+          key: Key(prod.articulo +
+              prod.registroItemResp.cantidad.toString() +
+              Random().nextInt(10000).toString()),
           background: Container(
             alignment: Alignment.centerRight,
             padding: EdgeInsets.symmetric(horizontal: 20.0),
@@ -236,7 +238,10 @@ class _VentasPageState extends State<VentasPage> {
                 backgroundColor: colorRojoBase(),
                 foregroundColor: Colors.white,
               ),
-              title: Text(prod.descripcion,
+              title: Text(
+                  prod.descripcion +
+                      ' - ' +
+                      prod.registroItemResp.indice.toString(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12.0,

@@ -6,7 +6,6 @@ import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/producto.select.popup.widget.dart';
 import 'package:flutter/material.dart';
-import 'package:dipalza_movil/src/utils/alert_util.dart' as alertUtil;
 
 // ignore: must_be_immutable
 class ProductosPopUpPage extends StatefulWidget {

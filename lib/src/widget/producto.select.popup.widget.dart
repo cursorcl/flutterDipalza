@@ -3,7 +3,6 @@ import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
-import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
