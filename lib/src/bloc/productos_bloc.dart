@@ -4,7 +4,9 @@ import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ProductosBloc {
+
   static final ProductosBloc _singleton = new ProductosBloc._internal();
+  final _productosController = BehaviorSubject<List<ProductosModel>>();
 
   factory ProductosBloc() {
     return _singleton;
@@ -14,16 +16,13 @@ class ProductosBloc {
     obtenerListaProductos();
   }
 
-  final _productosController = BehaviorSubject<List<ProductosModel>>();
-  Stream<List<ProductosModel>> get productosStream =>
-      _productosController.stream;
+  
+  Stream<List<ProductosModel>> get productosStream =>_productosController.stream;
+  List<ProductosModel> get listaProductos => _productosController.value;
 
   obtenerListaProductos() async {
-    _productosController.sink
-        .add(await ProductosProvider.productosProvider.obtenerListaProductos());
+    _productosController.sink.add(await ProductosProvider.productosProvider.obtenerListaProductos());
   }
-
-  List<ProductosModel> get listaProductos => _productosController.value;
 
   dispose() {
     _productosController?.close();

@@ -21,7 +21,6 @@ class _ProductosPageState extends State<ProductosPage> {
   Future<Null> getListaProductos() async {
     ProductosBloc().obtenerListaProductos();
     _listaProductos = ProductosBloc().listaProductos;
-    //  _listaProductos = await ProductosProvider.productosProvider.obtenerListaProductos();
     setState(() {});
   }
 

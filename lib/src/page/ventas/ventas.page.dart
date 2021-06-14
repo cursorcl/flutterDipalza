@@ -1,7 +1,10 @@
 import 'dart:math';
 
+import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
+import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/page/producto/productos.popup.page.dart';
@@ -24,14 +27,26 @@ class _VentasPageState extends State<VentasPage> {
   double _valorTotal = 0.0;
   double _valorCarne = 0.0;
   final productoVentaBloc = ProductosVentaBloc();
+  final condicionVentaBloc = CondicionVentaBloc();
   String _fecha = '';
   Widget _widgetResumenVenta;
   bool _primeraCarga = true;
+  List<CondicionVentaModel> _listaCondicionVenta = [];
+  CondicionVentaModel _condicionSeleccionada;
+
+  Future<Null> getListaCondicionVenta() async {
+    CondicionVentaBloc().obtenerListaCondicionesVenta();
+    _listaCondicionVenta =  CondicionVentaBloc().listaCondicionVenta;
+    setState(() {});
+  }
+  
 
   @override
   void initState() {
     print('>>>>>>>>> INIT STATE >>>>>>>>>');
+    DBLogProvider.db.nuevoLog(creaLogInfo('VentasPage', 'initState', 'Inicio'));
     super.initState();
+    getListaCondicionVenta();
     this.productoVentaBloc.limpiarProductos();
     this._fecha = DateTime.now().millisecondsSinceEpoch.toString();
     print('FECHA DEL REGISTRO: ' + this._fecha);
@@ -39,21 +54,14 @@ class _VentasPageState extends State<VentasPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('>>>>>>>>> BUILD STATE >>>>>>>>>');
-    // ClientesModel _cliente = ModalRoute.of(context).settings.arguments;
     InicioVentaModel _inicioVenta = ModalRoute.of(context).settings.arguments;
 
-    if (this._primeraCarga &&
-        _inicioVenta.listaVentaItem != null &&
-        _inicioVenta.listaVentaItem.isNotEmpty) {
+    if (this._primeraCarga && _inicioVenta.listaVentaItem != null && _inicioVenta.listaVentaItem.isNotEmpty) {
       for (ProductosModel producto in _inicioVenta.listaVentaItem) {
-        this._fecha =
-            producto.registroItemResp.fecha.millisecondsSinceEpoch.toString();
+        this._fecha = producto.registroItemResp.fecha.millisecondsSinceEpoch.toString();
         this.productoVentaBloc.agregarProducto(producto);
       }
       this._primeraCarga = false;
-      //  this._fecha = _inicioVenta.listaVentaItem[0].registroItemResp.fecha.millisecondsSinceEpoch.toString();
-
     }
 
     List<ProductosModel> _listaVenta = this.productoVentaBloc.listaProductos;
@@ -125,12 +133,31 @@ class _VentasPageState extends State<VentasPage> {
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15.0,
-                          ))
+                          )),
                     ],
                   ),
-                )
+                ),
               ],
-            )
+            ),
+            Row(
+              children:<Widget>[
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
+                ),
+                Text( 'Condicion Venta:',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
+                ),
+                Expanded(child: _crearComboCondicionVenta(context)),
+                ]),
           ],
         ));
   }
@@ -201,8 +228,7 @@ class _VentasPageState extends State<VentasPage> {
     );
   }
 
-  Widget _creaListaProductos(
-      BuildContext context, List<ProductosModel> _listaVenta) {
+  Widget _creaListaProductos(BuildContext context, List<ProductosModel> _listaVenta) {
     return ListView(
       shrinkWrap: true,
       children: _listaItem(context, _listaVenta),
@@ -273,6 +299,7 @@ class _VentasPageState extends State<VentasPage> {
     this._valorTotal = 0;
 
     List<ProductosModel> lista = productoVentaBloc.listaProductos;
+    
 
     this._valorItems = lista.length;
 
@@ -290,6 +317,7 @@ class _VentasPageState extends State<VentasPage> {
       width: size.width * 0.65,
       child: Table(
         children: [
+
           TableRow(children: [
             getCeldaTexto('Items:'),
             getCeldaTexto(this._valorItems.toString())
@@ -349,17 +377,6 @@ class _VentasPageState extends State<VentasPage> {
         SizedBox(
           height: 5.0,
         ),
-        // Text(
-        //   producto.numbered
-        //       ? 'Piezas Solicitadas: ' +
-        //           producto.registroItem.cantidad.toString()
-        //       : 'Cantidad Solicitada: ' +
-        //           producto.registroItem.cantidad.toString(),
-        //   style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13.0),
-        // ),
-        // SizedBox(
-        //   height: 2.0,
-        // ),
         Text(
           producto.numbered
               ? 'Kilos Confirmados: ' +
@@ -381,4 +398,72 @@ class _VentasPageState extends State<VentasPage> {
       setState(() {});
     }
   }
+
+
+  Widget _crearComboCondicionVenta(BuildContext context) {
+  return new Container(
+    color: colorRojoBase(),
+    child: new Center(
+          child: new DropdownButtonFormField(
+            value: _condicionSeleccionada,
+            items: getOpcionesDropDown(),
+            onChanged: changedDropDownItem,
+            style: const TextStyle(color: Colors.black),
+            //selectedItemBuilder: (BuildContext context) {getSelectedOpcionsDropDown(context);},
+          )
+      )      
+    );
+  }
+
+
+  void changedDropDownItem(CondicionVentaModel selectedCity) {
+    setState(() {
+      _condicionSeleccionada = selectedCity;
+    });
+  }
+
+  List<DropdownMenuItem<CondicionVentaModel>> getOpcionesDropDown() {
+    
+    List<DropdownMenuItem<CondicionVentaModel>> lista = [];
+
+    if(_listaCondicionVenta == null) return [];
+
+    _listaCondicionVenta.forEach((condicion) {
+      lista.add(DropdownMenuItem(
+        child: Text(condicion.descripcion, style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14.0,
+                ),
+                textAlign: TextAlign.right,
+                ),
+        value: condicion,
+      ));
+    });
+
+    return lista;
+  }
+
+  List<Widget> getSelectedOpcionsDropDown(BuildContext context) {
+    
+    List<Widget> lista = [];
+
+    if(_listaCondicionVenta == null) return [];
+
+    _listaCondicionVenta.forEach((condicion) {
+      lista.add( 
+        Text(
+          condicion.descripcion, 
+          style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14.0,
+                color: Colors.white
+          ),
+          textAlign: TextAlign.right,
+        ),
+      );
+    });
+
+    return lista;
+  }
+
 }

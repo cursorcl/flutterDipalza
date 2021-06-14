@@ -13,7 +13,7 @@ void main() async {
   await prefs.initPrefs();
   prefs.token = '';
   if (prefs.urlServicio == '') {
-    prefs.urlServicio = 'cursorcl.dynalias.com:8099';
+    prefs.urlServicio = '192.168.0.11:8888'; // 'cursorcl.dynalias.com:8099';
   }
 
   List<ConfiguracionModel> lista = await ParametrosProvider.parametrosProvider.obtenerConfiguraciones();

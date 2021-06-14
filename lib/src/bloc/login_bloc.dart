@@ -9,16 +9,11 @@ class LoginBloc with Validators {
   final _passwordController = BehaviorSubject<String>();
   final _rutaController = BehaviorSubject<String>();
 
-  Stream<String> get usuarioStream =>
-      _usuarioController.stream.transform(validarUsuario);
-  Stream<String> get passwordStream =>
-      _passwordController.stream.transform(validarPassword);
-  Stream<String> get rutaStream =>
-      _rutaController.stream.transform(validarRuta);
+  Stream<String> get usuarioStream => _usuarioController.stream.transform(validarUsuario);
+  Stream<String> get passwordStream => _passwordController.stream.transform(validarPassword);
+  Stream<String> get rutaStream => _rutaController.stream.transform(validarRuta);
 
-  // Stream<bool> get formValidStream => Rx.combineLatest2(usuarioStream, passwordStream, (e, p) => true);
-  Stream<bool> get formValidStream => Rx.combineLatest3(
-      usuarioStream, passwordStream, rutaStream, (a, b, c) => true);
+  Stream<bool> get formValidStream => Rx.combineLatest3( usuarioStream, passwordStream, rutaStream, (a, b, c) => true );
 
   Function(String) get changeUsuario => _usuarioController.sink.add;
   Function(String) get changePassword => _passwordController.sink.add;

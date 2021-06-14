@@ -18,7 +18,8 @@ class RegistroItemModel {
       this.descuento,
       this.esnumerado,
       this.sobrestock,
-      this.fecha});
+      this.fecha,
+      this.condicionventa});
 
   int indice;
   int fila;
@@ -31,6 +32,7 @@ class RegistroItemModel {
   bool esnumerado;
   bool sobrestock;
   String fecha;
+  String condicionventa;
 
   factory RegistroItemModel.fromJson(Map<String, dynamic> json) =>
       RegistroItemModel(
@@ -45,6 +47,7 @@ class RegistroItemModel {
         esnumerado: json["esnumerado"],
         sobrestock: json["sobrestock"],
         fecha: json["fecha"],
+        condicionventa: json["condicionventa"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -59,5 +62,6 @@ class RegistroItemModel {
         "esnumerado": esnumerado,
         "sobrestock": sobrestock,
         "fecha": fecha,
+        "condicionventa": condicionventa,
       };
 }
