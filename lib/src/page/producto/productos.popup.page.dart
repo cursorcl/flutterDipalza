@@ -1,6 +1,7 @@
 import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/provider/productos_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -11,11 +12,13 @@ import 'package:flutter/material.dart';
 class ProductosPopUpPage extends StatefulWidget {
   ClientesModel cliente;
   String fecha;
+  CondicionVentaModel condicionVenta;
   ProductosVentaBloc productosVentaBloc;
 
   ProductosPopUpPage(
       {@required this.cliente,
       @required this.fecha,
+      @required this.condicionVenta,
       @required this.productosVentaBloc});
 
   @override
@@ -29,8 +32,6 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
 
   Future<Null> getListaProductos() async {
     _listaProductos = ProductosBloc().listaProductos;
-    // _listaProductos =
-    //     await ProductosProvider.productosProvider.obtenerListaProductos();
     setState(() {});
   }
 
@@ -149,14 +150,7 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
             onPressed: () {
               return showDialog<void>(
                   context: context,
-                  // barrierDismissible: false, // user must tap button!
                   builder: (BuildContext context) {
-                    // return ProductoSelectPopUpWidget(
-                    //   producto: producto,
-                    //   productosVentaBloc: widget.productosVentaBloc,
-                    //   cliente: widget.cliente,
-                    //   fecha: widget.fecha,
-                    // );
                     return _obtenerProductoFull(producto);
                   }).then((value) => setState(() {
                     Navigator.of(context).pop();
@@ -168,21 +162,17 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
 
   Widget _obtenerProductoFull(ProductosModel producto) {
     return FutureBuilder(
-      future: ProductosProvider.productosProvider
-          .obtenerProducto(producto.articulo),
+      future: ProductosProvider.productosProvider.obtenerProducto(producto.articulo),
       builder: (BuildContext context, AsyncSnapshot<ProductosModel> snapshot) {
         if (snapshot.hasData) {
           return ProductoSelectPopUpWidget(
             producto: snapshot.data,
             productosVentaBloc: widget.productosVentaBloc,
             cliente: widget.cliente,
+            condicionVenta: widget.condicionVenta,
             fecha: widget.fecha,
           );
         } else {
-          // return alertUtil.showAlertDialog(
-          //     context,
-          //     'Problemas al obtener el detalle del producto (${producto.descripcion})',
-          //     Icons.error);
           return Center(child: CircularProgressIndicator());
         }
       },

@@ -31,12 +31,9 @@ class _VentasPageState extends State<VentasPage> {
   String _fecha = '';
   Widget _widgetResumenVenta;
   bool _primeraCarga = true;
-  List<CondicionVentaModel> _listaCondicionVenta = [];
-  CondicionVentaModel _condicionSeleccionada;
+  InicioVentaModel _inicioVenta;
 
   Future<Null> getListaCondicionVenta() async {
-    CondicionVentaBloc().obtenerListaCondicionesVenta();
-    _listaCondicionVenta =  CondicionVentaBloc().listaCondicionVenta;
     setState(() {});
   }
   
@@ -54,7 +51,7 @@ class _VentasPageState extends State<VentasPage> {
 
   @override
   Widget build(BuildContext context) {
-    InicioVentaModel _inicioVenta = ModalRoute.of(context).settings.arguments;
+    _inicioVenta = ModalRoute.of(context).settings.arguments;
 
     if (this._primeraCarga && _inicioVenta.listaVentaItem != null && _inicioVenta.listaVentaItem.isNotEmpty) {
       for (ProductosModel producto in _inicioVenta.listaVentaItem) {
@@ -65,6 +62,7 @@ class _VentasPageState extends State<VentasPage> {
     }
 
     List<ProductosModel> _listaVenta = this.productoVentaBloc.listaProductos;
+
     this._widgetResumenVenta = this.loadResumenVenta();
 
     return Scaffold(
@@ -134,30 +132,18 @@ class _VentasPageState extends State<VentasPage> {
                             color: Colors.white,
                             fontSize: 15.0,
                           )),
+
+                      Text(_inicioVenta.condicionVenta.descripcion,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.0,
+                          )                      
+                      )
                     ],
                   ),
                 ),
               ],
             ),
-            Row(
-              children:<Widget>[
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
-                ),
-                Text( 'Condicion Venta:',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11.0,
-                  fontWeight: FontWeight.bold),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
-                ),
-                Expanded(child: _crearComboCondicionVenta(context)),
-                ]),
           ],
         ));
   }
@@ -172,42 +158,49 @@ class _VentasPageState extends State<VentasPage> {
             Container(
               width: size.width * 0.35,
               alignment: Alignment.center,
-              child: FloatingActionButton(
-                  backgroundColor: Colors.green,
-                  tooltip: 'Ingresar Venta',
-                  child: Icon(
-                    Icons.add_shopping_cart,
-                    size: 35.0,
-                  ),
-                  onPressed: () {
-                    showDialog<void>(
-                        context: context,
-                        builder: (context) {
-                          return SimpleDialog(
-                            title: Center(child: Text('Selección de Producto')),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
-                            children: <Widget>[
-                              ProductosPopUpPage(
-                                cliente: _cliente,
-                                fecha: _fecha,
-                                productosVentaBloc: productoVentaBloc,
-                              ),
-                              SizedBox(
-                                height: 10.0,
-                              )
-                            ],
-                          );
-                        }).then((value) => setState(() {}));
-
-                    setState(() {});
-                  }),
+              child: getFloatButton(_cliente),
             ),
             this._widgetResumenVenta,
           ],
         ));
   }
 
+
+  Widget getFloatButton(ClientesModel _cliente){
+    return FloatingActionButton(
+        elevation: 10,
+
+        tooltip: 'Ingresar Venta',
+        child: Icon(
+          Icons.add_shopping_cart,
+          size: 35.0,
+        ),
+        onPressed: () {
+          showDialog<void>(
+              context: context,
+              builder: (context) {
+                return SimpleDialog(
+                  title: Center(child: Text('Selección de Producto')),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
+                  children: <Widget>[
+                    ProductosPopUpPage(
+                      cliente: _cliente,
+                      fecha: _fecha,
+                      condicionVenta: _inicioVenta.condicionVenta,
+                      productosVentaBloc: productoVentaBloc,
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    )
+                  ],
+                );
+              }).then((value) => setState(() {}));
+
+          setState(() {});
+        });
+    
+  }
   Widget getCeldaTexto(String valor) {
     return Container(
       alignment: Alignment.centerRight,
@@ -400,70 +393,11 @@ class _VentasPageState extends State<VentasPage> {
   }
 
 
-  Widget _crearComboCondicionVenta(BuildContext context) {
-  return new Container(
-    color: colorRojoBase(),
-    child: new Center(
-          child: new DropdownButtonFormField(
-            value: _condicionSeleccionada,
-            items: getOpcionesDropDown(),
-            onChanged: changedDropDownItem,
-            style: const TextStyle(color: Colors.black),
-            //selectedItemBuilder: (BuildContext context) {getSelectedOpcionsDropDown(context);},
-          )
-      )      
-    );
-  }
 
 
-  void changedDropDownItem(CondicionVentaModel selectedCity) {
-    setState(() {
-      _condicionSeleccionada = selectedCity;
-    });
-  }
 
-  List<DropdownMenuItem<CondicionVentaModel>> getOpcionesDropDown() {
-    
-    List<DropdownMenuItem<CondicionVentaModel>> lista = [];
 
-    if(_listaCondicionVenta == null) return [];
 
-    _listaCondicionVenta.forEach((condicion) {
-      lista.add(DropdownMenuItem(
-        child: Text(condicion.descripcion, style: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 14.0,
-                ),
-                textAlign: TextAlign.right,
-                ),
-        value: condicion,
-      ));
-    });
-
-    return lista;
-  }
-
-  List<Widget> getSelectedOpcionsDropDown(BuildContext context) {
-    
-    List<Widget> lista = [];
-
-    if(_listaCondicionVenta == null) return [];
-
-    _listaCondicionVenta.forEach((condicion) {
-      lista.add( 
-        Text(
-          condicion.descripcion, 
-          style: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 14.0,
-                color: Colors.white
-          ),
-          textAlign: TextAlign.right,
-        ),
-      );
-    });
-
-    return lista;
-  }
+ 
 
 }

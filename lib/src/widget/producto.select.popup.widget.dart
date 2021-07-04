@@ -1,5 +1,6 @@
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
@@ -13,12 +14,14 @@ class ProductoSelectPopUpWidget extends StatefulWidget {
   ProductosModel producto;
   ProductosVentaBloc productosVentaBloc;
   ClientesModel cliente;
+  CondicionVentaModel condicionVenta;
   String fecha;
 
   ProductoSelectPopUpWidget(
       {@required this.producto,
       @required this.productosVentaBloc,
       @required this.cliente,
+      @required this.condicionVenta,
       @required this.fecha});
 
   @override
@@ -32,18 +35,6 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // return FutureBuilder(
-    //   future: ProductosProvider.productosProvider
-    //       .obtenerProducto(widget.producto.articulo),
-    //   builder: (BuildContext context, AsyncSnapshot<ProductosModel> snapshot) {
-    //     print('snapshot.hasData' + snapshot.hasData.toString());
-    //     if (snapshot.hasData) {
-    //       return _createPopUp(context, snapshot.data);
-    //     } else {
-    //       return Center(child: CircularProgressIndicator());
-    //     }
-    //   },
-    // );
     return _createPopUp(context, widget.producto);
   }
 
@@ -145,7 +136,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                 : () {
                     setState(() {
                       _registrarItem(producto, widget.cliente,
-                          int.parse(_cantidad.text), context);
+                          int.parse(_cantidad.text), widget.condicionVenta, context);
                     });
                   },
           ),
@@ -155,7 +146,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
   }
 
   void _registrarItem(ProductosModel producto, ClientesModel cliente,
-      int cantidad, BuildContext context) async {
+      int cantidad, CondicionVentaModel condicionVenta, BuildContext context) async {
     final prefs = new PreferenciasUsuario();
     final registro = RegistroItemModel();
 
@@ -169,6 +160,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
     registro.descuento = 0;
     registro.esnumerado = producto.numbered;
     registro.fecha = widget.fecha;
+    registro.condicionventa = condicionVenta.codigo;
 
     if (!producto.numbered && cantidad > producto.stock) {
       registro.sobrestock = true;
@@ -187,7 +179,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
         await VentaProvider.ventaProvider.registrarItem(registro, context);
 
     // print('respuesta');
-    print(registroItemRespModelToJson(registrado));
+    //print(registroItemRespModelToJson(registrado));
 
     producto.registroItemResp = registrado;
     _cantidad.text = '';

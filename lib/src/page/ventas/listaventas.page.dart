@@ -35,7 +35,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
       ),
       body: _creaListaVentas(context),
       // floatingActionButton: creaBtnNuevaVenta(context),
-      floatingActionButton: creaBtnTramitar(context),
+      floatingActionButton: getFloatingActionButtons(context),
     );
   }
 
@@ -149,14 +149,16 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
   }
 
   Widget creaBtnTramitar(BuildContext context) {
-    return FloatingActionButton.extended(
+    return  Padding(
+      padding: const EdgeInsets.only(left: 25.0, bottom: 0.0),
+      child: FloatingActionButton.extended(
       onPressed: () {
         _transmitirDialog();
       },
       backgroundColor: HexColor('#ff7043'),
       tooltip: 'Transmitir Ventas',
       label: Text('Transmitir Ventas'),
-    );
+    ));
   }
 
   Padding creaBtnNuevaVenta(BuildContext context) {
@@ -174,6 +176,24 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
       },
     );
   }
+
+  getFloatingActionButtons(BuildContext context) {
+    return Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: creaBtnTramitar(context),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: creaBtnNuevaVenta(context),
+          ),
+      ],
+    );
+  }
+
+
+
 }
 
 // ignore: must_be_immutable

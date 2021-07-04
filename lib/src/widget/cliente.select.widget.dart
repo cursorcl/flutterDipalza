@@ -12,6 +12,7 @@ class ClientesSelectWidget extends StatefulWidget {
 class _ClientesSelectWidgetState extends State<ClientesSelectWidget> { 
   SimpleDialog dialogCliente = new SimpleDialog();
 
+
   @override
   void initState() {
     super.initState();
@@ -21,7 +22,7 @@ class _ClientesSelectWidgetState extends State<ClientesSelectWidget> {
   Widget build(BuildContext context) {
 
     this.dialogCliente = SimpleDialog(
-      title: Center(child: Text('Selección de Cliente')),
+      title: Center(child: Text('Cliente y Condición de Pago')),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       children: <Widget>[
         ClientesPopUpPage(),
@@ -41,6 +42,8 @@ class _ClientesSelectWidgetState extends State<ClientesSelectWidget> {
       ),
     );
   }
+
+
 
  
 }

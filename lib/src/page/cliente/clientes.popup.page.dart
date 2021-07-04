@@ -1,4 +1,6 @@
+import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/provider/cliente_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -17,6 +19,9 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
   List<ClientesModel> _searchResult = [];
   List<ClientesModel> _listaClientes = [];
 
+  List<CondicionVentaModel> _listaCondicionVenta = [];
+  CondicionVentaModel _condicionSeleccionada;
+
   Future<Null> getListaClientes() async {
     final prefs = new PreferenciasUsuario();
     _listaClientes = await ClientesProvider.clientesProvider
@@ -29,26 +34,48 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
     onSearchTextChanged(controller.text);
   }
 
+  Future<Null> getListaCondicionVenta() async {
+    CondicionVentaBloc().obtenerListaCondicionesVenta();
+    _listaCondicionVenta =  CondicionVentaBloc().listaCondicionVenta;
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     getListaClientes();
+    getListaCondicionVenta();
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> lista = [];
-
+    lista.add(_crearCondicionPago(context));
     lista.add(_creaInputBuscar(context));
     lista.addAll(_creaListaClientes(
         context,
         _searchResult.length != 0 || controller.text.isNotEmpty
             ? _searchResult
             : _listaClientes));
-    // lista.add(SizedBox(height: 10.0,));
+    
 
     return Column(
       children: lista,
+    );
+  }
+
+  Widget _crearCondicionPago(BuildContext context) {
+    return Container(
+      child: new Padding(
+         padding: EdgeInsets.all(8.0),
+         child: InputDecorator(
+              decoration: InputDecoration(
+                  errorStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+                  hintText: 'Condición de Pago',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0))),
+                  isEmpty: _condicionSeleccionada == null,
+              child:  _crearComboCondicionVenta(context),
+          ))
     );
   }
 
@@ -118,29 +145,98 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
         leading: CircleAvatar(
           radius: 20,
           child: Icon(Icons.account_box),
-          backgroundColor: colorRojoBase(),
+          backgroundColor: _condicionSeleccionada == null ? Colors.grey : colorRojoBase(),
           foregroundColor: Colors.white,
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(cliente.razon,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0, color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
             SizedBox(
               height: 5.0,
             ),
-            Text(getFormatRut(cliente.rut)),
+            Text(getFormatRut(cliente.rut),
+              style: TextStyle(color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
             SizedBox(
               height: 5.0,
             )
           ],
         ),
         trailing: IconButton(
-            icon: Icon(Icons.arrow_forward_ios),
+            disabledColor: Colors.blueGrey,
+            icon: Icon( Icons.arrow_forward_ios),
             onPressed: () {
-              Navigator.pushNamed(context, 'venta', arguments: new InicioVentaModel(cliente: cliente));
+              if(_condicionSeleccionada == null) return null;
+              Navigator.pushNamed(context, 'venta', arguments: new InicioVentaModel(cliente: cliente, condicionVenta: _condicionSeleccionada));
             }),
       ),
     );
   }
+
+
+
+  Widget _crearComboCondicionVenta(BuildContext context) {
+    return new Container(
+      child: new Center(
+          child: new DropdownButtonFormField(
+            value: _condicionSeleccionada,
+            items: getOpcionesDropDown(),
+            onChanged: changedDropDownItem,
+            style: const TextStyle(color: Colors.black),
+            //selectedItemBuilder: (BuildContext context) {getSelectedOpcionsDropDown(context);},
+          )
+      )      
+    );
+  }
+
+  void changedDropDownItem(CondicionVentaModel selectedCity) {
+    setState(() {
+      _condicionSeleccionada = selectedCity;
+    });
+  }
+
+ List<DropdownMenuItem<CondicionVentaModel>> getOpcionesDropDown() {
+    
+    List<DropdownMenuItem<CondicionVentaModel>> lista = [];
+
+    if(_listaCondicionVenta == null) return [];
+
+    _listaCondicionVenta.forEach((condicion) {
+      lista.add(DropdownMenuItem(
+        child: Text(condicion.descripcion, style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14.0,
+                ),
+                textAlign: TextAlign.right,
+                ),
+        value: condicion,
+      ));
+    });
+
+    return lista;
+  }
+
+  List<Widget> getSelectedOpcionsDropDown(BuildContext context) {
+    
+    List<Widget> lista = [];
+
+    if(_listaCondicionVenta == null) return [];
+
+    _listaCondicionVenta.forEach((condicion) {
+      lista.add( 
+        Text(
+          condicion.descripcion, 
+          style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14.0,
+                color: Colors.white
+          ),
+          textAlign: TextAlign.right,
+        ),
+      );
+    });
+
+    return lista;
+  }  
 }

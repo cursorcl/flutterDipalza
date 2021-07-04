@@ -7,6 +7,8 @@ import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
+import 'src/bloc/condicion_venta_bloc.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
     final prefs = new PreferenciasUsuario();
@@ -25,6 +27,7 @@ void main() async {
 
   validaPermisos();
 
+  CondicionVentaBloc().obtenerListaCondicionesVenta();
   runApp(MyApp());
 }
 

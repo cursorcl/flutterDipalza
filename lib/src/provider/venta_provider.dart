@@ -2,6 +2,7 @@ import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
@@ -96,38 +97,40 @@ class VentaProvider {
   Future<List<VentaModel>> obtenerListaVentas() async {
     try {
       final prefs = new PreferenciasUsuario();
-      Uri url =
-          Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.vendedor}');
-      DBLogProvider.db.nuevoLog(
-          creaLogInfo('VentasProvider', 'obtenerListaVentas', 'Inicio'));
+      Uri url = Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.vendedor}');
+      DBLogProvider.db.nuevoLog(creaLogInfo('VentasProvider', 'obtenerListaVentas', 'Inicio'));
       print('URL Lista Ventas: ' + url.toString());
 
-      final resp = await http.get(url, headers: <String, String>{
-        HttpHeaders.authorizationHeader: prefs.token
-      });
+      final resp = await http.get(url, headers: <String, String>{ HttpHeaders.authorizationHeader: prefs.token });
       print(resp.body);
 
       if (resp.statusCode == 200 || resp.statusCode == 202) {
         List<VentaModel> listaVentas = ventaModelFromJson(resp.body);
 
+        if(listaVentas.length == 0) {
+             return [];
+        }
+
         listaVentas.sort((a, b) => b.fecha.compareTo(a.fecha));
 
+        VentaModel ventaModel = listaVentas[0];
+        Uri url = Uri.http(prefs.urlServicio, '/sellcondition/${ventaModel.condicionventacode}');
+        final respCondicionVenta = await http.get(url, headers: <String, String>{ HttpHeaders.authorizationHeader: prefs.token});
+        CondicionVentaModel condicionVenta = null;
+        if(respCondicionVenta.statusCode == 200 || respCondicionVenta.statusCode == 202)
+        {
+            condicionVenta = condicionVentaModelFromJson(respCondicionVenta.body);
+        }
         List<ClientesModel> listaCliente;
-
-        Uri url = Uri.http(prefs.urlServicio,
-            '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
-
-        final respCliente = await http.get(url, headers: <String, String>{
-          HttpHeaders.authorizationHeader: prefs.token
-        });
+        url = Uri.http(prefs.urlServicio, '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
+        final respCliente = await http.get(url, headers: <String, String>{ HttpHeaders.authorizationHeader: prefs.token});
 
         if (respCliente.statusCode == 200 || respCliente.statusCode == 202) {
           listaCliente = clientesModelFromJson(respCliente.body);
 
           listaVentas.forEach((objVenta) {
-            ClientesModel cliente = listaCliente.firstWhere(
-                (objCliente) => objVenta.rut == objCliente.rut,
-                orElse: () => null);
+            objVenta.condicionventa = condicionVenta;
+            ClientesModel cliente = listaCliente.firstWhere((objCliente) => objVenta.rut == objCliente.rut, orElse: () => null);
             if (cliente != null) {
               objVenta.razon = cliente.razon;
               objVenta.cliente = cliente;
@@ -136,6 +139,9 @@ class VentaProvider {
             }
           });
         }
+
+
+
 
         return listaVentas;
       }
@@ -199,7 +205,7 @@ class VentaProvider {
   Future<bool> transmitirVentas(
       BuildContext context, TransmitirModel transmitir) async {
     final prefs = new PreferenciasUsuario();
-    Uri url = Uri.http(prefs.urlServicio, '/registersale/');
+    Uri url = Uri.http(prefs.urlServicio, '/registersale');
     print('URL Transmitir Venta: ' + url.toString());
 
     http.Response resp;

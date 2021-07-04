@@ -165,7 +165,7 @@ class _ProductosPageState extends State<ProductosPage> {
           children: <Widget>[
             detalleProducto(producto),
             Expanded(child: Container()),
-            btnLoad(producto)
+            //btnLoad(producto)
           ],
         ),
         trailing:

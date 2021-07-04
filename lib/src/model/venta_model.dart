@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'clientes_model.dart';
+import 'condicion-model.dart';
 
 List<VentaModel> ventaModelFromJson(String str) => List<VentaModel>.from(json.decode(str).map((x) => VentaModel.fromJson(x)));
 
@@ -18,6 +19,8 @@ class VentaModel {
         this.carne,
         this.iva,
         this.cliente,
+        this.condicionventacode,
+        this.condicionventa
     });
 
     String rut;
@@ -30,6 +33,8 @@ class VentaModel {
     double carne;
     double iva;
     ClientesModel cliente;
+    String condicionventacode;
+    CondicionVentaModel condicionventa;
 
     factory VentaModel.fromJson(Map<String, dynamic> json) => VentaModel(
         rut: json["rut"],
@@ -40,6 +45,8 @@ class VentaModel {
         totalila: json["totalila"] == null ? 0 : json["totalila"].toDouble(),
         carne: json["carne"] == null ? 0 : json["carne"].toDouble(),
         iva: json["iva"] == null ? 0 : json["iva"].toDouble(),
+        condicionventacode: json["condicionventacode"] == null ? "0" : json["condicionventacode"]
+
     );
 
     Map<String, dynamic> toJson() => {
@@ -51,5 +58,6 @@ class VentaModel {
         "totalila": totalila,
         "carne": carne,
         "iva": iva,
+        "condicionventacode": condicionventacode
     };
 }

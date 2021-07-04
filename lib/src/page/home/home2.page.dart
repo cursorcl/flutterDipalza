@@ -79,6 +79,7 @@ class Homev2Page extends StatelessWidget {
 
   Widget makeRoundedButton(Color color, IconData icon, String text,
       BuildContext context, String route) {
+
     return ClipRect(
       // child: GestureDetector(
       child: InkWell(
@@ -88,7 +89,7 @@ class Homev2Page extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: Container(
-            height: 170.0,
+            height: 140.0,
             margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
             decoration: BoxDecoration(
                 color: Color.fromRGBO(255, 255, 255, 0.2),
@@ -124,7 +125,7 @@ class Homev2Page extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: Container(
-            height: 170.0,
+            height: 140.0,
             margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
             decoration: BoxDecoration(
                 color: Color.fromRGBO(255, 255, 255, 0.2),
