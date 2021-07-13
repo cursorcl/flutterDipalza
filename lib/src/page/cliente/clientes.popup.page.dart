@@ -67,22 +67,25 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
   Widget _crearCondicionPago(BuildContext context) {
     return Container(
       child: new Padding(
-         padding: EdgeInsets.all(8.0),
-         child: InputDecorator(
-              decoration: InputDecoration(
-                  errorStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
-                  hintText: 'Condición de Pago',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0))),
-                  isEmpty: _condicionSeleccionada == null,
-              child:  _crearComboCondicionVenta(context),
-          ))
+         padding: EdgeInsets.symmetric(vertical : 0.0, horizontal: 4.0) ,
+         child: new Card(
+          child: new Padding(
+            padding: EdgeInsets.symmetric(vertical : 0.0, horizontal: 8.0) ,
+            child: InputDecorator(
+                decoration: InputDecoration( labelStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0), hintText: 'Condición de Pago', border: InputBorder.none),
+                isEmpty: _condicionSeleccionada == null,
+                child:  _crearComboCondicionVenta(context),
+            )
+          )
+          ),
+        )
     );
   }
 
   Widget _creaInputBuscar(BuildContext context) {
     return Container(
       child: new Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(4.0),
         child: new Card(
           child: new ListTile(
             leading: new Icon(Icons.search),
@@ -112,11 +115,22 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
       setState(() {});
       return;
     }
+    List<ClientesModel> result = _listaClientes.where((cliente) => cliente.razon.toLowerCase().contains(text.toLowerCase())).toList();
+    if (result == null || result.isEmpty) {
+      setState(() {});
+      return;
+    }
 
-    _listaClientes.forEach((clientes) {
-      if (clientes.razon.contains(text)) _searchResult.add(clientes);
+
+    _searchResult.addAll(result);
+/*    
+      _listaClientes.forEach((cliente) {
+      if (cliente.razon.toLowerCase().contains(text.toLowerCase())) 
+      {
+        _searchResult.add(cliente);
+      }
     });
-
+*/
     setState(() {});
   }
 
@@ -143,7 +157,7 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          radius: 20,
+          radius: 15,
           child: Icon(Icons.account_box),
           backgroundColor: _condicionSeleccionada == null ? Colors.grey : colorRojoBase(),
           foregroundColor: Colors.white,
@@ -152,14 +166,14 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(cliente.razon,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0, color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.0, color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
             SizedBox(
-              height: 5.0,
+              height: 4.0,
             ),
             Text(getFormatRut(cliente.rut),
-              style: TextStyle(color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
+              style: TextStyle( fontSize: 11.0, color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
             SizedBox(
-              height: 5.0,
+              height: 4.0,
             )
           ],
         ),

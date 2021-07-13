@@ -28,7 +28,7 @@ class RegistroItemModel {
   String vendedor;
   String articulo;
   int cantidad;
-  int descuento;
+  double descuento;
   bool esnumerado;
   bool sobrestock;
   String fecha;

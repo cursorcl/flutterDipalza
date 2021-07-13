@@ -145,7 +145,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
 
     Navigator.pushNamed(context, 'venta',
         arguments: new InicioVentaModel(
-            cliente: itemVenta.cliente, listaVentaItem: listaVentaItem));
+            cliente: itemVenta.cliente, listaVentaItem: listaVentaItem, condicionVenta: itemVenta.condicionventa));
   }
 
   Widget creaBtnTramitar(BuildContext context) {

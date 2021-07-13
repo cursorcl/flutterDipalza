@@ -22,11 +22,12 @@ class _ClientesSelectWidgetState extends State<ClientesSelectWidget> {
   Widget build(BuildContext context) {
 
     this.dialogCliente = SimpleDialog(
-      title: Center(child: Text('Cliente y Condición de Pago')),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      
+      title: Center(child: Text('Cliente')),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.0)),
       children: <Widget>[
         ClientesPopUpPage(),
-        SizedBox(height: 10.0,)
+        SizedBox(height: 5.0,)
       ],
     );
 

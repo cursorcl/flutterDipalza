@@ -31,6 +31,7 @@ class ProductoSelectPopUpWidget extends StatefulWidget {
 
 class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
   final _cantidad = TextEditingController();
+  final _descuento = TextEditingController();
   bool _blockBtn = true;
 
   @override
@@ -41,24 +42,14 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
   AlertDialog _createPopUp(BuildContext context, ProductosModel producto) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      title: Text('Código: ' + producto.articulo,
-          style:
-              TextStyle(color: producto.stock > 0 ? Colors.green : Colors.red)),
+      title: Text('Código: ' + producto.articulo, style: TextStyle(color: producto.stock > 0 ? Colors.green : Colors.red)),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-            Text(
-              producto.descripcion,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(
-              height: 10.0,
-            ),
-            Text('Valor Neto: ' +
-                getValorModena(producto.ventaneto.toDouble(), 0)),
-            SizedBox(
-              height: 10.0,
-            ),
+            Text(producto.descripcion,style: TextStyle(fontWeight: FontWeight.bold),),
+            SizedBox(height: 5.0,),
+            Text('Valor Neto: ' +getValorModena(producto.ventaneto.toDouble(), 0)),
+            SizedBox(height: 5.0,),
             producto.numbered
                 ? Row(
                     children: <Widget>[
@@ -78,14 +69,35 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                     style: TextStyle(
                         color: producto.stock > 0 ? Colors.black : Colors.red)),
             SizedBox(
-              height: 10.0,
+              height: 5.0,
+            ),
+
+            Container(
+                width: 30.0,
+                child: TextField(
+                  controller: _descuento,
+                  onChanged: (value) {
+                    if (value != '' && double.parse(value) >= 0 &&  double.parse(value) <= 100 && (_cantidad.text != '' && int.parse(_cantidad.text) > 0)) {
+                      _blockBtn = false;
+                    } else {
+                      _blockBtn = true;
+                    }
+                    setState(() {});
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: '% Descuento',
+                  ),
+                )),
+            SizedBox(
+              height: 5.0,
             ),
             Container(
                 width: 30.0,
                 child: TextField(
                   controller: _cantidad,
                   onChanged: (value) {
-                    if (value != '' && int.parse(value) > 0) {
+                    if (value != '' && int.parse(value) > 0  && (_descuento.text != '' && double.parse(_descuento.text) >= 0 &&  double.parse(_descuento.text) <= 100)) {
                       _blockBtn = false;
                     } else {
                       _blockBtn = true;
@@ -115,6 +127,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
             onPressed: () {
               setState(() {
                 _cantidad.text = '';
+                _descuento.text = '0';
                 Navigator.of(context).pop();
               });
             },
@@ -136,7 +149,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                 : () {
                     setState(() {
                       _registrarItem(producto, widget.cliente,
-                          int.parse(_cantidad.text), widget.condicionVenta, context);
+                          int.parse(_cantidad.text), double.parse(_descuento.text), widget.condicionVenta, context);
                     });
                   },
           ),
@@ -146,7 +159,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
   }
 
   void _registrarItem(ProductosModel producto, ClientesModel cliente,
-      int cantidad, CondicionVentaModel condicionVenta, BuildContext context) async {
+      int cantidad, double descuento, CondicionVentaModel condicionVenta, BuildContext context) async {
     final prefs = new PreferenciasUsuario();
     final registro = RegistroItemModel();
 
@@ -157,7 +170,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
     registro.vendedor = prefs.vendedor;
     registro.articulo = producto.articulo;
     registro.cantidad = cantidad;
-    registro.descuento = 0;
+    registro.descuento = descuento;
     registro.esnumerado = producto.numbered;
     registro.fecha = widget.fecha;
     registro.condicionventa = condicionVenta.codigo;

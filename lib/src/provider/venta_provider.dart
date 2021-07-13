@@ -1,3 +1,4 @@
+import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/log/db_log_provider.dart';
@@ -14,11 +15,14 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:collection/collection.dart';
 
 class VentaProvider {
+  
   static final VentaProvider ventaProvider = VentaProvider._();
 
   VentaProvider._() {
+     CondicionVentaBloc().obtenerListaCondicionesVenta();
     //
   }
 
@@ -113,14 +117,7 @@ class VentaProvider {
 
         listaVentas.sort((a, b) => b.fecha.compareTo(a.fecha));
 
-        VentaModel ventaModel = listaVentas[0];
-        Uri url = Uri.http(prefs.urlServicio, '/sellcondition/${ventaModel.condicionventacode}');
-        final respCondicionVenta = await http.get(url, headers: <String, String>{ HttpHeaders.authorizationHeader: prefs.token});
-        CondicionVentaModel condicionVenta = null;
-        if(respCondicionVenta.statusCode == 200 || respCondicionVenta.statusCode == 202)
-        {
-            condicionVenta = condicionVentaModelFromJson(respCondicionVenta.body);
-        }
+        var condiciones = CondicionVentaBloc().listaCondicionVenta;
         List<ClientesModel> listaCliente;
         url = Uri.http(prefs.urlServicio, '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
         final respCliente = await http.get(url, headers: <String, String>{ HttpHeaders.authorizationHeader: prefs.token});
@@ -129,7 +126,16 @@ class VentaProvider {
           listaCliente = clientesModelFromJson(respCliente.body);
 
           listaVentas.forEach((objVenta) {
-            objVenta.condicionventa = condicionVenta;
+            CondicionVentaModel condicionVenta = condiciones.firstWhereOrNull((c) => objVenta.condicionventacode == c.codigo);
+
+            if(condicionVenta != null)
+            {
+              objVenta.condicionventa = condicionVenta;
+            }
+            else {
+              objVenta.condicionventa = condiciones.first;
+              objVenta.condicionventacode = condiciones.first.codigo;
+            }
             ClientesModel cliente = listaCliente.firstWhere((objCliente) => objVenta.rut == objCliente.rut, orElse: () => null);
             if (cliente != null) {
               objVenta.razon = cliente.razon;

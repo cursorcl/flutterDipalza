@@ -4,7 +4,6 @@ import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/page/producto/productos.popup.page.dart';
@@ -27,23 +26,18 @@ class _VentasPageState extends State<VentasPage> {
   double _valorTotal = 0.0;
   double _valorCarne = 0.0;
   final productoVentaBloc = ProductosVentaBloc();
-  final condicionVentaBloc = CondicionVentaBloc();
   String _fecha = '';
   Widget _widgetResumenVenta;
   bool _primeraCarga = true;
   InicioVentaModel _inicioVenta;
 
-  Future<Null> getListaCondicionVenta() async {
-    setState(() {});
-  }
   
-
   @override
   void initState() {
     print('>>>>>>>>> INIT STATE >>>>>>>>>');
     DBLogProvider.db.nuevoLog(creaLogInfo('VentasPage', 'initState', 'Inicio'));
     super.initState();
-    getListaCondicionVenta();
+    
     this.productoVentaBloc.limpiarProductos();
     this._fecha = DateTime.now().millisecondsSinceEpoch.toString();
     print('FECHA DEL REGISTRO: ' + this._fecha);
