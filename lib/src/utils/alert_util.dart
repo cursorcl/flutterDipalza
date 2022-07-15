@@ -16,7 +16,7 @@ void showAlert(BuildContext context, String mensaje, IconData icono) {
         ),
         content: Text(mensaje),
         actions: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text(
               'Cerrar',
               style: TextStyle(color: colorRojoBase()),
@@ -63,7 +63,7 @@ Widget showAlertDialog(BuildContext context, String mensaje, IconData icono) {
     ),
     content: Text(mensaje),
     actions: <Widget>[
-      FlatButton(
+      TextButton(
         child: Text(
           'Cerrar',
           style: TextStyle(color: colorRojoBase()),

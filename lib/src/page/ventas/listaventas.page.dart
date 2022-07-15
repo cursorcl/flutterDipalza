@@ -150,6 +150,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
 
   Widget creaBtnTramitar(BuildContext context) {
     return  Padding(
+      
       padding: const EdgeInsets.only(left: 25.0, bottom: 0.0),
       child: FloatingActionButton.extended(
       onPressed: () {
@@ -233,29 +234,33 @@ class _MyDialogState extends State<MyDialog> {
                       children: <Widget>[
                         Container(
                           width: 100.0,
-                          child: RaisedButton(
+                          child: ElevatedButton(
                             child: Container(
                               child: Text('Cancelar'),
                             ),
-                            shape: RoundedRectangleBorder(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)),
-                            elevation: 0.0,
-                            color: Colors.grey,
-                            textColor: Colors.white,
+                              elevation: 0.0,
+                              primary: Colors.grey,
+                              textStyle: TextStyle(color: Colors.white),
+                            ),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ),
                         Container(
                           width: 100.0,
-                          child: RaisedButton(
+                          child: ElevatedButton(
                             child: Container(
                               child: Text('Transmitir'),
                             ),
+                            style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)),
                             elevation: 0.0,
-                            color: Colors.green,
-                            textColor: Colors.white,
+                            primary: Colors.green,
+                            textStyle: TextStyle(color: Colors.white),
+                            ),
                             onPressed: () {
                               setState(() {
                                 _loading = true;

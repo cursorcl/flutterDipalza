@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';

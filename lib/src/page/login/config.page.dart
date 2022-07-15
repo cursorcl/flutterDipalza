@@ -120,21 +120,21 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                       color: Theme.of(context).primaryColor,
                     ),
                     labelText: 'Dirección Servidor',
-                    helperText: '192.168.100.100:8080',
+                    helperText: '192.168.0.8:8099',
                   ),
                 ),
               ],
             ),
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('Cancelar'),
               onPressed: () {
                 setState(() {});
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text('Guardar'),
               onPressed: () {
                 _prefs.urlServicio = _urlServicio.text;

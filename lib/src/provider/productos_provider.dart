@@ -40,7 +40,6 @@ class ProductosProvider {
       Uri url = Uri.http(prefs.urlServicio, '/product/code/' + code);
       DBLogProvider.db.nuevoLog(
           creaLogInfo('ProductosProvider', 'obtenerProducto', 'Inicio'));
-      print('URL Productos: ' + url.toString());
 
       final resp = await http.get(url, headers: <String, String>{
         HttpHeaders.authorizationHeader: prefs.token

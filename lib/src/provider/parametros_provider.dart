@@ -43,7 +43,8 @@ class ParametrosProvider {
       await http.put(url,
           body: positionModelToJson(position),
           headers: <String, String>{
-            HttpHeaders.authorizationHeader: prefs.token
+            HttpHeaders.authorizationHeader: prefs.token,
+            'Content-Type': 'application/json; charset=UTF-8',
           });
     } catch (error) {
       DBLogProvider.db.nuevoLog(

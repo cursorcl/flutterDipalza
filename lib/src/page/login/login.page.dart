@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   final prefs = new PreferenciasUsuario();
   RutasModel _rutaSeleccionada;
   List<RutasModel> _listaRutas = [];
-  final scaffoldKey = new GlobalKey<ScaffoldState>();
+  final scaffoldKey = new GlobalKey<ScaffoldMessengerState>();
 
   @override
   void dispose() { 
@@ -128,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                 //       '¿Olvidó su Clave?',
                 //       style: TextStyle(color: colorRojoBase()),
                 //     )),
-                FlatButton(
+                TextButton(
                     onPressed: () => Navigator.pushNamed(context, 'config'),
                     onLongPress: () => Navigator.pushReplacementNamed(context, 'consoleLog'),
                     child: Row(
@@ -221,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   List<DropdownMenuItem<RutasModel>> getOpcionesDropDown() {
-    List<DropdownMenuItem<RutasModel>> lista = new List();
+    List<DropdownMenuItem<RutasModel>> lista = [];
 
     _listaRutas.forEach((ruta) {
       lista.add(DropdownMenuItem(
@@ -269,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
     return StreamBuilder(
       stream: bloc.formValidStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        return RaisedButton(
+        return ElevatedButton(
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
             child: Text(
@@ -277,12 +277,14 @@ class _LoginPageState extends State<LoginPage> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
+          style: ElevatedButton.styleFrom(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
           elevation: 0.0,
           // color: Theme.of(context).primaryColor,
-          color: colorRojoBase(),
-          textColor: Colors.white,
+          primary: colorRojoBase(),
+          textStyle: TextStyle(color: Colors.white),
+          ),
           onPressed: snapshot.hasData && _blockBotton
               ? () => _login(bloc, context)
               : null,
@@ -332,5 +334,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       scaffoldKey.currentState.showSnackBar(snackbar);
+      //ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      
   }
 }

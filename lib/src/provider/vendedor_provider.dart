@@ -11,15 +11,24 @@ class VenderdorProvider {
     final prefs = new PreferenciasUsuario();
     Codec<String, String> stringToBase64 = utf8.fuse(base64);
 
-    final url = Uri.http(prefs.urlServicio, '/login');
-    print(url);
+    final url = Uri.http(prefs.urlServicio, '/login');  
     final login = LoginModel();
-    print('>>>> Rut para Servicio: ' + getFormatRutToService(usuario));
+    
     login.rut = getFormatRutToService(usuario);
     login.password = stringToBase64.encode(password);
+    
     http.Response resp;
     try { // loginModelToJson
-      resp = await http.post(url, body: loginModelToJson(login)).timeout(Duration(seconds: 15));
+      final json = loginModelToJson(login);
+
+      print(">>>>  Login:" + url.toString() + " " + json );
+
+
+      resp = await http.post(url, 
+      headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: json).timeout(Duration(seconds: 15));
     } catch (error) {
       return RespuestaModel(
           status: 500,

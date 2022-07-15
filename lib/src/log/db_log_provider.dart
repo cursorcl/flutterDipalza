@@ -68,7 +68,7 @@ class DBLogProvider {
     final resp = await db.rawQuery(
         "SELECT * FROM logger where id != '${ultimo.id}' and  id <= '${ultimo.id}' order by id desc");
 
-    List<LogModel> list = new List();
+    List<LogModel> list = [];
 
     if (resp.isNotEmpty) {
       resp.forEach((c) {

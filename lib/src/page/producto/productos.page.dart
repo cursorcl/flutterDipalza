@@ -201,11 +201,13 @@ class _ProductosPageState extends State<ProductosPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        FlatButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0),
-                side: BorderSide(color: Colors.grey)),
-            padding: EdgeInsets.all(4.0),
+        TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  side: BorderSide(color: Colors.grey)),
+              padding: EdgeInsets.all(4.0),
+            ),
             onPressed: () => getListaProductos(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,

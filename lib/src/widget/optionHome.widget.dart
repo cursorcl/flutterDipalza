@@ -22,8 +22,10 @@ class OptionHomeWidget extends StatelessWidget {
         color: colorBackgraund != null ? colorBackgraund : Theme.of(context).primaryColorLight,
         shape: BoxShape.circle,
       ),
-      child: FlatButton(
-        shape: CircleBorder(),
+      child: TextButton(
+        style: TextButton.styleFrom(
+          shape: CircleBorder(),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,

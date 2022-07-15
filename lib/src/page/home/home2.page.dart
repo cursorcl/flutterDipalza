@@ -184,29 +184,43 @@ class Homev2Page extends StatelessWidget {
                     children: <Widget>[
                       Container(
                         width: 100.0,
-                        child: RaisedButton(
+                        child: ElevatedButton(
                           child: Container(
-                            child: Text('Cancelar'),
-                          ),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0)),
-                          elevation: 0.0,
-                          color: Theme.of(context).primaryColor,
-                          textColor: Colors.white,
-                          onPressed: () => Navigator.of(context).pop(),
+                              child: Text('Cancelar'),
+                            ),                          
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                                primary: Theme.of(context).primaryColor,
+                                textStyle: TextStyle(color: Theme.of(context).primaryColor,),
+
+                            ),
+                            onPressed: () => Navigator.of(context).pop(),
                         ),
+                        //child: RaisedButton(
+                        //  child: Container(
+                        //    child: Text('Cancelar'),
+                        //  ),
+
+                        //  elevation: 0.0,
+                        //  color: Theme.of(context).primaryColor,
+                        //  textColor: Colors.white,
+                        //  onPressed: () => Navigator.of(context).pop(),
+                        //),
                       ),
                       Container(
                         width: 100.0,
-                        child: RaisedButton(
+                        child: ElevatedButton(
                           child: Container(
                             child: Text('Salir'),
                           ),
+                          style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0)),
-                          elevation: 0.0,
-                          color: Theme.of(context).primaryColor,
-                          textColor: Colors.white,
+                            elevation: 0.0,
+                            primary: Theme.of(context).primaryColor,
+                            textStyle: TextStyle(color: Colors.white),
+                          ),
                           onPressed: () => exit(0),
                         ),
                       ),

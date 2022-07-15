@@ -40,7 +40,8 @@ class VentaProvider {
       resp = await http.post(url,
           body: registroItemModelToJson(registro),
           headers: <String, String>{
-            HttpHeaders.authorizationHeader: prefs.token
+            HttpHeaders.authorizationHeader: prefs.token,
+            'Content-Type': 'application/json; charset=UTF-8',
           });
     } catch (error) {
       Navigator.of(context).pop();
@@ -219,7 +220,8 @@ class VentaProvider {
       resp = await http.post(url,
           body: transmitirModelToJson(transmitir),
           headers: <String, String>{
-            HttpHeaders.authorizationHeader: prefs.token
+            HttpHeaders.authorizationHeader: prefs.token,
+            'Content-Type': 'application/json; charset=UTF-8',
           });
     } catch (error) {
       Navigator.of(context).pop();
