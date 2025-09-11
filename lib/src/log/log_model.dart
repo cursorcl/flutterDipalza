@@ -10,9 +10,9 @@ class LogModel {
     String log;
 
     LogModel({
-        this.id,
-        this.tipo,
-        this.log,
+        required this.id,
+        required this.tipo,
+        required this.log,
     });
 
     factory LogModel.fromJson(Map<String, dynamic> json) => LogModel(

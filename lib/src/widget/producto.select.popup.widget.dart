@@ -18,11 +18,11 @@ class ProductoSelectPopUpWidget extends StatefulWidget {
   String fecha;
 
   ProductoSelectPopUpWidget(
-      {@required this.producto,
-      @required this.productosVentaBloc,
-      @required this.cliente,
-      @required this.condicionVenta,
-      @required this.fecha});
+      {required this.producto,
+      required this.productosVentaBloc,
+      required this.cliente,
+      required this.condicionVenta,
+      required this.fecha});
 
   @override
   _ProductoSelectPopUpWidgetState createState() =>
@@ -30,140 +30,174 @@ class ProductoSelectPopUpWidget extends StatefulWidget {
 }
 
 class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
-  final _cantidad = TextEditingController();
-  final _descuento = TextEditingController();
-  bool _blockBtn = true;
+  final _cantidadCtrl = TextEditingController();
+  final _descuentoCtrl = TextEditingController(text: '0');
+  bool _blockBtn = true; // El estado del botón
 
   @override
   Widget build(BuildContext context) {
     return _createPopUp(context, widget.producto);
   }
 
+// La función que crea el AlertDialog, ahora mucho más limpio
   AlertDialog _createPopUp(BuildContext context, ProductosModel producto) {
+    // Función de validación unificada
+    void _updateButtonState() {
+      final bool isCantidadValid = _cantidadCtrl.text.isNotEmpty &&
+          int.tryParse(_cantidadCtrl.text) != null &&
+          int.parse(_cantidadCtrl.text) > 0;
+      final bool isDescuentoValid = _descuentoCtrl.text.isNotEmpty &&
+          double.tryParse(_descuentoCtrl.text) != null &&
+          double.parse(_descuentoCtrl.text) >= 0 &&
+          double.parse(_descuentoCtrl.text) <= 100;
+
+      // Si la cantidad es válida y el descuento también, habilita el botón.
+      // Usamos el estado del stock para habilitar el botón también
+      setState(() {
+        _blockBtn =
+            !(isCantidadValid && isDescuentoValid && producto.stock > 0);
+      });
+    }
+
+    // Ahora el AlertDialog con el nuevo diseño
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      title: Text('Código: ' + producto.articulo, style: TextStyle(color: producto.stock > 0 ? Colors.green : Colors.red)),
-      content: SingleChildScrollView(
-        child: ListBody(
+      titlePadding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+      actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      scrollable: true,
+      title: Text(
+        'Código: ${producto.articulo}',
+        style: TextStyle(
+          color: producto.stock > 0 ? Colors.green : Colors.red,
+          fontSize: 16,
+        ),
+      ),
+      content: SizedBox(
+        // Lo dejamos por si el contenido es muy grande
+        width: double.maxFinite,
+        child: Column(
+          // Usamos Column en lugar de ListBody
+          mainAxisSize:
+              MainAxisSize.min, // Para que la columna ocupe el mínimo espacio
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(producto.descripcion,style: TextStyle(fontWeight: FontWeight.bold),),
-            SizedBox(height: 5.0,),
-            Text('Valor Neto: ' +getValorModena(producto.ventaneto.toDouble(), 0)),
-            SizedBox(height: 5.0,),
+            Text(
+              producto.descripcion,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+            SizedBox(height: 5.0),
+            Text(
+                'Valor Neto: ${getValorModena(producto.ventaneto.toDouble(), 0)}'),
+            SizedBox(height: 5.0),
+            // Sección de stock/piezas
             producto.numbered
                 ? Row(
                     children: <Widget>[
                       Expanded(
-                          child: Text('Piezas: ' +
-                              getValorNumero(
-                                  producto.pieces > 0 ? producto.pieces : 0))),
+                        child: Text(
+                            'Piezas: ${getValorNumero(producto.pieces > 0 ? producto.pieces : 0)}'),
+                      ),
                       Expanded(
-                          child: Text('Kilos: ' +
-                              getValorNumeroDecimal(
-                                  producto.stock > 0 ? producto.stock : 0, 2))),
+                        child: Text(
+                            'Kilos: ${getValorNumeroDecimal(producto.stock > 0 ? producto.stock : 0, 2)}'),
+                      ),
                     ],
                   )
                 : Text(
-                    'Stock: ' +
-                        getValorNumero(producto.stock > 0 ? producto.stock : 0),
+                    'Stock: ${getValorNumero(producto.stock > 0 ? producto.stock : 0)}',
                     style: TextStyle(
-                        color: producto.stock > 0 ? Colors.black : Colors.red)),
-            SizedBox(
-              height: 5.0,
-            ),
-
-            Container(
-                width: 30.0,
-                child: TextField(
-                  controller: _descuento,
-                  onChanged: (value) {
-                    if (value != '' && double.parse(value) >= 0 &&  double.parse(value) <= 100 && (_cantidad.text != '' && int.parse(_cantidad.text) > 0)) {
-                      _blockBtn = false;
-                    } else {
-                      _blockBtn = true;
-                    }
-                    setState(() {});
-                  },
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: '% Descuento',
+                        color: producto.stock > 0 ? Colors.black : Colors.red),
                   ),
-                )),
-            SizedBox(
-              height: 5.0,
+            SizedBox(height: 10.0), // Espacio extra para los TextFields
+            // TextField para el descuento
+            TextField(
+              controller: _descuentoCtrl,
+              onChanged: (value) => _updateButtonState(),
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: '% Descuento',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
             ),
-            Container(
-                width: 30.0,
-                child: TextField(
-                  controller: _cantidad,
-                  onChanged: (value) {
-                    if (value != '' && int.parse(value) > 0  && (_descuento.text != '' && double.parse(_descuento.text) >= 0 &&  double.parse(_descuento.text) <= 100)) {
-                      _blockBtn = false;
-                    } else {
-                      _blockBtn = true;
-                    }
-                    setState(() {});
-                  },
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: producto.numbered ? 'Piezas' : 'Cantidad',
-                  ),
-                ))
+            SizedBox(height: 10.0),
+            // TextField para la cantidad
+            TextField(
+              controller: _cantidadCtrl,
+              onChanged: (value) => _updateButtonState(),
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: producto.numbered ? 'Piezas' : 'Cantidad',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
           ],
         ),
       ),
       actions: <Widget>[
-        Container(
-          width: 100.0,
-          child: ElevatedButton(
-            child: Container(
+        Row(children: [
+          ElevatedButton(
+            child: FittedBox(
+              fit: BoxFit
+                  .scaleDown, // Para que solo se escale hacia abajo si no cabe
               child: Text('Cancelar'),
             ),
             style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context)
+                  .colorScheme
+                  .onError, // Estilo para el botón de cancelar
+              elevation: 0,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0)),
-              elevation: 0.0,
-              primary: Theme.of(context).primaryColor,
-              textStyle: TextStyle(color: Colors.white),
             ),
             onPressed: () {
-              setState(() {
-                _cantidad.text = '';
-                _descuento.text = '0';
-                Navigator.of(context).pop();
-              });
+              _cantidadCtrl.text = '';
+              _descuentoCtrl.text = '0';
+              Navigator.of(context).pop();
             },
           ),
-        ),
-        Container(
-          width: 100.0,
-          child: ElevatedButton(
-            child: Container(
+          SizedBox(width: 10.0), // Espacio entre botones
+          ElevatedButton(
+            child: FittedBox(
+              fit: BoxFit
+                  .scaleDown, // Para que solo se escale hacia abajo si no cabe
               child: Text('Agregar'),
             ),
             style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)),
-              elevation: 0.0,
-              primary: Theme.of(context).primaryColor,
-              textStyle: TextStyle(color: Colors.white)
+                  borderRadius: BorderRadius.circular(10.0)),
             ),
             onPressed: _blockBtn
                 ? null
                 : () {
-                    setState(() {
-                      _registrarItem(producto, widget.cliente,
-                          int.parse(_cantidad.text), double.parse(_descuento.text), widget.condicionVenta, context);
-                    });
+                    // Lógica para agregar
+                    _registrarItem(
+                      producto,
+                      widget.cliente,
+                      int.parse(_cantidadCtrl.text),
+                      double.parse(_descuentoCtrl.text),
+                      widget.condicionVenta,
+                      context,
+                    );
                   },
           ),
-        ),
+        ])
       ],
     );
   }
 
-  void _registrarItem(ProductosModel producto, ClientesModel cliente,
-      int cantidad, double descuento, CondicionVentaModel condicionVenta, BuildContext context) async {
+  void _registrarItem(
+      ProductosModel producto,
+      ClientesModel cliente,
+      int cantidad,
+      double descuento,
+      CondicionVentaModel condicionVenta,
+      BuildContext context) async {
     final prefs = new PreferenciasUsuario();
     final registro = RegistroItemModel();
 
@@ -199,7 +233,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
     //print(registroItemRespModelToJson(registrado));
 
     producto.registroItemResp = registrado;
-    _cantidad.text = '';
+    _cantidadCtrl.text = '';
     widget.productosVentaBloc.agregarProducto(producto);
     setState(() {});
     Navigator.of(context).pop();

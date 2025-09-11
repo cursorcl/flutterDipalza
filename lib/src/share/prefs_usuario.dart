@@ -9,13 +9,13 @@ class PreferenciasUsuario {
 
   PreferenciasUsuario._internal();
 
-  SharedPreferences _prefs;
+  late SharedPreferences _prefs;
 
   initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  get vendedor {
+  String get vendedor {
     return _prefs.getString('vendedor') ?? '';
   }
 
@@ -23,15 +23,15 @@ class PreferenciasUsuario {
     _prefs.setString('vendedor', value);
   }
 
-  get name {
-    return _prefs.getString('name') ?? '';
+  String get name {
+    return _prefs.getString('name') ?? "";
   }
 
   set name(String value) {
     _prefs.setString('name', value);
   }
 
-  get rut {
+  String get rut {
     return _prefs.getString('rut') ?? '';
   }
 
@@ -39,7 +39,7 @@ class PreferenciasUsuario {
     _prefs.setString('rut', value);
   }
 
-  get password {
+  String get password {
     return _prefs.getString('password') ?? '';
   }
 
@@ -47,7 +47,7 @@ class PreferenciasUsuario {
     _prefs.setString('password', value);
   }
 
-  get token {
+  String get token {
     return _prefs.getString('token') ?? '';
   }
 
@@ -55,7 +55,7 @@ class PreferenciasUsuario {
     _prefs.setString('token', value);
   }
 
-  get urlServicio {
+  String get urlServicio {
     return _prefs.getString('urlServicio') ?? '';
   }
 
@@ -63,7 +63,7 @@ class PreferenciasUsuario {
     _prefs.setString('urlServicio', value);
   }
 
-  get ruta {
+  String get ruta {
     return _prefs.getString('ruta') ?? '';
   }
 
@@ -71,7 +71,7 @@ class PreferenciasUsuario {
     _prefs.setString('ruta', value);
   }
 
-  get reporte {
+  int get reporte {
     return _prefs.getInt('reporte') ?? 300000;
   }
 

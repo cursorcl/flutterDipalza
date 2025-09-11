@@ -14,9 +14,9 @@ class _VersionWidgetState extends State<VersionWidget> {
 
   // String _packageName;
 
-  String _version;
+   String? _version;
 
-  String _buildNumber;
+   String? _buildNumber;
 
   @override
   void initState() {

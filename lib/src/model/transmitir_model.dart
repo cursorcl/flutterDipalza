@@ -7,7 +7,7 @@ String transmitirModelToJson(TransmitirModel data) => json.encode(data.toJson())
 
 class TransmitirModel {
     TransmitirModel({
-        this.codigo,
+        required this.codigo,
     });
 
     String codigo;

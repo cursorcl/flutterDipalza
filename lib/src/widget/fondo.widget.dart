@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class FondoWidget extends StatelessWidget {
-  const FondoWidget({Key key}) : super(key: key);
+  const FondoWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +19,8 @@ class FondoWidget extends StatelessWidget {
               begin: FractionalOffset(0.0, 0.6),
               end: FractionalOffset(0.0, 1.0),
               colors: [
-            Color.fromRGBO(126, 108, 0, 1.0),
-            Color.fromRGBO(128, 10, 10, 1.0)
+            Color.fromRGBO(228, 175, 9, 0.5450980392156862),
+            Color.fromRGBO(228, 175, 9, 0.8)
           ])),
     );
 

@@ -13,11 +13,11 @@ class PositionModel {
         this.velocidad,
     });
 
-    String vendedor;
-    DateTime fecha;
-    double latitude;
-    double longitude;
-    double velocidad;
+    String? vendedor;
+    DateTime? fecha;
+    double? latitude;
+    double? longitude;
+    double? velocidad;
 
     factory PositionModel.fromJson(Map<String, dynamic> json) => PositionModel(
         vendedor: json["vendedor"],
@@ -26,10 +26,9 @@ class PositionModel {
         longitude: json["longitude"].toDouble(),
         velocidad: json["velocidad"].toDouble(),
     );
-
     Map<String, dynamic> toJson() => {
         "vendedor": vendedor,
-        "fecha": fecha.toIso8601String(),
+        "fecha": fecha == null ? DateTime.now().toIso8601String() : fecha!.toIso8601String(),
         "latitude": latitude,
         "longitude": longitude,
         "velocidad": velocidad,

@@ -6,11 +6,11 @@ String registroVentaModelToJson(RegistroVentaModel data) => json.encode(data.toJ
 
 class RegistroVentaModel {
     RegistroVentaModel({
-        this.rut,
-        this.codigo,
-        this.vendedor,
-        this.condicionVenta,
-        this.fecha,
+        required this.rut,
+        required this.codigo,
+        required this.vendedor,
+        required this.condicionVenta,
+        required this.fecha,
     });
 
     String rut;

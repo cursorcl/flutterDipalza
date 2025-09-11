@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
@@ -33,8 +35,6 @@ class VentaProvider {
       RegistroItemModel registro, BuildContext context) async {
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio, '/registeritem/');
-    print('URL Registrar: ' + url.toString());
-
     http.Response resp;
     try {
       resp = await http.post(url,
@@ -42,21 +42,24 @@ class VentaProvider {
           headers: <String, String>{
             HttpHeaders.authorizationHeader: prefs.token,
             'Content-Type': 'application/json; charset=UTF-8',
+            'Accept-Charset': 'utf-8'
           });
+      print(resp.body);
+      if (resp.statusCode == 200 || resp.statusCode == 202) {
+        String responseBody = utf8.decode(resp.bodyBytes);
+        return registroItemRespModelFromJson(responseBody);
+      } else if (resp.statusCode == 500) {
+        Navigator.of(context).pop();
+        showAlert(context, 'Problemas al agregar un Producto, Vuelva a intentar.',
+            Icons.error);
+      }
     } catch (error) {
       Navigator.of(context).pop();
       showAlert(context, 'Problemas al agregar un Producto, Vuelva a intentar.',
           Icons.error);
     }
 
-    print(resp.body);
-    if (resp.statusCode == 200 || resp.statusCode == 202) {
-      return registroItemRespModelFromJson(resp.body);
-    } else if (resp.statusCode == 500) {
-      Navigator.of(context).pop();
-      showAlert(context, 'Problemas al agregar un Producto, Vuelva a intentar.',
-          Icons.error);
-    }
+
 
     return registroItemRespModelFromJson('{}');
   }
@@ -68,13 +71,14 @@ class VentaProvider {
       ProductosVentaBloc productoVentaBloc) async {
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio,
-        '/removeregisteritem/' + producto.registroItemResp.indice.toString());
+        '/removeregisteritem/' + producto.registroItemResp!.indice.toString());
     print('URL Remover Item: ' + url.toString());
 
     http.Response resp;
     try {
       resp = await http.delete(url, headers: <String, String>{
-        HttpHeaders.authorizationHeader: prefs.token
+        HttpHeaders.authorizationHeader: prefs.token,
+        'Accept-Charset': 'utf-8'
       });
     } catch (error) {
       Navigator.of(context).pop();
@@ -83,7 +87,6 @@ class VentaProvider {
       return false;
     }
 
-    print(resp.body);
     if (resp.statusCode == 200 || resp.statusCode == 202) {
       productoVentaBloc.eliminarProducto(producto);
       return true;
@@ -103,14 +106,15 @@ class VentaProvider {
     try {
       final prefs = new PreferenciasUsuario();
       Uri url = Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.vendedor}');
-      DBLogProvider.db.nuevoLog(creaLogInfo('VentasProvider', 'obtenerListaVentas', 'Inicio'));
-      print('URL Lista Ventas: ' + url.toString());
 
-      final resp = await http.get(url, headers: <String, String>{ HttpHeaders.authorizationHeader: prefs.token });
-      print(resp.body);
+      final resp = await http.get(url, headers: {
+        HttpHeaders.authorizationHeader: prefs.token,
+        'Accept-Charset': 'utf-8'
+      });
 
       if (resp.statusCode == 200 || resp.statusCode == 202) {
-        List<VentaModel> listaVentas = ventaModelFromJson(resp.body);
+        String responseBody = utf8.decode(resp.bodyBytes);
+        List<VentaModel> listaVentas = ventaModelFromJson(responseBody);
 
         if(listaVentas.length == 0) {
              return [];
@@ -127,7 +131,7 @@ class VentaProvider {
           listaCliente = clientesModelFromJson(respCliente.body);
 
           listaVentas.forEach((objVenta) {
-            CondicionVentaModel condicionVenta = condiciones.firstWhereOrNull((c) => objVenta.condicionventacode == c.codigo);
+            CondicionVentaModel? condicionVenta = condiciones.firstWhereOrNull((c) => objVenta.condicionventacode == c.codigo);
 
             if(condicionVenta != null)
             {
@@ -137,7 +141,7 @@ class VentaProvider {
               objVenta.condicionventa = condiciones.first;
               objVenta.condicionventacode = condiciones.first.codigo;
             }
-            ClientesModel cliente = listaCliente.firstWhere((objCliente) => objVenta.rut == objCliente.rut, orElse: () => null);
+            ClientesModel? cliente = listaCliente.firstWhereOrNull((objCliente) => objVenta.rut == objCliente.rut);
             if (cliente != null) {
               objVenta.razon = cliente.razon;
               objVenta.cliente = cliente;
@@ -223,6 +227,19 @@ class VentaProvider {
             HttpHeaders.authorizationHeader: prefs.token,
             'Content-Type': 'application/json; charset=UTF-8',
           });
+      print(resp.body);
+      if (resp.statusCode == 200 || resp.statusCode == 202) {
+        return true;
+        // return resp.body == 'true' ? true : false;
+      } else if (resp.statusCode == 500) {
+        Navigator.of(context).pop();
+        DBLogProvider.db.nuevoLog(creaLogError(
+            'VentaProvider', 'transmitirVentas', resp.body.toString()));
+        showAlert(
+            context,
+            'Problemas con la transmisión las Ventas, Vuelva a intentar.',
+            Icons.error);
+      }
     } catch (error) {
       Navigator.of(context).pop();
       DBLogProvider.db.nuevoLog(
@@ -233,19 +250,7 @@ class VentaProvider {
           Icons.error);
     }
 
-    print(resp.body);
-    if (resp.statusCode == 200 || resp.statusCode == 202) {
-      return true;
-      // return resp.body == 'true' ? true : false;
-    } else if (resp.statusCode == 500) {
-      Navigator.of(context).pop();
-      DBLogProvider.db.nuevoLog(creaLogError(
-          'VentaProvider', 'transmitirVentas', resp.body.toString()));
-      showAlert(
-          context,
-          'Problemas con la transmisión las Ventas, Vuelva a intentar.',
-          Icons.error);
-    }
+
 
     return false;
   }

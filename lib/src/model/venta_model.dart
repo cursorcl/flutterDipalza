@@ -9,22 +9,22 @@ String ventaModelToJson(List<VentaModel> data) => json.encode(List<dynamic>.from
 
 class VentaModel {
     VentaModel({
-        this.rut,
+        required this.rut,
         this.razon,
-        this.codigo,
-        this.fecha,
-        this.neto,
-        this.descuento,
-        this.totalila,
-        this.carne,
-        this.iva,
+        required this.codigo,
+        required this.fecha,
+        required this.neto,
+        required this.descuento,
+        required this.totalila,
+        required this.carne,
+        required this.iva,
         this.cliente,
         this.condicionventacode,
         this.condicionventa
     });
 
     String rut;
-    String razon;
+    String? razon;
     String codigo;
     DateTime fecha;
     double neto;
@@ -32,9 +32,9 @@ class VentaModel {
     double totalila;
     double carne;
     double iva;
-    ClientesModel cliente;
-    String condicionventacode;
-    CondicionVentaModel condicionventa;
+    ClientesModel? cliente;
+    String? condicionventacode;
+    CondicionVentaModel? condicionventa;
 
     factory VentaModel.fromJson(Map<String, dynamic> json) => VentaModel(
         rut: json["rut"],

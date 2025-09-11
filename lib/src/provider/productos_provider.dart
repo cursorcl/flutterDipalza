@@ -14,14 +14,9 @@ class ProductosProvider {
   Future<List<ProductosModel>> obtenerListaProductos() async {
     try {
       final prefs = new PreferenciasUsuario();
-      Uri url = Uri.http(prefs.urlServicio, '/products');
-      DBLogProvider.db.nuevoLog(
-          creaLogInfo('ProductosProvider', 'obtenerListaProductos', 'Inicio'));
-      print('URL Productos: ' + url.toString());
-
-      final resp = await http.get(url, headers: <String, String>{
-        HttpHeaders.authorizationHeader: prefs.token
-      });
+      final token = prefs.token;
+      Uri url = Uri.http(prefs.urlServicio, '/api/productos');
+      final resp = await http.get(url, headers: {'Accept-Charset': 'utf-8', 'Authorization': 'Bearer $token',});
       print(resp.body);
       return productosModelFromJson(resp.body);
     } catch (error) {
@@ -31,19 +26,16 @@ class ProductosProvider {
     }
   }
 
-  /// Método que obtiene un producto con sus atributos.
-  /// code corresponde al código del producto buscado.
+  // Método que obtiene un producto con sus atributos.
+  // code corresponde al código del producto buscado.
 
-  Future<ProductosModel> obtenerProducto(String code) async {
+  Future<ProductosModel?> obtenerProducto(String code) async {
     try {
       final prefs = new PreferenciasUsuario();
-      Uri url = Uri.http(prefs.urlServicio, '/product/code/' + code);
-      DBLogProvider.db.nuevoLog(
-          creaLogInfo('ProductosProvider', 'obtenerProducto', 'Inicio'));
+      final token = prefs.token;
+      Uri url = Uri.http(prefs.urlServicio, '/api/productos/' + code);
 
-      final resp = await http.get(url, headers: <String, String>{
-        HttpHeaders.authorizationHeader: prefs.token
-      });
+      final resp = await http.get(url, headers: {'Accept-Charset': 'utf-8', 'Authorization': 'Bearer $token',});
       print(resp.body);
       print(productoModelFromJson(resp.body));
 

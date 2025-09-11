@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -15,13 +17,14 @@ class CondicionVentaProvider {
     try {
       final prefs = new PreferenciasUsuario();
       Uri url = Uri.http(prefs.urlServicio, '/sellconditions');
-      DBLogProvider.db.nuevoLog( creaLogInfo('CondicionVentaProvider', 'obtenerListaCondicionVenta', 'Inicio'));
-      print('URL CondicionVenta: ' + url.toString());
-
-      final resp = await http.get(url, headers: <String, String>{HttpHeaders.authorizationHeader: prefs.token});
+      final resp = await http.get(url,
+          headers:{
+            HttpHeaders.authorizationHeader: prefs.token,
+            'Accept-Charset': 'utf-8'
+      });
       if(resp.statusCode == 200){
-        print(resp.body);
-        return condicionVentasModelFromJson(resp.body);
+        String responseBody = utf8.decode(resp.bodyBytes);
+        return condicionVentasModelFromJson(responseBody);
       }
       return [];
     } catch (error) {

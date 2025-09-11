@@ -16,10 +16,10 @@ class ProductosPopUpPage extends StatefulWidget {
   ProductosVentaBloc productosVentaBloc;
 
   ProductosPopUpPage(
-      {@required this.cliente,
-      @required this.fecha,
-      @required this.condicionVenta,
-      @required this.productosVentaBloc});
+      {required this.cliente,
+      required this.fecha,
+      required this.condicionVenta,
+      required this.productosVentaBloc});
 
   @override
   _ProductosPopUpPageState createState() => _ProductosPopUpPageState();
@@ -148,34 +148,30 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
         trailing: IconButton(
             icon: Icon(Icons.arrow_forward_ios),
             onPressed: () {
-              return showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return _obtenerProductoFull(producto);
-                  }).then((value) => setState(() {
-                    Navigator.of(context).pop();
-                  }));
+                _mostrarProductoDialog(producto);
             }),
       ),
     );
   }
 
-  Widget _obtenerProductoFull(ProductosModel producto) {
-    return FutureBuilder(
-      future: ProductosProvider.productosProvider.obtenerProducto(producto.articulo),
-      builder: (BuildContext context, AsyncSnapshot<ProductosModel> snapshot) {
-        if (snapshot.hasData) {
-          return ProductoSelectPopUpWidget(
-            producto: snapshot.data,
+
+  Future<void> _mostrarProductoDialog(ProductosModel producto) async {
+    final productoCompleto = await ProductosProvider.productosProvider.obtenerProducto(producto.articulo);
+
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: ProductoSelectPopUpWidget(
+            producto: productoCompleto!,
             productosVentaBloc: widget.productosVentaBloc,
             cliente: widget.cliente,
             condicionVenta: widget.condicionVenta,
             fecha: widget.fecha,
-          );
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
+          ),
+        );
       },
     );
   }
+
 }

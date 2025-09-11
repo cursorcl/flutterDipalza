@@ -3,7 +3,7 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class ClientesSelectWidget extends StatefulWidget {
-  ClientesSelectWidget({Key key}) : super(key: key);
+  ClientesSelectWidget({Key? key}) : super(key: key);
 
   @override
   _ClientesSelectWidgetState createState() => _ClientesSelectWidgetState();
@@ -22,9 +22,11 @@ class _ClientesSelectWidgetState extends State<ClientesSelectWidget> {
   Widget build(BuildContext context) {
 
     this.dialogCliente = SimpleDialog(
-      
-      title: Center(child: Text('Cliente')),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.0)),
+      title: Center(child: Text('Clientes!')),
+      contentPadding: EdgeInsets.zero,
+      backgroundColor: Colors.white,
+
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
       children: <Widget>[
         ClientesPopUpPage(),
         SizedBox(height: 5.0,)

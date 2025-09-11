@@ -8,31 +8,31 @@ String registroItemModelToJson(RegistroItemModel data) =>
 
 class RegistroItemModel {
   RegistroItemModel(
-      {this.indice,
-      this.fila,
-      this.rut,
-      this.codigo,
-      this.vendedor,
-      this.articulo,
-      this.cantidad,
-      this.descuento,
-      this.esnumerado,
-      this.sobrestock,
-      this.fecha,
-      this.condicionventa});
+      { this.indice,
+         this.fila,
+         this.rut,
+         this.codigo,
+         this.vendedor,
+         this.articulo,
+         this.cantidad,
+         this.descuento,
+         this.esnumerado,
+         this.sobrestock,
+         this.fecha,
+         this.condicionventa});
 
-  int indice;
-  int fila;
-  String rut;
-  String codigo;
-  String vendedor;
-  String articulo;
-  int cantidad;
-  double descuento;
-  bool esnumerado;
-  bool sobrestock;
-  String fecha;
-  String condicionventa;
+  int? indice;
+  int? fila;
+  String? rut;
+  String? codigo;
+  String? vendedor;
+  String? articulo;
+  int? cantidad;
+  double? descuento;
+  bool? esnumerado;
+  bool? sobrestock;
+  String? fecha;
+  String? condicionventa;
 
   factory RegistroItemModel.fromJson(Map<String, dynamic> json) =>
       RegistroItemModel(

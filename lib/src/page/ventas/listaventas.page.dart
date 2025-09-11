@@ -9,8 +9,10 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/cliente.select.widget.dart';
 import 'package:flutter/material.dart';
 
+import '../../widget/fondo.widget.dart';
+
 class ListaVentasPage extends StatefulWidget {
-  const ListaVentasPage({Key key}) : super(key: key);
+  const ListaVentasPage({Key? key}) : super(key: key);
 
   @override
   _ListaVentasPageState createState() => _ListaVentasPageState();
@@ -34,8 +36,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
         ),
       ),
       body: _creaListaVentas(context),
-      // floatingActionButton: creaBtnNuevaVenta(context),
-      floatingActionButton: getFloatingActionButtons(context),
+      floatingActionButton: floatingActionButton(context),
     );
   }
 
@@ -45,20 +46,25 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
       builder:
           (BuildContext context, AsyncSnapshot<List<VentaModel>> snapshot) {
         if (snapshot.hasData) {
-          if (snapshot.data != null && snapshot.data.length > 0) {
-            this.cantidadVentas = snapshot.data.length;
-            return Column(
+            this.cantidadVentas = snapshot.data!.length;
+            return Stack(
+                children: <Widget>[
+                  // 1. FondoWidget() debe estar en la capa más baja del Stack.
+                  Positioned.fill(
+                    child: FondoWidget(),
+                  ),
+                  // 2. El resto del contenido (input y lista) debe ir en una Column
+                  //    para que el Expanded funcione.
+                  //    Usamos un Positioned.fill para que la Column ocupe todo el espacio.
+                  Positioned.fill(
+
+                      child:Column(
               children: <Widget>[
                 Expanded(
                     child: ListView(
-                        children: _ventasItems(context, snapshot.data))),
+                        children: _ventasItems(context, snapshot.data!))),
               ],
-            );
-          } else {
-            return Center(
-              child: Text('No Existen Ventas por Confirmar.'),
-            );
-          }
+            ))]);
         } else {
           return Center(
             child: CircularProgressIndicator(),
@@ -70,72 +76,102 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
 
   List<Widget> _ventasItems(BuildContext context, List<VentaModel> listaVenta) {
     final List<Widget> _listItem = [];
-
+  if(listaVenta.length == 0){
+    _listItem.add(_createEmptyCard());
+  }
+  else {
     listaVenta.forEach((itemVenta) {
       _listItem
         ..add(
-          Card(
-            child: ListTile(
-              leading: CircleAvatar(
-                radius: 20,
-                child: Icon(Icons.insert_chart),
-                backgroundColor: HexColor('#455a64'),
-                foregroundColor: Colors.white,
-              ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                      itemVenta.razon != null
-                          ? itemVenta.razon
-                          : 'Sin Información',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13.0,
-                      )),
-                  SizedBox(
-                    height: 2.0,
-                  ),
-                  Text(getFormatRut(itemVenta.rut),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.0,
-                      )),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                ],
-              ),
-              subtitle: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(formatoFechaCorta().format(itemVenta.fecha)),
-                  Expanded(child: Container()),
-                  Text(
-                      getValorModena(
-                          itemVenta.neto +
-                              itemVenta.totalila +
-                              itemVenta.carne +
-                              itemVenta.iva -
-                              itemVenta.descuento,
-                          0),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ))
-                ],
-              ),
-              trailing: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  onPressed: () {
-                    cargaDetalleVenta(context, itemVenta);
-                  }),
-            ),
-          ),
+            _createCard(itemVenta)
         );
     });
+  }
 
     return _listItem;
+  }
+
+  Widget _createEmptyCard() {
+    return  Card(
+
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 20,
+          child: Icon(Icons.insert_chart),
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('No hay ventas por confirmar!!',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.0,
+                )),
+          ],
+        ),
+
+      ),
+    );
+  }
+  Widget _createCard(VentaModel itemVenta) {
+    return  Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 20,
+          child: Icon(Icons.insert_chart),
+          backgroundColor: HexColor('#455a64'),
+          foregroundColor: Colors.white,
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(itemVenta.razon ?? 'Sin Información',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.0,
+                )),
+            SizedBox(
+              height: 2.0,
+            ),
+            Text(getFormatRut(itemVenta.rut),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12.0,
+                )),
+            SizedBox(
+              height: 5.0,
+            ),
+          ],
+        ),
+        subtitle: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(formatoFechaCorta().format(itemVenta.fecha)),
+            Expanded(child: Container()),
+            Text(
+                getValorModena(
+                    itemVenta.neto +
+                        itemVenta.totalila +
+                        itemVenta.carne +
+                        itemVenta.iva -
+                        itemVenta.descuento,
+                    0),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ))
+          ],
+        ),
+        trailing: IconButton(
+            icon: Icon(Icons.arrow_forward_ios),
+            onPressed: () {
+              cargaDetalleVenta(context, itemVenta);
+            }),
+      ),
+    );
   }
 
   cargaDetalleVenta(BuildContext context, VentaModel itemVenta) async {
@@ -145,24 +181,26 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
 
     Navigator.pushNamed(context, 'venta',
         arguments: new InicioVentaModel(
-            cliente: itemVenta.cliente, listaVentaItem: listaVentaItem, condicionVenta: itemVenta.condicionventa));
+            cliente: itemVenta.cliente,
+            listaVentaItem: listaVentaItem,
+            condicionVenta: itemVenta.condicionventa));
   }
 
-  Widget creaBtnTramitar(BuildContext context) {
-    return  Padding(
-      
-      padding: const EdgeInsets.only(left: 25.0, bottom: 0.0),
-      child: FloatingActionButton.extended(
-      onPressed: () {
-        _transmitirDialog();
-      },
-      backgroundColor: HexColor('#ff7043'),
-      tooltip: 'Transmitir Ventas',
-      label: Text('Transmitir Ventas'),
-    ));
+  Widget btnTransmit(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.only(left: 25.0, bottom: 0.0),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            _transmitirDialog();
+          },
+          backgroundColor: HexColor('#ff7043'),
+          tooltip: 'Transmitir Ventas',
+          label: Text('Transmitir Ventas'),
+          heroTag: 'transmit',
+        ));
   }
 
-  Padding creaBtnNuevaVenta(BuildContext context) {
+  Padding btnNewWindow(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 20.0, bottom: 0.0),
       child: ClientesSelectWidget(),
@@ -178,29 +216,26 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
     );
   }
 
-  getFloatingActionButtons(BuildContext context) {
+  floatingActionButton(BuildContext context) {
     return Stack(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: creaBtnTramitar(context),
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: creaBtnNuevaVenta(context),
-          ),
+      children: <Widget>[
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: btnTransmit(context),
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: btnNewWindow(context),
+        ),
       ],
     );
   }
-
-
-
 }
 
 // ignore: must_be_immutable
 class MyDialog extends StatefulWidget {
   int cantidadVentas;
-  MyDialog({@required this.cantidadVentas});
+  MyDialog({required this.cantidadVentas});
 
   @override
   _MyDialogState createState() => new _MyDialogState();
@@ -233,33 +268,33 @@ class _MyDialogState extends State<MyDialog> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         Container(
-                          width: 100.0,
+                          width: 115.0,
                           child: ElevatedButton(
                             child: Container(
                               child: Text('Cancelar'),
                             ),
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              backgroundColor: Colors.grey,
                               elevation: 0.0,
-                              primary: Colors.grey,
                               textStyle: TextStyle(color: Colors.white),
                             ),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ),
                         Container(
-                          width: 100.0,
+                          width: 115.0,
                           child: ElevatedButton(
                             child: Container(
                               child: Text('Transmitir'),
                             ),
                             style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
-                            elevation: 0.0,
-                            primary: Colors.green,
-                            textStyle: TextStyle(color: Colors.white),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              backgroundColor: Colors.green,
+                              elevation: 0.0,
+                              textStyle: TextStyle(color: Colors.white),
                             ),
                             onPressed: () {
                               setState(() {

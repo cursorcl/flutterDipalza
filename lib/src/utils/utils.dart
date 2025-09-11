@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:dart_rut_validator/dart_rut_validator.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
+import '../validacion/rut_validator.dart';
+
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
@@ -24,78 +24,58 @@ HexColor colorIconHome() {
 HexColor colorRojoBase() {
   return HexColor('#f44336');
 }
-
+HexColor colorVerdeBase() {
+  return HexColor('#004300');
+}
+/// Formatea un valor como CLP con separador y sin decimales
 String getValorModena(double valor, int decimal) {
-  FlutterMoneyFormatter fmf = FlutterMoneyFormatter(
-      amount: valor,
-      settings: MoneyFormatterSettings(
-          // symbol: 'IDR',
-          thousandSeparator: '.',
-          decimalSeparator: ',',
-          symbolAndNumberSeparator: ' ',
-          fractionDigits: decimal,
-          compactFormatType: CompactFormatType.short));
+  final format = NumberFormat.currency(
+    locale: 'es_CL',
+    symbol: '\$',
+    decimalDigits: decimal,
 
-  return fmf.output.symbolOnLeft + '.-';
+  );
+  return format.format(valor);
 }
 
+/// Formatea un número sin decimales
 String getValorNumero(double valor) {
-  FlutterMoneyFormatter fmf = FlutterMoneyFormatter(
-      amount: valor,
-      settings: MoneyFormatterSettings(
-          symbol: '',
-          thousandSeparator: '.',
-          decimalSeparator: ',',
-          symbolAndNumberSeparator: ' ',
-          fractionDigits: 0,
-          compactFormatType: CompactFormatType.short));
-
-  return fmf.output.symbolOnLeft + '';
+  final format = NumberFormat.currency(
+    locale: 'es_CL',
+    symbol: '',
+    decimalDigits: 0,
+  );
+  return format.format(valor).trim();
 }
 
+/// Formatea un número con N decimales
 String getValorNumeroDecimal(double valor, int decimal) {
-  FlutterMoneyFormatter fmf = FlutterMoneyFormatter(
-      amount: valor,
-      settings: MoneyFormatterSettings(
-          symbol: '',
-          thousandSeparator: '.',
-          decimalSeparator: ',',
-          symbolAndNumberSeparator: ' ',
-          fractionDigits: decimal,
-          compactFormatType: CompactFormatType.short));
-
-  return fmf.output.symbolOnLeft + '';
+  final format = NumberFormat.currency(
+    locale: 'es_CL',
+    symbol: '',
+    decimalDigits: decimal,
+  );
+  return format.format(valor).trim();
 }
 
 String getFormatRut(String rut) {
   while (rut.startsWith('0')) {
     rut = rut.substring(1, rut.length);
   }
-  rut = RUTValidator.formatFromText(rut);
+  rut = RUTValidator.formatear(rut);
   return rut;
 }
 
 String getFormatRutToService(String usuario) {
-  String rut = (RUTValidator.getRutNumbers(usuario)).toString() +
-      RUTValidator.getRutDV(usuario);
+  String rut = usuario.replaceAll(".", "").replaceAll("-", "");
   while (rut.length < 10) {
     rut = '0' + rut;
   }
   return rut;
 }
 
-DateFormat formatoFecha() {
-  return new DateFormat("dd MMM yyyy");
-}
-
-DateFormat formatoFechaCorta() {
-  return new DateFormat("dd/MM/yyyy");
-}
-
-DateFormat formatoFechaCortaHora() {
-  return new DateFormat("dd/MM/yyyy HH:mm");
-}
-
-DateFormat formatHora() {
-  return new DateFormat('HH:mm');
-}
+/// Formatos de fechas y horas
+DateFormat formatoFecha() => DateFormat("dd MMM yyyy", 'es_CL');
+DateFormat formatoFechaCorta() => DateFormat("dd/MM/yyyy", 'es_CL');
+DateFormat formatoFechaCortaHora() => DateFormat("dd/MM/yyyy HH:mm", 'es_CL');
+DateFormat formatoHora() => DateFormat("HH:mm", 'es_CL');

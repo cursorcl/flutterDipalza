@@ -4,7 +4,7 @@ import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 
 class ConfiguracionPage extends StatefulWidget {
-  const ConfiguracionPage({Key key}) : super(key: key);
+  const ConfiguracionPage({Key? key}) : super(key: key);
 
   @override
   _ConfiguracionPageState createState() => _ConfiguracionPageState();
@@ -50,35 +50,22 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   }
 
   Widget _crearListaConfig(BuildContext context) {
+    var color = _prefs.urlServicio != '' ? Colors.green : Colors.red;
+    var icon = _prefs.urlServicio != '' ? Icons.check : Icons.close;
     return ListView(
       children: [
         Card(
           child: ListTile(
             leading: CircleAvatar(
               radius: 25,
-              child: Icon(Icons.link),
-              backgroundColor: colorRojoBase(),
+              child: Icon(icon),
+              backgroundColor: color, //colorRojoBase(),
               foregroundColor: Colors.white,
             ),
             title: Stack(
               children: <Widget>[
                 Text('Dirección Servidor',
                     style: TextStyle(fontWeight: FontWeight.bold)),
-                Container(
-                  // padding: EdgeInsets.only(top: 10),
-                  alignment: Alignment.centerRight,
-                  child: _prefs.urlServicio != ''
-                      ? Text('Conectado',
-                          style: TextStyle(
-                              color: Colors.green,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.bold))
-                      : Text('Desconectado',
-                          style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.bold)),
-                ),
               ],
             ),
             subtitle: Column(

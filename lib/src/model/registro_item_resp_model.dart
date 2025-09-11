@@ -12,23 +12,23 @@ String registroItemRespModelToJson(RegistroItemRespModel data) =>
 
 class RegistroItemRespModel {
   RegistroItemRespModel({
-    this.indice,
-    this.rut,
-    this.codigo,
-    this.vendedor,
-    this.fila,
-    this.articulo,
-    this.cantidad,
-    this.neto,
-    this.descuento,
-    this.ila,
-    this.carne,
-    this.iva,
-    this.precio,
-    this.numeros,
-    this.correlativos,
-    this.pesos,
-    this.fecha,
+    required this.indice,
+    required this.rut,
+    required this.codigo,
+    required this.vendedor,
+    required this.fila,
+    required this.articulo,
+    required this.cantidad,
+    required this.neto,
+    required this.descuento,
+    required this.ila,
+    required this.carne,
+    required this.iva,
+    required this.precio,
+    required this.numeros,
+    required this.correlativos,
+    required this.pesos,
+     this.fecha,
   });
 
   int indice;
@@ -47,7 +47,7 @@ class RegistroItemRespModel {
   String numeros;
   String correlativos;
   String pesos;
-  DateTime fecha;
+  DateTime? fecha;
 
   factory RegistroItemRespModel.fromJson(Map<String, dynamic> json) =>
       RegistroItemRespModel(
@@ -87,6 +87,6 @@ class RegistroItemRespModel {
         "numeros": numeros,
         "correlativos": correlativos,
         "pesos": pesos,
-        "fecha": fecha.toIso8601String(),
+        "fecha": fecha == null ? "" : fecha!.toIso8601String(),
       };
 }

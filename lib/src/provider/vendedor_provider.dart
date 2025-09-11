@@ -11,11 +11,11 @@ class VenderdorProvider {
     final prefs = new PreferenciasUsuario();
     Codec<String, String> stringToBase64 = utf8.fuse(base64);
 
-    final url = Uri.http(prefs.urlServicio, '/login');  
+    final url = Uri.http(prefs.urlServicio, '/auth/login');
     final login = LoginModel();
     
-    login.rut = getFormatRutToService(usuario);
-    login.password = stringToBase64.encode(password);
+    login.username = getFormatRutToService(usuario);
+    login.password = password; //stringToBase64.encode(password);
     
     http.Response resp;
     try { // loginModelToJson

@@ -6,12 +6,12 @@ String clientesModelToJson(List<ClientesModel> data) => json.encode(List<dynamic
 
 class ClientesModel {
     ClientesModel({
-        this.rut,
-        this.codigo,
-        this.razon,
-        this.direccion,
-        this.telefono,
-        this.ciudad,
+        required this.rut,
+        required this.codigo,
+        required this.razon,
+        required this.direccion,
+        required this.telefono,
+        required this.ciudad,
     });
 
     String rut;

@@ -1,33 +1,53 @@
 import 'dart:convert';
 
-LoginResponseModel loginResponseModelFromJson(String str) => LoginResponseModel.fromJson(json.decode(str));
+// Helpers globales
+LoginResponseModel loginResponseModelFromJson(String str) =>
+    LoginResponseModel.fromJson(json.decode(str));
 
-String loginResponseModelToJson(LoginResponseModel data) => json.encode(data.toJson());
+String loginResponseModelToJson(LoginResponseModel data) =>
+    json.encode(data.toJson());
 
 class LoginResponseModel {
+    final String accessToken;
+    final String refreshToken;
+    final int expiresInSeconds;
+    final String codigo;
+    final String tipo;
+    final String rut;
+    final String nombre;
+
     LoginResponseModel({
-        this.code,
-        this.name,
-        this.rut,
-        this.token,
+        required this.accessToken,
+        required this.refreshToken,
+        required this.expiresInSeconds,
+        required this.codigo,
+        required this.tipo,
+        required this.rut,
+        required this.nombre,
     });
 
-    String code;
-    String name;
-    String rut;
-    String token;
-
-    factory LoginResponseModel.fromJson(Map<String, dynamic> json) => LoginResponseModel(
-        code: json["code"],
-        name: json["name"],
-        rut: json["rut"],
-        token: json["token"],
-    );
+    factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
+        final vendedor = json["vendedor"] ?? {};
+        return LoginResponseModel(
+            accessToken: json["accessToken"],
+            refreshToken: json["refreshToken"],
+            expiresInSeconds: json["expiresInSeconds"],
+            codigo: vendedor["codigo"],
+            tipo: vendedor["tipo"],
+            rut: vendedor["rut"],
+            nombre: vendedor["nombre"],
+        );
+    }
 
     Map<String, dynamic> toJson() => {
-        "code": code,
-        "name": name,
-        "rut": rut,
-        "token": token,
+        "accessToken": accessToken,
+        "refreshToken": refreshToken,
+        "expiresInSeconds": expiresInSeconds,
+        "vendedor": {
+            "codigo": codigo,
+            "tipo": tipo,
+            "rut": rut,
+            "nombre": nombre,
+        },
     };
 }

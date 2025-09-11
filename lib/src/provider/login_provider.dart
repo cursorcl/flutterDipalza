@@ -3,23 +3,23 @@ import 'package:flutter/material.dart';
 
 class LoginProvider extends InheritedWidget {
   final loginBloc = LoginBloc();
-  static LoginProvider _instancia;
+  static LoginProvider? _instancia;
 
-  factory LoginProvider({Key key, Widget child}) {
-    if (_instancia == null) {
-      _instancia = new LoginProvider._internal(key: key, child: child);
-    }
+  factory LoginProvider({Key? key, required Widget child}) {
+      _instancia ??= new LoginProvider._internal(key: key, child: child);
 
-    return _instancia;
+    return _instancia!;
   }
 
-  LoginProvider._internal({Key key, Widget child})
+  LoginProvider._internal({Key? key, required Widget child})
       : super(key: key, child: child);
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => true;
 
   static LoginBloc of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<LoginProvider>().loginBloc;
+    final provider = context.dependOnInheritedWidgetOfExactType<LoginProvider>();
+    assert(provider != null, 'LoginProvider not found in context');
+    return provider!.loginBloc;
   }
 }

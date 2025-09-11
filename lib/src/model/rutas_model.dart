@@ -6,8 +6,8 @@ String rutasModelToJson(List<RutasModel> data) => json.encode(List<dynamic>.from
 
 class RutasModel {
     RutasModel({
-        this.codigo,
-        this.descripcion,
+        required this.codigo,
+        required this.descripcion,
     });
 
     String codigo;

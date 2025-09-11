@@ -4,9 +4,10 @@ import 'package:dipalza_movil/src/provider/cliente_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 
 class ClientesPage extends StatefulWidget {
-  const ClientesPage({Key key}) : super(key: key);
+  const ClientesPage({Key? key}) : super(key: key);
 
   @override
   _ClientesPageState createState() => _ClientesPageState();
@@ -38,6 +39,7 @@ class _ClientesPageState extends State<ClientesPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool searchResult = _searchResult.length != 0 || controller.text.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorRojoBase(),
@@ -64,20 +66,25 @@ class _ClientesPageState extends State<ClientesPage> {
           ),
         ],
       ),
-      // body: Stack(
-      //   children: <Widget>[
-      //     FondoWidget(),
-      //     _creaListaClientes(context),
-      //   ],
-      // ),
-      body: Column(
+      body: Stack(
         children: <Widget>[
-          _verBuscar ? _creaInputBuscar(context) : Container(),
-          Expanded(
-              child: _searchResult.length != 0 || controller.text.isNotEmpty
-                  ? _creaListaClientes(context, _searchResult)
-                  : _creaListaClientes(context, _listaClientes)),
-        ],
+          // 1. FondoWidget() debe estar en la capa más baja del Stack.
+          Positioned.fill(
+            child: FondoWidget(),
+          ),
+          // 2. El resto del contenido (input y lista) debe ir en una Column
+          //    para que el Expanded funcione.
+          //    Usamos un Positioned.fill para que la Column ocupe todo el espacio.
+          Positioned.fill(
+          child: Column(
+              children: <Widget>[
+                  // El input de búsqueda (se mostrará o no)
+                  _verBuscar ? _creaInputBuscar(context) : Container(),
+                  searchResult ? _creaListaClientes(context, _searchResult) : _creaListaClientes(context, _listaClientes)
+              ],
+            ),
+          ),
+        ]
       ),
     );
   }
@@ -133,9 +140,10 @@ class _ClientesPageState extends State<ClientesPage> {
   Widget _creaListaClientes(
       BuildContext context, List<ClientesModel> listaCliente) {
     if (listaCliente.length == 0) {
-      return Center(
-        child: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
-      );
+      return _createEmptyCard();
+      //Center(
+      //  child: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
+      //);
     }
 
     return RefreshIndicator(
@@ -147,6 +155,19 @@ class _ClientesPageState extends State<ClientesPage> {
         },
       ),
     );
+  }
+
+  _createEmptyCard() {
+    return Card(
+        child: ListTile(
+          leading: CircleAvatar(
+            radius: 25,
+            child: Icon(Icons.account_box),
+            backgroundColor: colorRojoBase(),
+            foregroundColor: Colors.white,
+          ),
+          title: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
+    ));
   }
 
   _creaCard(ClientesModel cliente) {
@@ -161,9 +182,20 @@ class _ClientesPageState extends State<ClientesPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(cliente.razon, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.0, )),
-            SizedBox(height: 2.0,),
-            Text(getFormatRut(cliente.rut), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0, )),
+            Text(cliente.razon,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.0,
+                )),
+            SizedBox(
+              height: 2.0,
+            ),
+            Text(getFormatRut(cliente.rut),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12.0,
+                )),
             SizedBox(
               height: 5.0,
             )
@@ -171,7 +203,10 @@ class _ClientesPageState extends State<ClientesPage> {
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[Text(cliente.direccion, style: TextStyle(fontSize: 12.0)), Text(cliente.telefono, style: TextStyle(fontSize: 12.0))],
+          children: <Widget>[
+            Text(cliente.direccion, style: TextStyle(fontSize: 12.0)),
+            Text(cliente.telefono, style: TextStyle(fontSize: 12.0))
+          ],
         ),
         trailing: IconButton(
             icon: Icon(Icons.arrow_forward_ios),

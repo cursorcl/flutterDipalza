@@ -8,7 +8,7 @@ class ConsoleLogPage extends StatefulWidget {
 }
 
 class _ConsoleLogPageState extends State<ConsoleLogPage> {
-  LogModel ultimoLog;
+  late LogModel ultimoLog;
   final List<Container> _logs = <Container>[];
   ScrollController _scrollController = new ScrollController();
 

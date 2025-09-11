@@ -5,11 +5,11 @@ class OptionHomeWidget extends StatelessWidget {
   final String router;
   final IconData icon;
   final String textIcon;
-  final Color colorText;
-  final Color colorIcon;
-  final Color colorBackgraund;
+  final Color? colorText;
+  final Color? colorIcon;
+  final Color? colorBackgraund;
 
-  const OptionHomeWidget({@required this.router, @required this.icon, @required this.textIcon, this.colorText, this.colorIcon, this.colorBackgraund});
+  const OptionHomeWidget({required this.router, required this.icon, required this.textIcon, this.colorText, this.colorIcon, this.colorBackgraund});
 
   @override
   Widget build(BuildContext context) {

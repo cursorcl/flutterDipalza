@@ -14,17 +14,20 @@ String productosModelToJson(List<ProductosModel> data) =>
 
 class ProductosModel {
   ProductosModel(
-      {this.articulo,
-      this.descripcion,
-      this.ventaneto,
-      this.porcila,
-      this.porccarne,
-      this.unidad,
-      this.stock,
-      this.pieces,
-      this.numbered,
-      this.registroItem,
-      this.registroItemResp});
+      {
+        required this.articulo,
+        required this.descripcion,
+        required this.ventaneto,
+        required this.porcila,
+        required this.porccarne,
+        required this.unidad,
+        required this.stock,
+        required this.pieces,
+        required this.numbered,
+        this.registroItem,
+        this.registroItemResp
+      }
+      );
 
   String articulo;
   String descripcion;
@@ -35,33 +38,33 @@ class ProductosModel {
   double stock;
   double pieces;
   bool numbered;
-  RegistroItemModel registroItem;
-  RegistroItemRespModel registroItemResp;
+  RegistroItemModel? registroItem;
+  RegistroItemRespModel? registroItemResp;
 
   factory ProductosModel.fromJson(Map<String, dynamic> json) => ProductosModel(
-        articulo: json["Articulo"],
-        descripcion: json["Descripcion"],
-        ventaneto: json["VentaNeto"] == null ? 0 : json["VentaNeto"].toInt(),
-        porcila: json["PorcIla"] == null ? 0 : json["PorcIla"].toDouble(),
-        porccarne: json["PorcCarne"] == null ? 0 : json["PorcCarne"].toDouble(),
+        articulo: json["articulo"],
+        descripcion: json["descripcion"],
+        ventaneto: json["ventaNeto"] == null ? 0 : json["ventaNeto"].toInt(),
+        porcila: json["porcIla"] == null ? 0 : json["porcIla"].toDouble(),
+        porccarne: json["porcCarne"] == null ? 0 : json["porcCarne"].toDouble(),
         // unidad: unidadValues.map[json["unidad"].toUpperCase()],
-        unidad: json["Unidad"].toUpperCase(),
-        stock: json["Stock"] == null ? 0 : json["Stock"].toDouble(),
-        pieces: json["Pieces"] == null ? 0 : json["Pieces"].toDouble(),
-        numbered: json["Numbered"] == null ? false : json["Numbered"],
+        unidad: json["unidad"].toUpperCase(),
+        stock: json["stock"] == null ? 0 : json["stock"].toDouble(),
+        pieces: json["pieces"] == null ? 0 : json["pieces"].toDouble(),
+        numbered: json["numbered"] == null ? false : json["numbered"],
       );
 
   Map<String, dynamic> toJson() => {
-        "Articulo": articulo,
-        "Descripcion": descripcion,
-        "VentaNeto": ventaneto,
-        "PorcIla": porcila,
-        "PorcCarne": porccarne,
+        "articulo": articulo,
+        "descripcion": descripcion,
+        "ventaNeto": ventaneto,
+        "porcIla": porcila,
+        "porcCarne": porccarne,
         // "unidad": unidadValues.reverse[unidad],
-        "Unidad": unidad,
-        "Stock": stock,
-        "Pieces": pieces,
-        "Numbered": numbered,
+        "unidad": unidad,
+        "stock": stock,
+        "pieces": pieces,
+        "numbered": numbered,
       };
 
   ProductosModel clone() {
@@ -121,7 +124,7 @@ final unidadValuesDetalle = EnumValues({
 
 class EnumValues<T> {
   Map<String, T> map;
-  Map<T, String> reverseMap;
+  late Map<T, String> reverseMap;
 
   EnumValues(this.map);
 

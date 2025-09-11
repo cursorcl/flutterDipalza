@@ -7,8 +7,8 @@ String loginModelToJson(CondicionVentaModel data) => json.encode(data.toJson());
 
 class CondicionVentaModel {
     CondicionVentaModel({
-        this.codigo,
-        this.descripcion,
+        required this.codigo,
+        required this.descripcion,
 
     });
 

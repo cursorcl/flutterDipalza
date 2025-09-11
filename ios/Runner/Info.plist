@@ -44,5 +44,16 @@
 	<key>UIStatusBarHidden</key>
 	<true/>
 
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Esta aplicación necesita tu ubicación para mostrarte servicios cercanos.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Esta aplicación necesita tu ubicación para ofrecerte notificaciones y servicios en segundo plano.</string>
+    <key>NSLocationUsageDescription</key>
+    <string>This app needs your location to provide accurate information and services.</string>
 </dict>
 </plist>

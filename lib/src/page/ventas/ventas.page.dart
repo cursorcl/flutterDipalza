@@ -10,8 +10,10 @@ import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../widget/fondo.widget.dart';
+
 class VentasPage extends StatefulWidget {
-  const VentasPage({Key key}) : super(key: key);
+  const VentasPage({Key? key}) : super(key: key);
 
   @override
   _VentasPageState createState() => _VentasPageState();
@@ -26,29 +28,30 @@ class _VentasPageState extends State<VentasPage> {
   double _valorCarne = 0.0;
   final productoVentaBloc = ProductosVentaBloc();
   String _fecha = '';
-  Widget _widgetResumenVenta;
+  Widget? _widgetResumenVenta;
   bool _primeraCarga = true;
-  InicioVentaModel _inicioVenta;
+  InicioVentaModel? _inicioVenta;
 
-  
   @override
   void initState() {
-    print('>>>>>>>>> INIT STATE >>>>>>>>>');
     DBLogProvider.db.nuevoLog(creaLogInfo('VentasPage', 'initState', 'Inicio'));
     super.initState();
-    
+
     this.productoVentaBloc.limpiarProductos();
     this._fecha = DateTime.now().millisecondsSinceEpoch.toString();
-    print('FECHA DEL REGISTRO: ' + this._fecha);
   }
 
   @override
   Widget build(BuildContext context) {
-    _inicioVenta = ModalRoute.of(context).settings.arguments;
+    final route = ModalRoute.of(context);
+    final arguments = route?.settings.arguments;
+    _inicioVenta = arguments is InicioVentaModel ? arguments : null;
 
-    if (this._primeraCarga && _inicioVenta.listaVentaItem != null && _inicioVenta.listaVentaItem.isNotEmpty) {
-      for (ProductosModel producto in _inicioVenta.listaVentaItem) {
-        this._fecha = producto.registroItemResp.fecha.millisecondsSinceEpoch.toString();
+    if (_primeraCarga && _inicioVenta?.listaVentaItem?.isNotEmpty == true) {
+      final lista = _inicioVenta!.listaVentaItem!;
+      for (ProductosModel producto in lista) {
+        this._fecha =
+            producto.registroItemResp!.fecha!.millisecondsSinceEpoch.toString();
         this.productoVentaBloc.agregarProducto(producto);
       }
       this._primeraCarga = false;
@@ -57,13 +60,13 @@ class _VentasPageState extends State<VentasPage> {
     List<ProductosModel> _listaVenta = this.productoVentaBloc.listaProductos;
 
     this._widgetResumenVenta = this.loadResumenVenta();
-
+    ClientesModel cliente = _inicioVenta!.cliente!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorRojoBase(),
         leading: IconButton(
             icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pushNamed(context, 'home')),
+            onPressed: () => Navigator.of(context).maybePop()), //Navigator.pushNamed(context, 'home')),
         title: Container(
           child: Center(
             child: Text(
@@ -73,18 +76,27 @@ class _VentasPageState extends State<VentasPage> {
           ),
         ),
       ),
-      body: Container(
-        height: double.infinity,
-        child: Column(
-          children: <Widget>[
-            _creaCabeceraCliente(context, _inicioVenta.cliente),
-            _creaCabeceraResumen(context, _inicioVenta.cliente),
-            Expanded(
-              child: _creaListaProductos(context, _listaVenta),
-            )
-          ],
-        ),
-      ),
+      body:  Stack(children: <Widget>[
+          // 1. FondoWidget() debe estar en la capa más baja del Stack.
+          Positioned.fill(
+            child: FondoWidget(),
+          ),
+
+          // 2. El resto del contenido (input y lista) debe ir en una Column
+          //    para que el Expanded funcione.
+          //    Usamos un Positioned.fill para que la Column ocupe todo el espacio.
+          Positioned.fill(
+            child: Column(
+              children: <Widget>[
+                _creaCabeceraCliente(context, cliente),
+                _creaCabeceraResumen(context, cliente),
+                Expanded(
+                  child: _creaListaProductos(context, _listaVenta),
+                )
+              ],
+            ),
+          )
+        ]),
     );
   }
 
@@ -125,13 +137,11 @@ class _VentasPageState extends State<VentasPage> {
                             color: Colors.white,
                             fontSize: 15.0,
                           )),
-
-                      Text(_inicioVenta.condicionVenta.descripcion,
+                      Text(_inicioVenta!.condicionVenta!.descripcion ?? "",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15.0,
-                          )                      
-                      )
+                          ))
                     ],
                   ),
                 ),
@@ -151,18 +161,17 @@ class _VentasPageState extends State<VentasPage> {
             Container(
               width: size.width * 0.35,
               alignment: Alignment.center,
-              child: getFloatButton(_cliente),
+              child: btnFloatingAction(_cliente),
             ),
-            this._widgetResumenVenta,
+            this._widgetResumenVenta!,
           ],
         ));
   }
 
-
-  Widget getFloatButton(ClientesModel _cliente){
+  Widget btnFloatingAction(ClientesModel _cliente) {
+    var condicionVenta = _inicioVenta!.condicionVenta!;
     return FloatingActionButton(
         elevation: 10,
-
         tooltip: 'Ingresar Venta',
         child: Icon(
           Icons.add_shopping_cart,
@@ -175,12 +184,12 @@ class _VentasPageState extends State<VentasPage> {
                 return SimpleDialog(
                   title: Center(child: Text('Selección de Producto')),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0)),
+                      borderRadius: BorderRadius.circular(5.0)),
                   children: <Widget>[
                     ProductosPopUpPage(
                       cliente: _cliente,
                       fecha: _fecha,
-                      condicionVenta: _inicioVenta.condicionVenta,
+                      condicionVenta: condicionVenta,
                       productosVentaBloc: productoVentaBloc,
                     ),
                     SizedBox(
@@ -192,8 +201,8 @@ class _VentasPageState extends State<VentasPage> {
 
           setState(() {});
         });
-    
   }
+
   Widget getCeldaTexto(String valor) {
     return Container(
       alignment: Alignment.centerRight,
@@ -214,7 +223,8 @@ class _VentasPageState extends State<VentasPage> {
     );
   }
 
-  Widget _creaListaProductos(BuildContext context, List<ProductosModel> _listaVenta) {
+  Widget _creaListaProductos(
+      BuildContext context, List<ProductosModel> _listaVenta) {
     return ListView(
       shrinkWrap: true,
       children: _listaItem(context, _listaVenta),
@@ -225,9 +235,17 @@ class _VentasPageState extends State<VentasPage> {
     final List<Widget> opciones = [];
 
     lista.forEach((prod) {
+      num cantidad = 0;
+      int indice = 0;
+
+      if (prod.registroItemResp != null) {
+        cantidad = prod.registroItemResp!.cantidad ?? 0;
+        indice = prod.registroItemResp!.indice;
+      }
+
       Widget widgetTemp = Dismissible(
           key: Key(prod.articulo +
-              prod.registroItemResp.cantidad.toString() +
+              cantidad.toString() +
               Random().nextInt(10000).toString()),
           background: Container(
             alignment: Alignment.centerRight,
@@ -250,10 +268,7 @@ class _VentasPageState extends State<VentasPage> {
                 backgroundColor: colorRojoBase(),
                 foregroundColor: Colors.white,
               ),
-              title: Text(
-                  prod.descripcion +
-                      ' - ' +
-                      prod.registroItemResp.indice.toString(),
+              title: Text(prod.descripcion + ' - ' + indice.toString(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12.0,
@@ -285,17 +300,20 @@ class _VentasPageState extends State<VentasPage> {
     this._valorTotal = 0;
 
     List<ProductosModel> lista = productoVentaBloc.listaProductos;
-    
 
     this._valorItems = lista.length;
 
     lista.forEach((prod) {
-      this._valorNeto = this._valorNeto + prod.registroItemResp.neto;
-      this._valorIla = this._valorIla + prod.registroItemResp.ila;
-      this._valorCarne = this._valorCarne + prod.registroItemResp.carne;
-      this._valorIva = this._valorIva + prod.registroItemResp.iva;
-      this._valorTotal =
-          this._valorNeto + this._valorIla + this._valorCarne + this._valorIva;
+      if (prod.registroItemResp != null) {
+        this._valorNeto = this._valorNeto + prod.registroItemResp!.neto;
+        this._valorIla = this._valorIla + prod.registroItemResp!.ila;
+        this._valorCarne = this._valorCarne + prod.registroItemResp!.carne;
+        this._valorIva = this._valorIva + prod.registroItemResp!.iva;
+        this._valorTotal = this._valorNeto +
+            this._valorIla +
+            this._valorCarne +
+            this._valorIva;
+      }
     });
 
     return Container(
@@ -303,7 +321,6 @@ class _VentasPageState extends State<VentasPage> {
       width: size.width * 0.65,
       child: Table(
         children: [
-
           TableRow(children: [
             getCeldaTexto('Items:'),
             getCeldaTexto(this._valorItems.toString())
@@ -357,6 +374,10 @@ class _VentasPageState extends State<VentasPage> {
   }
 
   Column detalleSolicitado(ProductosModel producto) {
+    double cantidad = 0;
+    if (producto.registroItemResp != null)
+      cantidad = producto.registroItemResp!.cantidad;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
@@ -365,10 +386,8 @@ class _VentasPageState extends State<VentasPage> {
         ),
         Text(
           producto.numbered
-              ? 'Kilos Confirmados: ' +
-                  producto.registroItemResp.cantidad.toString()
-              : 'Cantidad Confirmada: ' +
-                  getValorNumero(producto.registroItemResp.cantidad),
+              ? 'Kilos Confirmados: ' + cantidad.toString()
+              : 'Cantidad Confirmada: ' + getValorNumero(cantidad),
           style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13.0),
         ),
       ],
@@ -384,13 +403,4 @@ class _VentasPageState extends State<VentasPage> {
       setState(() {});
     }
   }
-
-
-
-
-
-
-
- 
-
 }

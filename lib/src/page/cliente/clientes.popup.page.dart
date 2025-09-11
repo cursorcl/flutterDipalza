@@ -8,7 +8,7 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class ClientesPopUpPage extends StatefulWidget {
-  const ClientesPopUpPage({Key key}) : super(key: key);
+  const ClientesPopUpPage({Key? key}) : super(key: key);
 
   @override
   _ClientesPopUpPageState createState() => _ClientesPopUpPageState();
@@ -20,7 +20,7 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
   List<ClientesModel> _listaClientes = [];
 
   List<CondicionVentaModel> _listaCondicionVenta = [];
-  CondicionVentaModel _condicionSeleccionada;
+  CondicionVentaModel? _condicionSeleccionada;
 
   Future<Null> getListaClientes() async {
     final prefs = new PreferenciasUsuario();
@@ -37,6 +37,7 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
   Future<Null> getListaCondicionVenta() async {
     CondicionVentaBloc().obtenerListaCondicionesVenta();
     _listaCondicionVenta =  CondicionVentaBloc().listaCondicionVenta;
+    _condicionSeleccionada = _listaCondicionVenta[0] ?? null;
     setState(() {});
   }
 
@@ -66,26 +67,18 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
 
   Widget _crearCondicionPago(BuildContext context) {
     return Container(
-      child: new Padding(
-         padding: EdgeInsets.symmetric(vertical : 0.0, horizontal: 4.0) ,
-         child: new Card(
-          child: new Padding(
-            padding: EdgeInsets.symmetric(vertical : 0.0, horizontal: 8.0) ,
+      child:  new Card(
             child: InputDecorator(
-                decoration: InputDecoration( labelStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0), hintText: 'Condición de Pago', border: InputBorder.none),
+                decoration: InputDecoration( labelStyle: TextStyle(color: Colors.redAccent, fontSize: 14.0), hintText: 'Condición de Pago', border: InputBorder.none),
                 isEmpty: _condicionSeleccionada == null,
                 child:  _crearComboCondicionVenta(context),
             )
-          )
           ),
-        )
     );
   }
 
   Widget _creaInputBuscar(BuildContext context) {
     return Container(
-      child: new Padding(
-        padding: EdgeInsets.all(4.0),
         child: new Card(
           child: new ListTile(
             leading: new Icon(Icons.search),
@@ -105,7 +98,6 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -120,17 +112,7 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
       setState(() {});
       return;
     }
-
-
     _searchResult.addAll(result);
-/*    
-      _listaClientes.forEach((cliente) {
-      if (cliente.razon.toLowerCase().contains(text.toLowerCase())) 
-      {
-        _searchResult.add(cliente);
-      }
-    });
-*/
     setState(() {});
   }
 
@@ -157,8 +139,8 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          radius: 15,
-          child: Icon(Icons.account_box),
+          radius: 16,
+          child: Icon(Icons.account_circle_outlined),
           backgroundColor: _condicionSeleccionada == null ? Colors.grey : colorRojoBase(),
           foregroundColor: Colors.white,
         ),
@@ -168,13 +150,10 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
             Text(cliente.razon,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.0, color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
             SizedBox(
-              height: 4.0,
+              height: 3.0,
             ),
             Text(getFormatRut(cliente.rut),
               style: TextStyle( fontSize: 11.0, color: _condicionSeleccionada == null ? Colors.grey : Colors.black)),
-            SizedBox(
-              height: 4.0,
-            )
           ],
         ),
         trailing: IconButton(
@@ -198,13 +177,12 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
             items: getOpcionesDropDown(),
             onChanged: changedDropDownItem,
             style: const TextStyle(color: Colors.black),
-            //selectedItemBuilder: (BuildContext context) {getSelectedOpcionsDropDown(context);},
           )
       )      
     );
   }
 
-  void changedDropDownItem(CondicionVentaModel selectedCity) {
+  void changedDropDownItem(CondicionVentaModel? selectedCity) {
     setState(() {
       _condicionSeleccionada = selectedCity;
     });

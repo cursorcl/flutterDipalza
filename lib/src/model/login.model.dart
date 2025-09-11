@@ -6,20 +6,20 @@ String loginModelToJson(LoginModel data) => json.encode(data.toJson());
 
 class LoginModel {
     LoginModel({
-        this.rut,
+        this.username,
         this.password,
     });
 
-    String rut;
-    String password;
+    String? username;
+    String? password;
 
     factory LoginModel.fromJson(Map<String, dynamic> json) => LoginModel(
-        rut: json["rut"],
+        username: json["username"],
         password: json["password"],
     );
 
     Map<String, dynamic> toJson() => {
-        "rut": rut,
+        "username": username,
         "password": password,
     };
 }

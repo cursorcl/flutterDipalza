@@ -6,8 +6,8 @@ String configuracionModelToJson(List<ConfiguracionModel> data) => json.encode(Li
 
 class ConfiguracionModel {
     ConfiguracionModel({
-        this.clave,
-        this.valor,
+        required this.clave,
+        required this.valor,
     });
 
     String clave;

@@ -3,9 +3,10 @@ import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 
 class ProductosPage extends StatefulWidget {
-  const ProductosPage({Key key}) : super(key: key);
+  const ProductosPage({Key? key}) : super(key: key);
 
   @override
   _ProductosPageState createState() => _ProductosPageState();
@@ -18,17 +19,7 @@ class _ProductosPageState extends State<ProductosPage> {
   List<ProductosModel> _listaProductos = [];
   bool _verBuscar = false;
 
-  Future<Null> getListaProductos() async {
-    ProductosBloc().obtenerListaProductos();
-    _listaProductos = ProductosBloc().listaProductos;
-    setState(() {});
-  }
 
-  Future<void> getListaProductosRefrescar() async {
-    ProductosBloc();
-    getListaProductos();
-    onSearchTextChanged(controller.text);
-  }
 
   @override
   void initState() {
@@ -67,13 +58,27 @@ class _ProductosPageState extends State<ProductosPage> {
       //     _creaListaProductos(context),
       //   ],
       // ),
-      body: Column(
+      body: Stack(
         children: <Widget>[
-          _verBuscar ? _creaInputBuscar(context) : Container(),
-          Expanded(
-              child: _searchResult.length != 0 || controller.text.isNotEmpty
-                  ? _creaListaProductos(context, _searchResult)
-                  : _creaListaProductos(context, _listaProductos)),
+          Positioned.fill(
+            child: FondoWidget(),
+          ),
+          Positioned.fill(
+            child: Column(
+              children: <Widget>[
+                // El input de búsqueda (se mostrará o no)
+                _verBuscar ? _creaInputBuscar(context) : Container(),
+
+                // La lista de productos, que ahora sí puede expandirse
+                // para ocupar el espacio restante.
+                Expanded(
+                  child: _searchResult.length != 0 || controller.text.isNotEmpty
+                      ? _creaListaProductos(context, _searchResult)
+                      : _creaListaProductos(context, _listaProductos),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -148,54 +153,76 @@ class _ProductosPageState extends State<ProductosPage> {
   }
 
   _creaCard(ProductosModel producto) {
+    final stock = producto.stock > 0 ? producto.stock : 0;
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          radius: 25,
+          radius: 20,
           child: Icon(Icons.card_giftcard),
           backgroundColor: colorRojoBase(),
           foregroundColor: Colors.white,
         ),
-        title: Text(producto.descripcion,
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13.0,
-                color: Colors.black)),
-        subtitle: Row(
-          children: <Widget>[
-            detalleProducto(producto),
-            Expanded(child: Container()),
-            //btnLoad(producto)
+        title: Text(
+          producto.descripcion,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15.0,
+            color: Colors.black,
+          ),
+        ),
+        subtitle: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Precio:',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const Spacer(),
+                Text(
+                  '\$${producto.ventaneto.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Text(
+                  'Stock:',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const Spacer(),
+                Text(
+                  '${stock.toStringAsFixed(2)} ${producto.unidad}',
+                  style:  TextStyle(fontWeight: FontWeight.bold, color: stock > 0 ? Colors.blueAccent : Colors.red,),
+                ),
+              ],
+            ),
+            if(producto.numbered)
+              Row(
+                children: [
+                  const Text(
+                    'Piezas:',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${producto.pieces.toStringAsFixed(0)}',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: producto.pieces > 0 ? Colors.blueAccent : Colors.red,),
+                  ),
+                ],
+              ),
           ],
         ),
-        trailing:
-            IconButton(icon: Icon(Icons.arrow_forward_ios), onPressed: () {}),
+/*        trailing: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios),
+          onPressed: () {},
+        ),*/
       ),
     );
   }
 
-  Column detalleProducto(ProductosModel producto) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(
-          height: 5.0,
-        ),
-        Text(
-          'V. Neto: ' + getValorModena(producto.ventaneto.toDouble(), 0),
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.0),
-        ),
-        SizedBox(
-          height: 2.0,
-        ),
-        Text('Unidad: ' + producto.unidad,
-            style: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 14.0,
-                color: Colors.grey)),
-      ],
-    );
-  }
 
   Column btnLoad(ProductosModel producto) {
     return Column(
@@ -233,5 +260,17 @@ class _ProductosPageState extends State<ProductosPage> {
             )),
       ],
     );
+  }
+
+  Future<Null> getListaProductos() async {
+    ProductosBloc().obtenerListaProductos();
+    _listaProductos = ProductosBloc().listaProductos;
+    setState(() {});
+  }
+
+  Future<void> getListaProductosRefrescar() async {
+    ProductosBloc();
+    getListaProductos();
+    onSearchTextChanged(controller.text);
   }
 }

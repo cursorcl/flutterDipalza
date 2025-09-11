@@ -2,7 +2,7 @@ import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 
 class Configuracion2Page extends StatefulWidget {
-  const Configuracion2Page({Key key}) : super(key: key);
+  const Configuracion2Page({Key? key}) : super(key: key);
 
   @override
   _Configuracion2PageState createState() => _Configuracion2PageState();

@@ -16,7 +16,6 @@ class ProductosBloc {
     obtenerListaProductos();
   }
 
-  
   Stream<List<ProductosModel>> get productosStream =>_productosController.stream;
   List<ProductosModel> get listaProductos => _productosController.value;
 
