@@ -21,22 +21,39 @@ class ListaVentasPage extends StatefulWidget {
 class _ListaVentasPageState extends State<ListaVentasPage> {
   int cantidadVentas = 0;
 
+
   @override
   Widget build(BuildContext context) {
+    final _puedeTransmitir = cantidadVentas > 0;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorRojoBase(),
         title: Container(
           child: Center(
             child: Text(
-              'Lista de Ventas Diaria',
+              'Ventas',
               style: TextStyle(color: Colors.white),
             ),
           ),
         ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TextButton.icon(
+                onPressed: _puedeTransmitir ? _transmitirDialog : null,
+                icon: const Icon(Icons.cloud_upload, size: 20),
+                label: const Text('Facturar'),
+                style: TextButton.styleFrom(
+                  // Su AppBar es rojo; asegure contraste blanco
+                  foregroundColor: Colors.white,
+                  disabledForegroundColor: Colors.white70,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+              ),
+            ),
+    ]
       ),
       body: _creaListaVentas(context),
-      floatingActionButton: floatingActionButton(context),
     );
   }
 
@@ -46,16 +63,20 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
       builder:
           (BuildContext context, AsyncSnapshot<List<VentaModel>> snapshot) {
         if (snapshot.hasData) {
-            this.cantidadVentas = snapshot.data!.length;
+          final nuevaCant = snapshot.data!.length;
+
+          // Solo si cambió, actualiza el estado del padre post-frame
+          if (nuevaCant != cantidadVentas) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              setState(() => cantidadVentas = nuevaCant);
+            });
+          }
             return Stack(
                 children: <Widget>[
-                  // 1. FondoWidget() debe estar en la capa más baja del Stack.
                   Positioned.fill(
                     child: FondoWidget(),
                   ),
-                  // 2. El resto del contenido (input y lista) debe ir en una Column
-                  //    para que el Expanded funcione.
-                  //    Usamos un Positioned.fill para que la Column ocupe todo el espacio.
                   Positioned.fill(
 
                       child:Column(
@@ -186,19 +207,6 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             condicionVenta: itemVenta.condicionventa));
   }
 
-  Widget btnTransmit(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.only(left: 25.0, bottom: 0.0),
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            _transmitirDialog();
-          },
-          backgroundColor: HexColor('#ff7043'),
-          tooltip: 'Transmitir Ventas',
-          label: Text('Transmitir Ventas'),
-          heroTag: 'transmit',
-        ));
-  }
 
   Padding btnNewWindow(BuildContext context) {
     return Padding(
@@ -216,20 +224,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
     );
   }
 
-  floatingActionButton(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Align(
-          alignment: Alignment.bottomLeft,
-          child: btnTransmit(context),
-        ),
-        Align(
-          alignment: Alignment.bottomRight,
-          child: btnNewWindow(context),
-        ),
-      ],
-    );
-  }
+
 }
 
 // ignore: must_be_immutable
@@ -259,7 +254,7 @@ class _MyDialogState extends State<MyDialog> {
             : ListBody(
                 children: <Widget>[
                   Text(
-                    'Se realizará la Transmisión de ${widget.cantidadVentas} ventas registradas.',
+                    'Se facturarán ${widget.cantidadVentas} ventas.',
                     textAlign: TextAlign.justify,
                   ),
                   Container(
@@ -299,7 +294,6 @@ class _MyDialogState extends State<MyDialog> {
                             onPressed: () {
                               setState(() {
                                 _loading = true;
-                                print('acepto transmicion de venta');
                                 _callServiceTransmit(context);
                               });
                             },
@@ -316,10 +310,8 @@ class _MyDialogState extends State<MyDialog> {
 
   void _callServiceTransmit(BuildContext context) async {
     final prefs = new PreferenciasUsuario();
-
     bool resp = await VentaProvider.ventaProvider
         .transmitirVentas(context, new TransmitirModel(codigo: prefs.vendedor));
-
     Navigator.of(context).pop();
     if (resp) {
       showAlert(context, 'Transmisión de Ventas realizada con exito.',

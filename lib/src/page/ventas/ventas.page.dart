@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 
 import '../../widget/fondo.widget.dart';
 
+import 'dart:developer';
+
 class VentasPage extends StatefulWidget {
   const VentasPage({Key? key}) : super(key: key);
 
@@ -34,7 +36,6 @@ class _VentasPageState extends State<VentasPage> {
 
   @override
   void initState() {
-    DBLogProvider.db.nuevoLog(creaLogInfo('VentasPage', 'initState', 'Inicio'));
     super.initState();
 
     this.productoVentaBloc.limpiarProductos();

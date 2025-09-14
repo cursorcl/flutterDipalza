@@ -1,10 +1,9 @@
 import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/provider/cliente_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
+import 'package:flutter/material.dart';
 
 class ClientesPage extends StatefulWidget {
   const ClientesPage({Key? key}) : super(key: key);
@@ -21,8 +20,7 @@ class _ClientesPageState extends State<ClientesPage> {
 
   Future<Null> getListaClientes() async {
     final prefs = new PreferenciasUsuario();
-    _listaClientes = await ClientesProvider.clientesProvider
-        .obtenerListaClientes(prefs.vendedor, prefs.ruta, context);
+    _listaClientes = await ClientesProvider.clientesProvider.obtenerListaClientes(prefs.vendedor, prefs.ruta, context);
     setState(() {});
   }
 
@@ -43,9 +41,6 @@ class _ClientesPageState extends State<ClientesPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorRojoBase(),
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pushNamed(context, 'home')),
         title: Container(
           child: Center(
             child: Text(
@@ -66,26 +61,19 @@ class _ClientesPageState extends State<ClientesPage> {
           ),
         ],
       ),
-      body: Stack(
-        children: <Widget>[
-          // 1. FondoWidget() debe estar en la capa más baja del Stack.
-          Positioned.fill(
-            child: FondoWidget(),
-          ),
-          // 2. El resto del contenido (input y lista) debe ir en una Column
-          //    para que el Expanded funcione.
-          //    Usamos un Positioned.fill para que la Column ocupe todo el espacio.
-          Positioned.fill(
+      body: Stack(children: <Widget>[
+        Positioned.fill(
+          child: FondoWidget(),
+        ),
+        Positioned.fill(
           child: Column(
-              children: <Widget>[
-                  // El input de búsqueda (se mostrará o no)
-                  _verBuscar ? _creaInputBuscar(context) : Container(),
-                  searchResult ? _creaListaClientes(context, _searchResult) : _creaListaClientes(context, _listaClientes)
-              ],
-            ),
+            children: <Widget>[
+              _verBuscar ? _creaInputBuscar(context) : Container(),
+              Expanded(child: searchResult ? _creaListaClientes(context, _searchResult) : _creaListaClientes(context, _listaClientes))
+            ],
           ),
-        ]
-      ),
+        ),
+      ]),
     );
   }
 
@@ -102,8 +90,7 @@ class _ClientesPageState extends State<ClientesPage> {
               leading: new Icon(Icons.search),
               title: new TextField(
                 controller: controller,
-                decoration: new InputDecoration(
-                    hintText: 'Buscar', border: InputBorder.none),
+                decoration: new InputDecoration(hintText: 'Buscar', border: InputBorder.none),
                 onChanged: onSearchTextChanged,
               ),
               trailing: new IconButton(
@@ -137,14 +124,8 @@ class _ClientesPageState extends State<ClientesPage> {
     setState(() {});
   }
 
-  Widget _creaListaClientes(
-      BuildContext context, List<ClientesModel> listaCliente) {
-    if (listaCliente.length == 0) {
-      return _createEmptyCard();
-      //Center(
-      //  child: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
-      //);
-    }
+  Widget _creaListaClientes(BuildContext context, List<ClientesModel> listaCliente) {
+    if (listaCliente.length == 0) return _createEmptyCard();
 
     return RefreshIndicator(
       onRefresh: getListaClientesRefrescar,
@@ -160,13 +141,13 @@ class _ClientesPageState extends State<ClientesPage> {
   _createEmptyCard() {
     return Card(
         child: ListTile(
-          leading: CircleAvatar(
-            radius: 25,
-            child: Icon(Icons.account_box),
-            backgroundColor: colorRojoBase(),
-            foregroundColor: Colors.white,
-          ),
-          title: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
+      leading: CircleAvatar(
+        radius: 25,
+        child: Icon(Icons.account_box),
+        backgroundColor: colorRojoBase(),
+        foregroundColor: Colors.white,
+      ),
+      title: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
     ));
   }
 
@@ -203,16 +184,13 @@ class _ClientesPageState extends State<ClientesPage> {
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(cliente.direccion, style: TextStyle(fontSize: 12.0)),
-            Text(cliente.telefono, style: TextStyle(fontSize: 12.0))
-          ],
+          children: <Widget>[Text(cliente.direccion, style: TextStyle(fontSize: 12.0)), Text(cliente.telefono, style: TextStyle(fontSize: 12.0))],
         ),
         trailing: IconButton(
-            icon: Icon(Icons.arrow_forward_ios),
+            icon: Icon(Icons.remove_red_eye_outlined),
             onPressed: () {
-              Navigator.pushNamed(context, 'venta',
-                  arguments: new InicioVentaModel(cliente: cliente));
+              // TODO Debo presentar sus ventas anteriores
+              //Navigator.pushNamed(context, 'venta', arguments: new InicioVentaModel(cliente: cliente));
             }),
       ),
     );

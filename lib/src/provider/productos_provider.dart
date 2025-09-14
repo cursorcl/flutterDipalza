@@ -17,7 +17,6 @@ class ProductosProvider {
       final token = prefs.token;
       Uri url = Uri.http(prefs.urlServicio, '/api/productos');
       final resp = await http.get(url, headers: {'Accept-Charset': 'utf-8', 'Authorization': 'Bearer $token',});
-      print(resp.body);
       return productosModelFromJson(resp.body);
     } catch (error) {
       DBLogProvider.db.nuevoLog(creaLogError(

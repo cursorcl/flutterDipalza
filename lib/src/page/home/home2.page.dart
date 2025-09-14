@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:dipalza_movil/src/page/home/ActionTile.dart';
 
+import '../ventas/listaventas.page.dart';
+
 class HomeAction {
   final IconData icon;
   final Color color;
@@ -108,7 +110,16 @@ class Homev2Page extends StatelessWidget {
   Padding makeFloatingPoint(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 20.0, bottom: 0.0),
-      child: ClientesSelectWidget(),
+      //child: ClientesSelectWidget(),
+      child: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ListaVentasPage()),
+          );
+        },
+        child: const Icon(Icons.list), // Puedes cambiar el ícono
+      ),
     );
   }
 

@@ -5,6 +5,15 @@ List<ClientesModel> clientesModelFromJson(String str) => List<ClientesModel>.fro
 String clientesModelToJson(List<ClientesModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class ClientesModel {
+    String rut;
+    String codigo;
+    String razon;
+    String direccion;
+    String telefono;
+    String ciudad;
+    String giro;
+    String ruta;
+
     ClientesModel({
         required this.rut,
         required this.codigo,
@@ -12,22 +21,19 @@ class ClientesModel {
         required this.direccion,
         required this.telefono,
         required this.ciudad,
+        required this.giro,
+        required this.ruta
     });
 
-    String rut;
-    String codigo;
-    String razon;
-    String direccion;
-    String telefono;
-    String ciudad;
-
     factory ClientesModel.fromJson(Map<String, dynamic> json) => ClientesModel(
-        rut: json["Rut"],
-        codigo: json["Codigo"],
-        razon: json["Razon"],
-        direccion: json["Direccion"],
-        telefono: json["Telefono"],
-        ciudad: json["Ciudad"],
+        rut: json["rut"] ?? "",
+        codigo: json["codigo"] ?? "",
+        razon: json["razon"] ?? "",
+        direccion: json["direccion"] ?? "",
+        telefono: json["telefono"] ?? "",
+        ciudad: json["ciudad"] ?? "",
+        giro: json["giro"] ?? "",
+        ruta: json["tuta"] ?? ""
     );
 
     Map<String, dynamic> toJson() => {
@@ -37,5 +43,7 @@ class ClientesModel {
         "Direccion": direccion,
         "Telefono": telefono,
         "Ciudad": ciudad,
+        "Giro": giro,
+        "Ruta": ruta
     };
 }

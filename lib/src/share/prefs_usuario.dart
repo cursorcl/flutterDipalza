@@ -78,4 +78,12 @@ class PreferenciasUsuario {
   set reporte(int value) {
     _prefs.setInt('reporte', value);
   }
+
+  List<String> get recentEndpoints {
+    return _prefs.getStringList('serviceHistory') ?? [];
+  }
+
+  set recentEndpoints(List<String> value) {
+    _prefs.setStringList('serviceHistory', value);
+  }
 }
