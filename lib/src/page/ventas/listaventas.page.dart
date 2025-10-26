@@ -1,15 +1,17 @@
-import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
-import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/transmitir_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
+import 'package:dipalza_movil/src/page/ventas/venta.page.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/cliente.select.widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../widget/connectivity_banner.widget.dart';
 import '../../widget/fondo.widget.dart';
+import 'listaventas.detalle.page.dart';
 
 class ListaVentasPage extends StatefulWidget {
   const ListaVentasPage({Key? key}) : super(key: key);
@@ -53,6 +55,14 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             ),
     ]
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Llama a la navegación sin datos para "Crear"
+          _irAPaginaVenta(context, null);
+        },
+        child: const Icon(Icons.add),
+        backgroundColor: colorRojoBase(), // Usa tu color
+      ),
       body: _creaListaVentas(context),
     );
   }
@@ -81,8 +91,11 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
 
                       child:Column(
               children: <Widget>[
+                // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
+                ConnectivityBanner(),
                 Expanded(
                     child: ListView(
+
                         children: _ventasItems(context, snapshot.data!))),
               ],
             ))]);
@@ -138,10 +151,45 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
     );
   }
   Widget _createCard(VentaModel itemVenta) {
-    return  Card(
+    return Slidable(
+      // Clave única para que Flutter maneje bien la lista
+        key: ValueKey(itemVenta.id),
+
+        // --- Acciones de la izquierda (o usa endActionPane para la derecha) ---
+        endActionPane: ActionPane(
+          motion: const StretchMotion(), // Animación
+          children: [
+            // --- BOTÓN ELIMINAR ---
+            SlidableAction(
+              onPressed: (context) {
+                // Llama a un nuevo diálogo de confirmación
+                _eliminarVentaDialog(context, itemVenta);
+              },
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              icon: Icons.delete,
+              label: 'Eliminar',
+            ),
+            // --- BOTÓN MODIFICAR ---
+            SlidableAction(
+              onPressed: (context) {
+                // Llama a la misma página de "Nueva Venta" pero con datos
+                _irAPaginaVenta(context, itemVenta);
+              },
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              icon: Icons.edit,
+              label: 'Modificar',
+            ),
+          ],
+        ),
+
+        // --- TU CARD ORIGINAL (EL "HIJO" DEL SLIDABLE) ---
+        child:   Card(
       child: ListTile(
+        tileColor: Colors.grey[100],
         leading: CircleAvatar(
-          radius: 20,
+          radius: 15,
           child: Icon(Icons.insert_chart),
           backgroundColor: HexColor('#455a64'),
           foregroundColor: Colors.white,
@@ -149,7 +197,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(itemVenta.razon ?? 'Sin Información',
+            Text(itemVenta.clienteNombre ?? '--',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -158,7 +206,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             SizedBox(
               height: 2.0,
             ),
-            Text(getFormatRut(itemVenta.rut),
+            Text(getFormatRut(itemVenta.clienteRut),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12.0,
@@ -171,15 +219,15 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
         subtitle: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(formatoFechaCorta().format(itemVenta.fecha)),
+            //Text(formatoFechaCorta().format(itemVenta.fecha)),
+            Text(itemVenta.condicionVentaNombre),
             Expanded(child: Container()),
             Text(
                 getValorModena(
-                    itemVenta.neto +
-                        itemVenta.totalila +
-                        itemVenta.carne +
-                        itemVenta.iva -
-                        itemVenta.descuento,
+                    itemVenta.total +
+                        itemVenta.totalIla +
+                        itemVenta.totalIva -
+                        itemVenta.totalDescuento,
                     0),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -189,29 +237,77 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
         trailing: IconButton(
             icon: Icon(Icons.arrow_forward_ios),
             onPressed: () {
-              cargaDetalleVenta(context, itemVenta);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ListaVentasDetallePage(ventaId: itemVenta.id), // Pasando el ventaId
+                ),
+              );
             }),
       ),
+    )
     );
   }
 
-  cargaDetalleVenta(BuildContext context, VentaModel itemVenta) async {
-    List<ProductosModel> listaVentaItem = await VentaProvider.ventaProvider
-        .obtenerListaVentasItem(itemVenta.rut, itemVenta.codigo,
-            itemVenta.fecha.millisecondsSinceEpoch);
 
-    Navigator.pushNamed(context, 'venta',
-        arguments: new InicioVentaModel(
-            cliente: itemVenta.cliente,
-            listaVentaItem: listaVentaItem,
-            condicionVenta: itemVenta.condicionventa));
+  void _irAPaginaVenta(BuildContext context, VentaModel? venta) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        // Pasa la venta (o null) a la PaginaVenta
+        builder: (context) => PaginaVenta(ventaParaEditar: venta),
+      ),
+    ).then((valor) {
+      // --- 4. (Opcional) Refresca la lista cuando vuelvas ---
+      // Si PaginaVenta devuelve 'true' (o cualquier valor)
+      // significando que se guardó algo, refrescamos el FutureBuilder.
+      if (valor == true) {
+        setState(() {
+          // Esto forzará al FutureBuilder a recargarse
+        });
+      }
+    });
   }
+  Future<void> _eliminarVentaDialog(BuildContext context, VentaModel venta) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Eliminación'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('¿Estás seguro de que deseas eliminar la venta de "${venta.clienteNombre ?? 'Cliente'}"?'),
+                const Text('Esta acción no se puede deshacer.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                // --- AQUÍ VA TU LÓGICA DE BORRADO ---
+                print('Eliminando venta ID: ${venta.id}');
 
+                // 1. Llama a tu provider:
+                // VentaProvider.ventaProvider.eliminarVenta(venta.id);
 
-  Padding btnNewWindow(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 20.0, bottom: 0.0),
-      child: ClientesSelectWidget(),
+                // 2. Cierra el diálogo y refresca la lista
+                Navigator.of(context).pop();
+                setState(() {
+                  // Refresca el FutureBuilder
+                });
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

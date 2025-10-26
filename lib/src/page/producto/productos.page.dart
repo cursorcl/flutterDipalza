@@ -5,8 +5,13 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 
+import '../../widget/connectivity_banner.widget.dart';
+
 class ProductosPage extends StatefulWidget {
-  const ProductosPage({Key? key}) : super(key: key);
+
+  final bool isForSelection;
+
+  const ProductosPage({Key? key, this.isForSelection = false}) : super(key: key);
 
   @override
   _ProductosPageState createState() => _ProductosPageState();
@@ -24,7 +29,6 @@ class _ProductosPageState extends State<ProductosPage> {
   @override
   void initState() {
     super.initState();
-    getListaProductos();
   }
 
   @override
@@ -52,12 +56,6 @@ class _ProductosPageState extends State<ProductosPage> {
           ),
         ],
       ),
-      // body: Column(
-      //   children: <Widget>[
-      //     // FondoWidget(),
-      //     _creaListaProductos(context),
-      //   ],
-      // ),
       body: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -66,15 +64,37 @@ class _ProductosPageState extends State<ProductosPage> {
           Positioned.fill(
             child: Column(
               children: <Widget>[
+                // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
+                ConnectivityBanner(),
                 // El input de búsqueda (se mostrará o no)
                 _verBuscar ? _creaInputBuscar(context) : Container(),
-
-                // La lista de productos, que ahora sí puede expandirse
-                // para ocupar el espacio restante.
                 Expanded(
-                  child: _searchResult.length != 0 || controller.text.isNotEmpty
-                      ? _creaListaProductos(context, _searchResult)
-                      : _creaListaProductos(context, _listaProductos),
+                  // 1. EL STREAMBUILDER ES EL WIDGET PRINCIPAL
+                  child: StreamBuilder<List<ProductosModel>>(
+                    stream: ProductosBloc().productosStream,
+                    builder: (context, snapshot) {
+                      // 2. MANEJO DE ESTADOS DEL STREAM
+                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(child: Text('No existen Productos a mostrar.'));
+                      }
+
+                      // 3. LA LISTA COMPLETA VIENE DIRECTAMENTE DEL STREAM
+                      final listaCompleta = snapshot.data!;
+
+                      // 4. LA LÓGICA DE BÚSQUEDA AHORA USA LA LISTA DEL STREAM
+                      final listaAMostrar = _filtrarLista(listaCompleta);
+
+                      return _creaListaProductos(context, listaAMostrar);
+                    },
+                  ),
                 ),
               ],
             ),
@@ -83,7 +103,20 @@ class _ProductosPageState extends State<ProductosPage> {
       ),
     );
   }
-
+  List<ProductosModel> _filtrarLista(List<ProductosModel> listaCompleta) {
+    if (controller.text.isEmpty) {
+      return listaCompleta;
+    } else {
+      _searchResult.clear();
+      listaCompleta.forEach((producto) {
+        if (producto.descripcion.toUpperCase().contains(controller.text.toUpperCase()) ||
+            producto.articulo == controller.text) {
+          _searchResult.add(producto);
+        }
+      });
+      return _searchResult;
+    }
+  }
   Widget _creaInputBuscar(BuildContext context) {
     return AnimatedOpacity(
       opacity: _verBuscar ? 1.0 : 0.0,
@@ -118,20 +151,10 @@ class _ProductosPageState extends State<ProductosPage> {
     );
   }
 
-  onSearchTextChanged(String text) async {
-    _searchResult.clear();
-    if (text.isEmpty) {
+  onSearchTextChanged(String text)  {
       setState(() {});
-      return;
     }
 
-    _listaProductos.forEach((producto) {
-      if (producto.descripcion.toUpperCase().contains(text.toUpperCase()) ||
-          producto.articulo == text) _searchResult.add(producto);
-    });
-
-    setState(() {});
-  }
 
   Widget _creaListaProductos(
       BuildContext context, List<ProductosModel> listaProducto) {
@@ -215,6 +238,13 @@ class _ProductosPageState extends State<ProductosPage> {
               ),
           ],
         ),
+          onTap: () {
+            if (widget.isForSelection) {
+              Navigator.pop(context, producto);
+            } else {
+              // Tu acción original
+            }
+          }
 /*        trailing: IconButton(
           icon: const Icon(Icons.arrow_forward_ios),
           onPressed: () {},
@@ -269,8 +299,7 @@ class _ProductosPageState extends State<ProductosPage> {
   }
 
   Future<void> getListaProductosRefrescar() async {
-    ProductosBloc();
-    getListaProductos();
-    onSearchTextChanged(controller.text);
+    // Solo le decimos al BLoC que recargue. El StreamBuilder se encargará del resto.
+    await ProductosBloc().obtenerListaProductos();
   }
 }

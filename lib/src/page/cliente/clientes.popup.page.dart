@@ -1,11 +1,12 @@
 import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/model/condicion-model.dart';
+import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import 'package:dipalza_movil/src/model/inicio_venta_model.dart';
 import 'package:dipalza_movil/src/provider/cliente_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ClientesPopUpPage extends StatefulWidget {
   const ClientesPopUpPage({Key? key}) : super(key: key);
@@ -15,6 +16,8 @@ class ClientesPopUpPage extends StatefulWidget {
 }
 
 class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
+
+
   TextEditingController controller = new TextEditingController();
   List<ClientesModel> _searchResult = [];
   List<ClientesModel> _listaClientes = [];
@@ -50,6 +53,7 @@ class _ClientesPopUpPageState extends State<ClientesPopUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final condicionVentaBloc = Provider.of<CondicionVentaBloc>(context, listen: false);
     final List<Widget> lista = [];
     lista.add(_crearCondicionPago(context));
     lista.add(_creaInputBuscar(context));

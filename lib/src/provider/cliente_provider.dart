@@ -48,7 +48,34 @@ class ClientesProvider {
       return clientesModelFromJson(responseBody);
     }
      return clientesModelFromJson('[]');
-    
+  }
+
+  Future<ClientesModel> obtenerClienteByRutCodigo(String rut, String codigo) async {
+    final prefs = new PreferenciasUsuario();
+
+
+    var params = prefs.urlServicio.split(":");
+
+    final  url = Uri(
+      scheme: 'http',
+      host: params[0],
+      port: int.parse(params[1]),
+      pathSegments: ['api', 'clientes', rut],
+    );
+    if(codigo != null &&  codigo.trim() != "")
+      url.replace(queryParameters: {'codigo': codigo});
+
+
+    final resp = await http.get(url, headers: {
+      HttpHeaders.authorizationHeader: 'Bearer ${prefs.token}',
+      'Accept-Charset': 'utf-8'
+    });
+
+    if (resp.statusCode == 200 || resp.statusCode == 202) {
+      String responseBody = utf8.decode(resp.bodyBytes);
+      return clienteModelFromJson(responseBody);
+    }
+    return clienteModelFromJson('{}');
   }
 
 }

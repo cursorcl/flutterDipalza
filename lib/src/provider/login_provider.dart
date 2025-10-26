@@ -19,7 +19,6 @@ class LoginProvider extends InheritedWidget {
 
   static LoginBloc of(BuildContext context) {
     final provider = context.dependOnInheritedWidgetOfExactType<LoginProvider>();
-    assert(provider != null, 'LoginProvider not found in context');
     return provider!.loginBloc;
   }
 }

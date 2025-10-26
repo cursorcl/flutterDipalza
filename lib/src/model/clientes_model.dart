@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+ClientesModel clienteModelFromJson(String str) => ClientesModel.fromJson(json.decode(str));
+
+
 List<ClientesModel> clientesModelFromJson(String str) => List<ClientesModel>.from(json.decode(str).map((x) => ClientesModel.fromJson(x)));
 
 String clientesModelToJson(List<ClientesModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));

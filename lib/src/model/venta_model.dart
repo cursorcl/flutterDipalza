@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'clientes_model.dart';
-import 'condicion-model.dart';
+import 'condicion_venta_model.dart';
 
 List<VentaModel> ventaModelFromJson(String str) => List<VentaModel>.from(json.decode(str).map((x) => VentaModel.fromJson(x)));
 
@@ -9,55 +9,56 @@ String ventaModelToJson(List<VentaModel> data) => json.encode(List<dynamic>.from
 
 class VentaModel {
     VentaModel({
-        required this.rut,
-        this.razon,
-        required this.codigo,
+        required this.id,
         required this.fecha,
-        required this.neto,
-        required this.descuento,
-        required this.totalila,
-        required this.carne,
-        required this.iva,
-        this.cliente,
-        this.condicionventacode,
-        this.condicionventa
-    });
+        required this.clienteRut,
+        required this.clienteCodigo,
+        required this.clienteNombre,
+        required this.condicionVentaCodigo,
+        required this.condicionVentaNombre,
+        required this.total,
+        required this.totalDescuento,
+        required this.totalIla,
+        required this.totalIva,
 
-    String rut;
-    String? razon;
-    String codigo;
+    });
+    int id;
+    String clienteRut;
+    String clienteNombre;
+    String clienteCodigo;
     DateTime fecha;
-    double neto;
-    double descuento;
-    double totalila;
-    double carne;
-    double iva;
-    ClientesModel? cliente;
-    String? condicionventacode;
-    CondicionVentaModel? condicionventa;
+    double total;
+    double totalDescuento;
+    double totalIla;
+    double totalIva;
+    String condicionVentaCodigo;
+    String condicionVentaNombre;
 
     factory VentaModel.fromJson(Map<String, dynamic> json) => VentaModel(
-        rut: json["rut"],
-        codigo: json["codigo"],
+        id: json["id"] == null ? 0 : json["id"],
         fecha: DateTime.parse(json["fecha"]),
-        neto: json["neto"] == null ? 0 : json["neto"].toDouble(),
-        descuento: json["descuento"] == null ? 0 : json["descuento"].toDouble(),
-        totalila: json["totalila"] == null ? 0 : json["totalila"].toDouble(),
-        carne: json["carne"] == null ? 0 : json["carne"].toDouble(),
-        iva: json["iva"] == null ? 0 : json["iva"].toDouble(),
-        condicionventacode: json["condicionventacode"] == null ? "0" : json["condicionventacode"]
-
+        clienteRut: json["clienteRut"],
+        clienteCodigo: json["clienteCodigo"],
+        clienteNombre: json["clienteNombre"],
+        condicionVentaCodigo: json["condicionVentaCodigo"],
+        condicionVentaNombre: json["condicionVentaNombre"],
+        total: json["total"].toDouble(),
+        totalDescuento: json["totalDescuento"].toDouble(),
+        totalIla: json["totalIla"].toDouble(),
+        totalIva: json["totalIva"].toDouble(),
     );
 
     Map<String, dynamic> toJson() => {
-        "rut": rut,
-        "codigo": codigo,
-        "fecha": fecha,
-        "neto": neto,
-        "descuento": descuento,
-        "totalila": totalila,
-        "carne": carne,
-        "iva": iva,
-        "condicionventacode": condicionventacode
+        "id": id,
+        "fecha": fecha.toIso8601String(),
+        "clienteRut": clienteRut,
+        "clienteCodigo": clienteCodigo,
+        "clienteNombre": clienteNombre,
+        "condicionVentaCodigo": condicionVentaCodigo,
+        "condicionVentaNombre": condicionVentaNombre,
+        "total": total,
+        "totalDescuento": totalDescuento,
+        "totalIla": totalIla,
+        "totalIva": totalIva
     };
 }

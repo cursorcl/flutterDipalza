@@ -1,30 +1,42 @@
-import 'dart:async';
+// src/bloc/condicion_venta_bloc.dart
 
-import 'package:dipalza_movil/src/model/condicion-model.dart';
+import 'dart:async';
+import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import 'package:dipalza_movil/src/provider/condicion_venta_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
-class CondicionVentaBloc  {
+// MODIFICADO: Ya no es un Singleton, es una clase normal.
+class CondicionVentaBloc {
 
-  static final CondicionVentaBloc _singleton = new CondicionVentaBloc._internal();
+  // El BehaviorSubject sigue siendo una excelente elección.
   final _condicionVentaController = BehaviorSubject<List<CondicionVentaModel>>();
 
-  factory CondicionVentaBloc() {
-    return _singleton;
-  }
+  // Streams y getters públicos se mantienen igual.
+  Stream<List<CondicionVentaModel>> get condicionVentaStream => _condicionVentaController.stream;
+  List<CondicionVentaModel> get listaCondicionVenta => _condicionVentaController.value;
 
-  CondicionVentaBloc._internal() {
+  // MODIFICADO: El constructor ahora es público y simple.
+  CondicionVentaBloc() {
+    // La obtención de datos se sigue llamando al momento de la creación.
     obtenerListaCondicionesVenta();
   }
 
- Stream<List<CondicionVentaModel>> get condicionVentaStream => _condicionVentaController.stream;
- List<CondicionVentaModel> get listaCondicionVenta => _condicionVentaController.value;
-
-  obtenerListaCondicionesVenta() async {
-    _condicionVentaController.sink.add(await CondicionVentaProvider.condicionVentaProvider.obtenerListaCondicionVenta());
+  Future<void> obtenerListaCondicionesVenta() async {
+    // Añadimos un try-catch por robustez.
+    try {
+      final data = await CondicionVentaProvider.condicionVentaProvider.obtenerListaCondicionVenta();
+      if (!_condicionVentaController.isClosed) {
+        _condicionVentaController.sink.add(data);
+      }
+    } catch (e) {
+      if (!_condicionVentaController.isClosed) {
+        _condicionVentaController.addError(e);
+      }
+    }
   }
 
-  dispose() {
-    _condicionVentaController?.close();
+  // El método dispose es crucial. Provider nos ayudará a llamarlo.
+  void dispose() {
+    _condicionVentaController.close();
   }
 }

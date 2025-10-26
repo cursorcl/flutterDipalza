@@ -1,8 +1,8 @@
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/model/condicion-model.dart';
+import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/model/registro_item_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -198,8 +198,9 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
       double descuento,
       CondicionVentaModel condicionVenta,
       BuildContext context) async {
-    final prefs = new PreferenciasUsuario();
-    final registro = RegistroItemModel();
+      final prefs = new PreferenciasUsuario();
+      var registro;
+/*    final registro = VentaDetalleItemModel();
 
     registro.indice = 0;
     registro.fila = 0;
@@ -221,10 +222,10 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
       registro.sobrestock = false;
     }
 
-    producto.registroItem = registro;
+    producto.registroItem = registro;*/
 
     print('envio');
-    print(registroItemModelToJson(registro));
+    print(ventaDetalleItemModelToJson(registro));
 
     RegistroItemRespModel registrado =
         await VentaProvider.ventaProvider.registrarItem(registro, context);

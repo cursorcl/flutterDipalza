@@ -86,4 +86,36 @@ class PreferenciasUsuario {
   set recentEndpoints(List<String> value) {
     _prefs.setStringList('serviceHistory', value);
   }
+
+  // --- NUEVO: Getter para fechaFacturacion ---
+  DateTime get fechaFacturacion {
+    // Leemos el string guardado en SharedPreferences.
+    final fechaGuardada = _prefs.getString('fechaFacturacion');
+
+    // Si no hay nada guardado, devolvemos la fecha de mañana como valor por defecto.
+    if (fechaGuardada == null) {
+      return DateTime.now().add(const Duration(days: 1));
+    }
+
+    // Si hay un string, lo convertimos de nuevo a un objeto DateTime.
+    // Usamos tryParse para evitar errores si el string estuviera mal formado.
+    return DateTime.tryParse(fechaGuardada) ?? DateTime.now().add(const Duration(days: 1));
+  }
+
+  // --- NUEVO: Setter para fechaFacturacion ---
+  set fechaFacturacion(DateTime value) {
+    // Guardamos la fecha convirtiéndola a un string en formato ISO 8601.
+    // Este formato ('2025-09-15T10:30:00.000') es estándar y seguro.
+    _prefs.setString('fechaFacturacion', value.toIso8601String());
+  }
+
+
+  double get iva {
+    return  _prefs.getDouble('iva') ?? 19.0;
+  }
+
+  set iva(double value) {
+    _prefs.setDouble('iva', value);
+  }
+
 }

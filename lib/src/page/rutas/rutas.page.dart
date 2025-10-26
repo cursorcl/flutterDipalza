@@ -7,8 +7,7 @@ import '../../utils/utils.dart';
 
 class RutasPage extends StatefulWidget {
 
-  final List<RutasModel> listaRutas;
-  const RutasPage({Key? key, required this.listaRutas}) : super(key: key);
+  const RutasPage({Key? key}) : super(key: key);
 
   @override
   _RutasPageState createState() => _RutasPageState();
@@ -24,8 +23,6 @@ class _RutasPageState extends State<RutasPage> {
   @override
   void initState() {
     super.initState();
-    // Cargar las rutas iniciales en el BLoC
-    rutasBloc.cargarRutas(widget.listaRutas);
 
     // Escuchar cambios en el campo de búsqueda
     _searchController.addListener(_filtrarRutas);
@@ -140,7 +137,7 @@ class _RutasPageState extends State<RutasPage> {
                   const SizedBox(height: 16),
                   Text('Error: ${snapshot.error}'),
                   ElevatedButton(
-                    onPressed: () => rutasBloc.cargarRutas(widget.listaRutas),
+                    onPressed: () => rutasBloc.limpiarFiltro(),//  rutasBloc.cargarRutas(widget.listaRutas),
                     child: const Text('Reintentar'),
                   ),
                 ],

@@ -20,11 +20,7 @@ class VenderdorProvider {
     http.Response resp;
     try { // loginModelToJson
       final json = loginModelToJson(login);
-
-      print(">>>>  Login:" + url.toString() + " " + json );
-
-
-      resp = await http.post(url, 
+      resp = await http.post(url,
       headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
         },

@@ -18,7 +18,6 @@ class ParametrosProvider {
       Uri url = Uri.http(prefs.urlServicio, '/configuration');
       // DBLogProvider.db.nuevoLog(
       //     creaLogInfo('ParametrosProvider', 'obtenerConfiguraciones', 'Inicio'));
-      print('URL Configuraciones: ' + url.toString());
 
       final resp = await http.get(url, headers: <String, String>{
         HttpHeaders.authorizationHeader: prefs.token

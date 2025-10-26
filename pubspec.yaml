@@ -32,10 +32,14 @@ dependencies:
   http: ^0.13.4
   rxdart: ^0.27.2
   shared_preferences: ^2.0.8
-  intl: ^0.18.1
   path_provider: ^2.0.6
   sqflite: ^2.0.0+4
   geolocator: ^7.7.1
+  connectivity_plus: ^6.0.3
+  provider: ^6.1.2
+  get_it: ^7.7.0 # Esta es la librería para el Service Locator
+  intl: ^0.19.0 # Paquete para formato de fechas y números
+  flutter_slidable: ^4.0.3
   
 
 dev_dependencies:

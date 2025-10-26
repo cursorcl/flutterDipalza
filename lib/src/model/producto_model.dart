@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:dipalza_movil/src/model/registro_item_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 
 List<ProductosModel> productosModelFromJson(String str) => List<ProductosModel>.from( json.decode(str).map((x) => ProductosModel.fromJson(x)));
@@ -31,20 +31,20 @@ class ProductosModel {
 
   String articulo;
   String descripcion;
-  int ventaneto;
+  double ventaneto;
   double porcila;
   double porccarne;
   String unidad;
   double stock;
   double pieces;
   bool numbered;
-  RegistroItemModel? registroItem;
+  VentaDetalleItemModel? registroItem;
   RegistroItemRespModel? registroItemResp;
 
   factory ProductosModel.fromJson(Map<String, dynamic> json) => ProductosModel(
         articulo: json["articulo"],
         descripcion: json["descripcion"],
-        ventaneto: json["ventaNeto"] == null ? 0 : json["ventaNeto"].toInt(),
+        ventaneto: json["ventaNeto"] == null ? 0 : json["ventaNeto"].toDouble(),
         porcila: json["porcIla"] == null ? 0 : json["porcIla"].toDouble(),
         porccarne: json["porcCarne"] == null ? 0 : json["porcCarne"].toDouble(),
         // unidad: unidadValues.map[json["unidad"].toUpperCase()],

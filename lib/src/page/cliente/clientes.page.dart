@@ -5,8 +5,13 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 
+import '../../widget/connectivity_banner.widget.dart';
+
 class ClientesPage extends StatefulWidget {
-  const ClientesPage({Key? key}) : super(key: key);
+
+  final bool isForSelection;
+
+  const ClientesPage({Key? key, this.isForSelection = false}) : super(key: key);
 
   @override
   _ClientesPageState createState() => _ClientesPageState();
@@ -68,6 +73,8 @@ class _ClientesPageState extends State<ClientesPage> {
         Positioned.fill(
           child: Column(
             children: <Widget>[
+              // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
+              ConnectivityBanner(),
               _verBuscar ? _creaInputBuscar(context) : Container(),
               Expanded(child: searchResult ? _creaListaClientes(context, _searchResult) : _creaListaClientes(context, _listaClientes))
             ],
@@ -189,9 +196,24 @@ class _ClientesPageState extends State<ClientesPage> {
         trailing: IconButton(
             icon: Icon(Icons.remove_red_eye_outlined),
             onPressed: () {
+              // Cambia la acción según el modo
+              if (widget.isForSelection) {
+              // --- NUEVA ACCIÓN: Devuelve el cliente ---
+              Navigator.pop(context, cliente);
+              } else {
+              // --- TU ACCIÓN ORIGINAL ---
               // TODO Debo presentar sus ventas anteriores
               //Navigator.pushNamed(context, 'venta', arguments: new InicioVentaModel(cliente: cliente));
+              print('Modo Vista: ${cliente.razon}');
+              }
             }),
+        onTap: () {
+          if (widget.isForSelection) {
+            Navigator.pop(context, cliente);
+          } else {
+            // Tu acción original
+          }
+        },
       ),
     );
   }

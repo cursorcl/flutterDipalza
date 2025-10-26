@@ -1,5 +1,5 @@
 import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/model/condicion-model.dart';
+import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 
 class InicioVentaModel {

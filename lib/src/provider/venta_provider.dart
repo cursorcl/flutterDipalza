@@ -4,10 +4,8 @@ import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/log/db_log_provider.dart';
-import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/model/condicion-model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/model/registro_item_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_item_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 import 'package:dipalza_movil/src/model/transmitir_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
@@ -17,14 +15,16 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
-import 'package:collection/collection.dart';
+import 'dart:developer' as developer;
+
+import '../services/locator.dart';
 
 class VentaProvider {
   
   static final VentaProvider ventaProvider = VentaProvider._();
+  final CondicionVentaBloc _condicionVentaBloc = locator<CondicionVentaBloc>();
 
   VentaProvider._() {
-     CondicionVentaBloc().obtenerListaCondicionesVenta();
     //
   }
 
@@ -32,13 +32,13 @@ class VentaProvider {
   * Metodo Encargado de realizar la llamada al Servicio para registrar un Item(Producto) a una futura venta de un cliente.
   */
   Future<RegistroItemRespModel> registrarItem(
-      RegistroItemModel registro, BuildContext context) async {
+      VentaDetalleItemModel registro, BuildContext context) async {
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio, '/registeritem/');
     http.Response resp;
     try {
       resp = await http.post(url,
-          body: registroItemModelToJson(registro),
+          body: ventaDetalleItemModelToJson(registro),
           headers: <String, String>{
             HttpHeaders.authorizationHeader: prefs.token,
             'Content-Type': 'application/json; charset=UTF-8',
@@ -105,10 +105,17 @@ class VentaProvider {
   Future<List<VentaModel>> obtenerListaVentas() async {
     try {
       final prefs = new PreferenciasUsuario();
-      Uri url = Uri.http(prefs.urlServicio, '/listsales/sale/${prefs.vendedor}');
+      var fechaFacturacion = prefs.fechaFacturacion.toIso8601String().split('T').first;
+
+
+      Uri url = Uri.http(
+        prefs.urlServicio,
+        '/api/ventas/header/vendedor/${prefs.vendedor}/fecha',
+        {'fecha': fechaFacturacion},
+      );
 
       final resp = await http.get(url, headers: {
-        HttpHeaders.authorizationHeader: prefs.token,
+        HttpHeaders.authorizationHeader: 'Bearer ${prefs.token}',
         'Accept-Charset': 'utf-8'
       });
 
@@ -119,50 +126,50 @@ class VentaProvider {
         if(listaVentas.length == 0) {
              return [];
         }
-
-        listaVentas.sort((a, b) => b.fecha.compareTo(a.fecha));
-
-        var condiciones = CondicionVentaBloc().listaCondicionVenta;
-        List<ClientesModel> listaCliente;
-        url = Uri.http(prefs.urlServicio, '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
-        final respCliente = await http.get(url, headers: <String, String>{ HttpHeaders.authorizationHeader: prefs.token});
-
-        if (respCliente.statusCode == 200 || respCliente.statusCode == 202) {
-          listaCliente = clientesModelFromJson(respCliente.body);
-
-          listaVentas.forEach((objVenta) {
-            CondicionVentaModel? condicionVenta = condiciones.firstWhereOrNull((c) => objVenta.condicionventacode == c.codigo);
-
-            if(condicionVenta != null)
-            {
-              objVenta.condicionventa = condicionVenta;
-            }
-            else {
-              objVenta.condicionventa = condiciones.first;
-              objVenta.condicionventacode = condiciones.first.codigo;
-            }
-            ClientesModel? cliente = listaCliente.firstWhereOrNull((objCliente) => objVenta.rut == objCliente.rut);
-            if (cliente != null) {
-              objVenta.razon = cliente.razon;
-              objVenta.cliente = cliente;
-            } else {
-              objVenta.razon = getFormatRut(objVenta.rut);
-            }
-          });
-        }
-
-
-
-
         return listaVentas;
       }
     } catch (error) {
-      DBLogProvider.db.nuevoLog(creaLogError(
-          'VentasProvider', 'obtenerListaVentas', error.toString()));
       return [];
     }
     return [];
   }
+
+
+
+
+  Future<List<VentaDetalleItemModel>> obtenerListaVentasDetalle(int ventaId) async {
+    try {
+      final prefs = new PreferenciasUsuario(); //RegistroItemRespModel
+      Uri url = Uri.http(prefs.urlServicio,
+          '/api/ventas/${ventaId}/detalles');
+      developer.log('URL Lista Ventas Item: ' + url.toString());
+
+      final resp = await http.get(url, headers: <String, String>{
+        HttpHeaders.authorizationHeader: 'Bearer ${prefs.token}',
+        'Accept-Charset': 'utf-8'
+      });
+      developer.log(resp.body);
+
+      if (resp.statusCode == 200 || resp.statusCode == 202) {
+        List<VentaDetalleItemModel> listaVentasItem =
+        listVentaDetalleItemModel(resp.body);
+
+        return listaVentasItem;
+      }
+    } catch (error, stackTrace) {
+      developer.log(
+        'Ocurrió un error al cargar las ventas detalle.',
+        name: 'cl.eos.dipalza', // Un nombre para filtrar en la consola
+        error: error,        // El objeto de la excepción
+        stackTrace: stackTrace,    // El stack trace
+        level: 1000,                // Nivel de severidad (ej. 900 para warning, 1000 para error grave)
+      );
+    }
+    return [];
+  }
+
+
+
 
   /*
   * Metodo Encargado de realizar la llamada al Servicio para otener la lista de Items(Productos) que contempla una futura venta realizada por el Vendedor.

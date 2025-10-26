@@ -2,12 +2,15 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
+import '../../model/rutas_model.dart';
 import '../../share/prefs_usuario.dart';
 import '../../utils/jwt_util.dart';
 import '../../utils/utils.dart';
-
-
+import '../../widget/connectivity_banner.widget.dart';
+import '../rutas/rutas.page.dart';
+import 'package:intl/intl.dart';
 
 enum ConnectionStatus { unknown, ok, invalid }
 
@@ -21,6 +24,11 @@ class ConfiguracionPage extends StatefulWidget {
 class _ConfiguracionPageState extends State<ConfiguracionPage> {
   final _prefs = PreferenciasUsuario();
   late TextEditingController _urlController;
+  RutasModel? _rutaSeleccionada;
+  DateTime? _fechaTrabajo;
+  double? _iva;
+  double? _ila;
+  late final NumberFormat _pct = NumberFormat.decimalPattern('es_CL');
 
   ConnectionStatus _status = ConnectionStatus.unknown;
   bool _probando = false;
@@ -53,6 +61,37 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     super.dispose();
   }
 
+  String _fmt(DateTime d) => DateFormat('dd/MM/yyyy').format(d);
+
+  Future<void> _pickFechaTrabajo() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaTrabajo ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      helpText: 'Seleccione fecha de trabajo',
+      cancelText: 'Cancelar',
+      confirmText: 'Aceptar',
+    );
+    if (picked != null) {
+      setState(() => _fechaTrabajo = picked);
+      _prefs.fechaFacturacion = picked; // mismo setter que usa LoginPage
+    }
+  }
+
+  Future<void> _pickRuta() async {
+    // TODO: reemplace por su carga real de rutas
+    final List<RutasModel> listaRutas = [];
+    final seleccion = await Navigator.push<RutasModel>(
+      context,
+      MaterialPageRoute(builder: (context) =>RutasPage()), // RutasPage(listaRutas: listaRutas)),
+    );
+    if (seleccion != null) {
+      setState(() => _rutaSeleccionada = seleccion);
+      _prefs.ruta = seleccion.codigo; // mismo setter que usa LoginPage
+    }
+  }
+
   // ---------- Normalización y validación ----------
 
   String? _validateUrl(String input) {
@@ -77,6 +116,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     }
     return null; // válido
   }
+
 
 
   /// Quita esquema y trailing slash. Devuelve 'host:puerto'.
@@ -121,6 +161,87 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     return false;
   }
 
+
+  String _fmtPct(double v) => '${_pct.format(v)} %';
+
+// Acepta “19”, “19.0” o “19,0” y valida rango 0..100
+  String? _validatePct(String? raw) {
+    final t = (raw ?? '').trim();
+    if (t.isEmpty) return 'Ingrese un valor';
+    final val = double.tryParse(t.replaceAll('.', '').replaceAll(',', '.')) ??
+        double.tryParse(t);
+    if (val == null) return 'Número inválido';
+    if (val < 0 || val > 100) return 'Debe estar entre 0 y 100';
+    return null;
+  }
+
+  double _parsePct(String raw) {
+    // ya validado
+    return double.parse(raw.trim().replaceAll('.', '').replaceAll(',', '.'));
+  }
+
+  Future<void> _editTax({
+    required String titulo,
+    required double valorActual,
+    required ValueChanged<double> onSave,
+  }) async {
+    final formKey = GlobalKey<FormState>();
+    final controller = TextEditingController(text: _pct.format(valorActual));
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        final bottom = MediaQuery.of(ctx).viewInsets.bottom;
+        return Padding(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, bottom + 16),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titulo, style: Theme.of(ctx).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: controller,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9\.,]')),
+                  ],
+                  decoration: const InputDecoration(
+                    hintText: 'Ej.: 19 o 19,0',
+                    suffixText: '%',
+                  ),
+                  validator: _validatePct,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Spacer(),
+                    FilledButton.icon(
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          final v = _parsePct(controller.text);
+                          onSave(v);
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('$titulo actualizado a ${_fmtPct(v)}')),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.save),
+                      label: const Text('Guardar'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
   // ---------- UI helpers ----------
 
   Color _statusColor(BuildContext context) {
@@ -318,6 +439,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -338,6 +461,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       ),
       body: ListView(
         children: [
+          // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
+          ConnectivityBanner(),
           // -------- Conexión --------
           _sectionHeader('Conexión'),
           Card(
@@ -371,33 +496,50 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
           ),
 
           // // -------- Preferencias --------
-          // _sectionHeader('Preferencias'),
-          // SwitchListTile.adaptive(
-          //   secondary: const Icon(Icons.notifications_active),
-          //   title: const Text('Notificaciones'),
-          //   value: true,
-          //   onChanged: (v) {
-          //     // TODO: persistir preferencia
-          //   },
-          // ),
-          // ListTile(
-          //   leading: const Icon(Icons.language),
-          //   title: const Text('Idioma'),
-          //   subtitle: const Text('Español'),
-          //   onTap: () {
-          //     // TODO: selector de idioma
-          //   },
-          //   trailing: const Icon(Icons.chevron_right),
-          // ),
-          // ListTile(
-          //   leading: const Icon(Icons.brightness_6),
-          //   title: const Text('Tema'),
-          //   subtitle: const Text('Seguir sistema'),
-          //   onTap: () {
-          //     // TODO: selector de tema
-          //   },
-          //   trailing: const Icon(Icons.chevron_right),
-          // ),
+          _sectionHeader('Preferencias'),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Column(
+              children: [
+                // Ruta
+                ListTile(
+                  leading: const Icon(Icons.map_outlined),
+                  title: const Text('Ruta'),
+                  subtitle: Text(
+                    _rutaSeleccionada?.descripcion ?? _rutaSeleccionada?.codigo ?? 'Seleccione una ruta',
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _pickRuta,
+                ),
+                const Divider(height: 0),
+
+                // Fecha de trabajo
+                ListTile(
+                  leading: const Icon(Icons.today),
+                  title: const Text('Fecha de trabajo'),
+                  subtitle: Text(
+                    _fechaTrabajo != null ? _fmt(_fechaTrabajo!) : 'Seleccione fecha',
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const Icon(Icons.edit_calendar),
+                  onTap: _pickFechaTrabajo,
+                ),
+                const Divider(height: 0),
+                ListTile(
+                  leading: const Icon(Icons.receipt_long),
+                  title: const Text('IVA'),
+                  subtitle: Text(_fmtPct(_prefs.iva)),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _editTax(
+                    titulo: 'IVA',
+                    valorActual: _prefs.iva,
+                    onSave: (v) => setState(() => _prefs.iva = v),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
           // -------- Cuenta --------
           if(_canShowLogout) ...[

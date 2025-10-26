@@ -31,11 +31,11 @@ HexColor colorVerdeBase() {
 String getValorModena(double valor, int decimal) {
   final format = NumberFormat.currency(
     locale: 'es_CL',
-    symbol: '\$',
+    symbol: '',
     decimalDigits: decimal,
 
   );
-  return format.format(valor);
+  return '\$${format.format(valor)}';
 }
 
 /// Formatea un número sin decimales
