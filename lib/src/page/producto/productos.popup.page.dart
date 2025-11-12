@@ -31,7 +31,7 @@ class _ProductosPopUpPageState extends State<ProductosPopUpPage> {
   List<ProductosModel> _listaProductos = [];
 
   Future<Null> getListaProductos() async {
-    _listaProductos = ProductosBloc().listaProductos;
+    _listaProductos = ProductsBloc().productList;
     setState(() {});
   }
 

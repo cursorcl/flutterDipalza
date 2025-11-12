@@ -2,12 +2,14 @@ import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/model/venta_detalle_item_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
+
+import '../model/venta_model.dart';
 
 // ignore: must_be_immutable
 class ProductoSelectPopUpWidget extends StatefulWidget {
@@ -176,14 +178,14 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                 ? null
                 : () {
                     // Lógica para agregar
-                    _registrarItem(
+/*                    _registrarItem(
                       producto,
                       widget.cliente,
                       int.parse(_cantidadCtrl.text),
                       double.parse(_descuentoCtrl.text),
                       widget.condicionVenta,
                       context,
-                    );
+                    );*/
                   },
           ),
         ])
@@ -200,42 +202,16 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
       BuildContext context) async {
       final prefs = new PreferenciasUsuario();
       var registro;
-/*    final registro = VentaDetalleItemModel();
-
-    registro.indice = 0;
-    registro.fila = 0;
-    registro.rut = cliente.rut;
-    registro.codigo = cliente.codigo;
-    registro.vendedor = prefs.vendedor;
-    registro.articulo = producto.articulo;
-    registro.cantidad = cantidad;
-    registro.descuento = descuento;
-    registro.esnumerado = producto.numbered;
-    registro.fecha = widget.fecha;
-    registro.condicionventa = condicionVenta.codigo;
-
-    if (!producto.numbered && cantidad > producto.stock) {
-      registro.sobrestock = true;
-    } else if (producto.numbered && cantidad > producto.pieces) {
-      registro.sobrestock = true;
-    } else {
-      registro.sobrestock = false;
-    }
-
-    producto.registroItem = registro;*/
-
     print('envio');
-    print(ventaDetalleItemModelToJson(registro));
+    print(ventaDetalleModelToJson(registro));
 
-    RegistroItemRespModel registrado =
-        await VentaProvider.ventaProvider.registrarItem(registro, context);
+    VentaModel registrado =
+        await VentaProvider.ventaProvider.saveItemVenta(registro);
 
-    // print('respuesta');
-    //print(registroItemRespModelToJson(registrado));
 
-    producto.registroItemResp = registrado;
-    _cantidadCtrl.text = '';
-    widget.productosVentaBloc.agregarProducto(producto);
+    // producto.registroItemResp = registrado;
+    // _cantidadCtrl.text = '';
+    // widget.productosVentaBloc.agregarProducto(producto);
     setState(() {});
     Navigator.of(context).pop();
   }

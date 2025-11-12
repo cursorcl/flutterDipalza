@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:dipalza_movil/src/model/venta_detalle_item_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 
 List<ProductosModel> productosModelFromJson(String str) => List<ProductosModel>.from( json.decode(str).map((x) => ProductosModel.fromJson(x)));
@@ -38,7 +38,7 @@ class ProductosModel {
   double stock;
   double pieces;
   bool numbered;
-  VentaDetalleItemModel? registroItem;
+  VentaDetalleModel? registroItem;
   RegistroItemRespModel? registroItemResp;
 
   factory ProductosModel.fromJson(Map<String, dynamic> json) => ProductosModel(
@@ -129,9 +129,7 @@ class EnumValues<T> {
   EnumValues(this.map);
 
   Map<T, String> get reverse {
-    if (reverseMap == null) {
       reverseMap = map.map((k, v) => new MapEntry(v, k));
-    }
     return reverseMap;
   }
 }

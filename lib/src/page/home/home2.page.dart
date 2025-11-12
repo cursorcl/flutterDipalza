@@ -84,7 +84,6 @@ class Homev2Page extends StatelessWidget {
           ]),
         ),
       ]),
-      // bottomNavigationBar: bottomNavigationBar(context),
       floatingActionButton: makeFloatingPoint(context),
     );
   }

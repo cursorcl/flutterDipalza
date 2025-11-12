@@ -68,6 +68,6 @@ class RutasBloc {
 
   // Cierra el stream para liberar memoria
   dispose() {
-    _rutasController?.close();
+    _rutasController.close();
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../model/venta_detalle_item_model.dart';
+import '../../model/venta_detalle_model.dart';
 
 class VentaDetalleTile extends StatelessWidget {
-  final VentaDetalleItemModel item;
+  final VentaDetalleModel item;
 
   const VentaDetalleTile({Key? key, required this.item}) : super(key: key);
 
@@ -98,12 +98,12 @@ class VentaDetalleTile extends StatelessWidget {
                 ),
 
                 // Total descuento a la derecha (solo si es > 0)
-                if (item.descuento > 0)
+                if (item.totalDescuento > 0)
                   Text(
-                    '- ${formatoMoneda.format(item.descuento)}',
+                    '- ${formatoMoneda.format(item.totalDescuento)}',
                     style: estiloDescuento,
                   )
-                else Text('0',  style: estiloDescuento  )
+                else Text('- \$0',  style: estiloDescuento  )
                 ,
               ],
             ),

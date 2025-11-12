@@ -14,7 +14,6 @@ import 'package:provider/provider.dart';
 
 import 'src/bloc/condicion_venta_bloc.dart';
 
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {

@@ -59,7 +59,7 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
   void _loadLogs() async {
     final List<LogModel> listaLogs = await DBLogProvider.db.getLogs(20);
 
-    if (listaLogs != null && listaLogs.isNotEmpty) {
+    if ( listaLogs.isNotEmpty) {
       ultimoLog = listaLogs[listaLogs.length - 1];
     }
 
@@ -72,7 +72,7 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
     final List<LogModel> listaLogs =
         await DBLogProvider.db.getLogPaginados(ultimoLog, 10);
 
-    if (listaLogs != null && listaLogs.isNotEmpty) {
+    if ( listaLogs.isNotEmpty) {
       ultimoLog = listaLogs[listaLogs.length - 1];
     }
 

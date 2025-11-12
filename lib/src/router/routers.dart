@@ -23,6 +23,7 @@ Map<String, WidgetBuilder> getApplicationRoutes() {
     'home': (BuildContext context) => HomePage(),
     'productos': (BuildContext context) => ProductosPage(),
     'venta': (BuildContext context) => VentasPage(),
+    'ventaDetalle': (BuildContext context) => ListaVentasDetallePage(),
     'listaVentas': (BuildContext context) => ListaVentasPage(),
     'consoleLog': (BuildContext context) => ConsoleLogPage(),
   };

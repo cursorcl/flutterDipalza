@@ -24,8 +24,8 @@ class LoginBloc with Validators {
   String get ruta => _rutaController.value;
 
   dispose() {
-    _usuarioController?.close();
-    _passwordController?.close();
-    _rutaController?.close();
+    _usuarioController.close();
+    _passwordController.close();
+    _rutaController.close();
   }
 }

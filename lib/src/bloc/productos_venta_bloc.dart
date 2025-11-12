@@ -36,6 +36,6 @@ class ProductosVentaBloc {
       _productosVentaController.value;
 
   dispose() {
-    _productosVentaController?.close();
+    _productosVentaController.close();
   }
 }

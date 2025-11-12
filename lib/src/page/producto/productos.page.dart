@@ -5,6 +5,7 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 
+import '../../provider/productos_provider.dart';
 import '../../widget/connectivity_banner.widget.dart';
 
 class ProductosPage extends StatefulWidget {
@@ -18,17 +19,18 @@ class ProductosPage extends StatefulWidget {
 }
 
 class _ProductosPageState extends State<ProductosPage> {
-  // final productosBloc = new ProductosBloc();
+
+  final ProductsBloc _productsBloc = new ProductsBloc();
   TextEditingController controller = new TextEditingController();
   List<ProductosModel> _searchResult = [];
-  List<ProductosModel> _listaProductos = [];
-  bool _verBuscar = false;
+  bool _showSearch = false;
 
 
 
   @override
   void initState() {
     super.initState();
+    _productsBloc.obtainProducts();
   }
 
   @override
@@ -50,7 +52,7 @@ class _ProductosPageState extends State<ProductosPage> {
             tooltip: 'Buscar',
             onPressed: () {
               setState(() {
-                _verBuscar = true;
+                _showSearch = true;
               });
             },
           ),
@@ -67,11 +69,11 @@ class _ProductosPageState extends State<ProductosPage> {
                 // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
                 ConnectivityBanner(),
                 // El input de búsqueda (se mostrará o no)
-                _verBuscar ? _creaInputBuscar(context) : Container(),
+                _showSearch ? _creaInputBuscar(context) : Container(),
                 Expanded(
                   // 1. EL STREAMBUILDER ES EL WIDGET PRINCIPAL
                   child: StreamBuilder<List<ProductosModel>>(
-                    stream: ProductosBloc().productosStream,
+                    stream: _productsBloc.productsStream,
                     builder: (context, snapshot) {
                       // 2. MANEJO DE ESTADOS DEL STREAM
                       if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
@@ -119,7 +121,7 @@ class _ProductosPageState extends State<ProductosPage> {
   }
   Widget _creaInputBuscar(BuildContext context) {
     return AnimatedOpacity(
-      opacity: _verBuscar ? 1.0 : 0.0,
+      opacity: _showSearch ? 1.0 : 0.0,
       duration: Duration(milliseconds: 500),
       child: Container(
         color: colorRojoBase(),
@@ -140,7 +142,7 @@ class _ProductosPageState extends State<ProductosPage> {
                   controller.clear();
                   onSearchTextChanged('');
                   setState(() {
-                    _verBuscar = false;
+                    _showSearch = false;
                   });
                 },
               ),
@@ -253,7 +255,7 @@ class _ProductosPageState extends State<ProductosPage> {
     );
   }
 
-
+/*
   Column btnLoad(ProductosModel producto) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -291,15 +293,10 @@ class _ProductosPageState extends State<ProductosPage> {
       ],
     );
   }
-
-  Future<Null> getListaProductos() async {
-    ProductosBloc().obtenerListaProductos();
-    _listaProductos = ProductosBloc().listaProductos;
-    setState(() {});
-  }
+*/
 
   Future<void> getListaProductosRefrescar() async {
     // Solo le decimos al BLoC que recargue. El StreamBuilder se encargará del resto.
-    await ProductosBloc().obtenerListaProductos();
+    await _productsBloc.obtainProducts();
   }
 }

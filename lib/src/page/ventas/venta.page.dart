@@ -1,4 +1,5 @@
 import 'package:dipalza_movil/src/model/clientes_model.dart';
+import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/utils/utils.dart'; // Para colorRojoBase() y getFormatRut()
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -12,27 +13,32 @@ import '../cliente/clientes.page.dart';
 import 'listaventas.detalle.page.dart';
 
 class PaginaVenta extends StatefulWidget {
-  final VentaModel? ventaParaEditar;
+  final VentaModel? ventaEnEdicion;
 
-  const PaginaVenta({Key? key, this.ventaParaEditar}) : super(key: key);
+
+  const PaginaVenta({Key? key, this.ventaEnEdicion}) : super(key: key);
 
   @override
   _PaginaVentaState createState() => _PaginaVentaState();
 }
 
 class _PaginaVentaState extends State<PaginaVenta> {
-  // --- Estado de la página ---
+
+   VentaModel? ventaParaEditar;
+  PreferenciasUsuario pref = PreferenciasUsuario();
   bool _estaCargando = false;
   ClientesModel? _clienteSeleccionado;
   List<CondicionVentaModel> _listaCondicionesVenta = [];
   CondicionVentaModel? _condicionSeleccionada;
-  final DateTime _fechaFacturacion = DateTime.now();
+  late final DateTime _fechaFacturacion;
 
 
   @override
   void initState() {
     super.initState();
+    ventaParaEditar = widget.ventaEnEdicion;
     _cargarDatosIniciales();
+    _fechaFacturacion = pref.fechaFacturacion;
   }
 
   /// Navega a tu ClientesPage y espera un resultado
@@ -98,23 +104,25 @@ class _PaginaVentaState extends State<PaginaVenta> {
             // --- 4. Botón de Acción ---
             ElevatedButton.icon(
               icon: const Icon(Icons.arrow_forward),
-              label: const Text('Continuar a Detalle Venta'),
+              label: const Text('Detalle Venta'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorRojoBase(), // Usando tu color
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                foregroundColor: Colors.white,
                 textStyle: const TextStyle(fontSize: 18),
               ),
               onPressed: (_clienteSeleccionado == null)
                   ? null // Deshabilita el botón si no hay cliente
                   : () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => widget.ventaParaEditar == null ? ListaVentasDetallePage() : ListaVentasDetallePage(ventaId: widget
-                        .ventaParaEditar!.id),
-                  ),
-                );
-              },
+                    saveVenta();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => this.ventaParaEditar == null ? ListaVentasDetallePage() : ListaVentasDetallePage(ventaModel: this
+                              .ventaParaEditar, esEdicion: true),
+                        ),
+                      );
+                    },
             ),
           ],
         ),
@@ -191,7 +199,7 @@ class _PaginaVentaState extends State<PaginaVenta> {
 
     try {
       _listaCondicionesVenta = await CondicionVentaProvider.condicionVentaProvider.obtenerListaCondicionVenta();
-      if (widget.ventaParaEditar != null) {
+      if (this.ventaParaEditar != null) {
          _cargarDatosParaEdicion();
       } else {
         if (_listaCondicionesVenta.isNotEmpty) {
@@ -210,15 +218,15 @@ class _PaginaVentaState extends State<PaginaVenta> {
   void _cargarDatosParaEdicion() async {
     setState(() => _estaCargando = true);
 
-    final venta = widget.ventaParaEditar!;
+    final venta = this.ventaParaEditar!;
     final prefs = new PreferenciasUsuario();
 
     try {
       final cliente = await ClientesProvider.clientesProvider
-          .obtenerClienteByRutCodigo( venta.clienteRut, venta.clienteCodigo);
+          .obtenerClienteByRutCodigo( venta.rutCliente, venta.codigoCliente);
 
       final condicion =_listaCondicionesVenta.firstWhere(
-              (c) => c.codigo == venta.condicionVentaCodigo,
+              (c) => c.codigo == venta.codigoCondicionVenta,
               orElse: () => _listaCondicionesVenta.first);
       setState(() {
         _clienteSeleccionado = cliente;
@@ -231,4 +239,21 @@ class _PaginaVentaState extends State<PaginaVenta> {
       setState(() => _estaCargando = false);
     }
   }
+
+  void saveVenta() {
+    VentaModel ventaModel = VentaModel(
+      id: this.ventaParaEditar?.id ?? -1,
+      fecha: _fechaFacturacion,
+      rutCliente: _clienteSeleccionado!.rut,
+      codigoCliente: _clienteSeleccionado!.codigo,
+      codigoVendedor: pref.vendedor,
+      codigoRuta: pref.ruta,
+      codigoCondicionVenta: _condicionSeleccionada!.codigo
+    );
+    VentaProvider.ventaProvider.saveVenta(ventaModel).then((value) {
+      setState(() {
+       this.ventaParaEditar = value;
+      });
+    });
+    }
 }

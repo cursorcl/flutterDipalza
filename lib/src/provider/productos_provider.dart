@@ -19,8 +19,7 @@ class ProductosProvider {
       final resp = await http.get(url, headers: {'Accept-Charset': 'utf-8', 'Authorization': 'Bearer $token',});
       return productosModelFromJson(resp.body);
     } catch (error) {
-      DBLogProvider.db.nuevoLog(creaLogError(
-          'ProductosProvider', 'obtenerListaProductos', error.toString()));
+
       return [];
     }
   }

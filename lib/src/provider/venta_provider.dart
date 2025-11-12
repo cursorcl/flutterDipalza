@@ -1,17 +1,13 @@
 import 'dart:convert';
 
 import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
-import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
-import 'package:dipalza_movil/src/log/db_log_provider.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/model/venta_detalle_item_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
 import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
-import 'package:dipalza_movil/src/model/transmitir_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart';
-import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
@@ -28,47 +24,109 @@ class VentaProvider {
     //
   }
 
-  /*
-  * Metodo Encargado de realizar la llamada al Servicio para registrar un Item(Producto) a una futura venta de un cliente.
-  */
-  Future<RegistroItemRespModel> registrarItem(
-      VentaDetalleItemModel registro, BuildContext context) async {
+  /* ================= GRABAR =================== */
+
+  Future<VentaModel> saveVenta(VentaModel ventaModel) async {
+
     final prefs = new PreferenciasUsuario();
-    Uri url = Uri.http(prefs.urlServicio, '/registeritem/');
+    Uri url = Uri.http(prefs.urlServicio, '/api/ventas');
+    http.Response resp = await http.post(url,
+        body: VentaModel.toJson(ventaModel),
+        headers: <String, String>{
+          HttpHeaders.authorizationHeader: 'Bearer ${prefs.token}',
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept-Charset': 'utf-8'
+        });
+
+    if (resp.statusCode >= 200 && resp.statusCode < 300) {
+      String responseBody = utf8.decode(resp.bodyBytes);
+      VentaModel ventaModel =  VentaModel.fromJson(responseBody);
+      return ventaModel;
+    }
+
+    // En lugar de retornar null, lanza un error
+    throw Exception('Error al grabar la venta: ${resp.statusCode} ${resp.body}');
+  }
+
+
+  Future<VentaModel> saveItemVenta( VentaDetalleModel registro) async {
+    final prefs = new PreferenciasUsuario();
+
+    final json = ventaDetalleModelToJson(registro);
+    print(json);
+    Uri url = Uri.http(prefs.urlServicio, '/api/ventas/detalleVenta');
     http.Response resp;
     try {
       resp = await http.post(url,
-          body: ventaDetalleItemModelToJson(registro),
+          body: json,
           headers: <String, String>{
-            HttpHeaders.authorizationHeader: prefs.token,
+            HttpHeaders.authorizationHeader: 'Bearer ${prefs.token}',
             'Content-Type': 'application/json; charset=UTF-8',
             'Accept-Charset': 'utf-8'
           });
       print(resp.body);
       if (resp.statusCode == 200 || resp.statusCode == 202) {
         String responseBody = utf8.decode(resp.bodyBytes);
-        return registroItemRespModelFromJson(responseBody);
-      } else if (resp.statusCode == 500) {
-        Navigator.of(context).pop();
-        showAlert(context, 'Problemas al agregar un Producto, Vuelva a intentar.',
-            Icons.error);
+        return  VentaModel.fromJson(responseBody);
+      } else  {
+        throw Exception('Error al grabar el item de venta: ${resp.statusCode} ${resp.body}');
       }
     } catch (error) {
-      Navigator.of(context).pop();
-      showAlert(context, 'Problemas al agregar un Producto, Vuelva a intentar.',
-          Icons.error);
+      throw error;
+    }
+  }
+
+
+  /* ================= LISTADOS =================== */
+
+
+  Future<bool> removeVenta(int ventaId) async {
+    final prefs = new PreferenciasUsuario();
+    Uri url = Uri.http(prefs.urlServicio, '/api/ventas/${ventaId}');
+    http.Response resp = await http.delete(url,
+        headers: <String, String>{
+          HttpHeaders.authorizationHeader: 'Bearer ${prefs.token}',
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept-Charset': 'utf-8'
+        });
+    if (resp.statusCode == 200 || resp.statusCode == 202) {
+      String responseBody = utf8.decode(resp.bodyBytes);
+      VentaModel ventaModel =  VentaModel.fromJson(responseBody);
+      return true;
     }
 
-
-
-    return registroItemRespModelFromJson('{}');
+    // En lugar de retornar null, lanza un error
+    return false;
   }
+
+  Future<VentaModel> removeItemVenta(int itemVentaId) async {
+    final prefs = new PreferenciasUsuario();
+    Uri url = Uri.http(prefs.urlServicio, '/api/ventas/eliminarItemVenta/${itemVentaId}');
+    http.Response resp = await http.delete(url,
+        headers: <String, String>{
+          HttpHeaders.authorizationHeader: 'Bearer ${prefs.token}',
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept-Charset': 'utf-8'
+        });
+    if (resp.statusCode == 200 || resp.statusCode == 202) {
+      String responseBody = utf8.decode(resp.bodyBytes);
+      VentaModel ventaModel =  VentaModel.fromJson(responseBody);
+      return ventaModel;
+    }
+
+    // En lugar de retornar null, lanza un error
+    developer.log("No se ha eliminado el item de venta ${itemVentaId}");
+    throw Exception("No se ha eliminado el item de venta ${itemVentaId}: ${resp.statusCode} ${resp.body}");
+  }
+
+  /* ================= LISTADOS =================== */
 
   /*
   * Metodo Encargado de realizar la llamada al Servicio para remover un Item(Producto) a una futura venta de un cliente.
   */
   Future<bool> removerItem(ProductosModel producto, BuildContext context,
-      ProductosVentaBloc productoVentaBloc) async {
+      ProductosVentaBloc productoVentaBloc) async
+  {
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio,
         '/removeregisteritem/' + producto.registroItemResp!.indice.toString());
@@ -100,7 +158,7 @@ class VentaProvider {
   }
 
   /*
-  * Metodo Encargado de realizar la llamada al Servicio para otener las futuras ventas ingresadas por el vendedor.
+  * Metodo Encargado de realizar la llamada al Servicio para otener las futuras ventas ingresadas por el vendedor para el día que se está trabajando.
   */
   Future<List<VentaModel>> obtenerListaVentas() async {
     try {
@@ -110,7 +168,7 @@ class VentaProvider {
 
       Uri url = Uri.http(
         prefs.urlServicio,
-        '/api/ventas/header/vendedor/${prefs.vendedor}/fecha',
+        '/api/ventas/vendedor/${prefs.vendedor}/fecha',
         {'fecha': fechaFacturacion},
       );
 
@@ -121,7 +179,7 @@ class VentaProvider {
 
       if (resp.statusCode == 200 || resp.statusCode == 202) {
         String responseBody = utf8.decode(resp.bodyBytes);
-        List<VentaModel> listaVentas = ventaModelFromJson(responseBody);
+        List<VentaModel> listaVentas = VentaModel.listFromJson(responseBody);
 
         if(listaVentas.length == 0) {
              return [];
@@ -129,17 +187,19 @@ class VentaProvider {
         return listaVentas;
       }
     } catch (error) {
+      developer.log("Se ha producido un error al cargar las ventas", error: error);
       return [];
     }
     return [];
   }
 
-
-
-
-  Future<List<VentaDetalleItemModel>> obtenerListaVentasDetalle(int ventaId) async {
+  /**
+   * Obtiene el detalle de productos asociados a una venta.
+   * @param ventaId El ID de la venta para la cual se obtendrán los detalles.
+   */
+  Future<List<VentaDetalleModel>> obtenerListaVentasDetalle(int ventaId) async {
     try {
-      final prefs = new PreferenciasUsuario(); //RegistroItemRespModel
+      final prefs = new PreferenciasUsuario();
       Uri url = Uri.http(prefs.urlServicio,
           '/api/ventas/${ventaId}/detalles');
       developer.log('URL Lista Ventas Item: ' + url.toString());
@@ -151,8 +211,8 @@ class VentaProvider {
       developer.log(resp.body);
 
       if (resp.statusCode == 200 || resp.statusCode == 202) {
-        List<VentaDetalleItemModel> listaVentasItem =
-        listVentaDetalleItemModel(resp.body);
+        List<VentaDetalleModel> listaVentasItem =
+        listVentaDetalleModel(resp.body);
 
         return listaVentasItem;
       }
@@ -168,97 +228,4 @@ class VentaProvider {
     return [];
   }
 
-
-
-
-  /*
-  * Metodo Encargado de realizar la llamada al Servicio para otener la lista de Items(Productos) que contempla una futura venta realizada por el Vendedor.
-  */
-  Future<List<ProductosModel>> obtenerListaVentasItem(
-      String rutCliente, String codeCliente, int fecha) async {
-    try {
-      final prefs = new PreferenciasUsuario(); //RegistroItemRespModel
-      Uri url = Uri.http(prefs.urlServicio,
-          '/listsales/sale/${prefs.vendedor}/rut/$rutCliente/code/$codeCliente/date/$fecha');
-      DBLogProvider.db.nuevoLog(
-          creaLogInfo('VentasProvider', 'obtenerListaVentasItem', 'Inicio'));
-      print('URL Lista Ventas Item: ' + url.toString());
-
-      final resp = await http.get(url, headers: <String, String>{
-        HttpHeaders.authorizationHeader: prefs.token
-      });
-      print(resp.body);
-
-      if (resp.statusCode == 200 || resp.statusCode == 202) {
-        List<RegistroItemRespModel> listaVentasItem =
-            listRegistroItemRespModelFromJson(resp.body);
-
-        List<ProductosModel> _listaProductos = ProductosBloc().listaProductos;
-        List<ProductosModel> _listaProductosFinal = [];
-
-        listaVentasItem.forEach((item) {
-          for (ProductosModel producto in _listaProductos) {
-            if (item.articulo == producto.articulo) {
-              ProductosModel newRegistro = producto.clone();
-              newRegistro.registroItemResp = item;
-              _listaProductosFinal.add(newRegistro);
-              break;
-            }
-          }
-        });
-
-        return _listaProductosFinal;
-      }
-    } catch (error) {
-      DBLogProvider.db.nuevoLog(creaLogError(
-          'VentasProvider', 'obtenerListaVentasItem', error.toString()));
-      return [];
-    }
-    return [];
-  }
-
-/*
-  * Metodo Encargado de realizar la llamada al Servicio para realizar la transmisión final de una futura venta que pasa a ser una Venta Finalizada.
-  */
-  Future<bool> transmitirVentas(
-      BuildContext context, TransmitirModel transmitir) async {
-    final prefs = new PreferenciasUsuario();
-    Uri url = Uri.http(prefs.urlServicio, '/registersale');
-    print('URL Transmitir Venta: ' + url.toString());
-
-    http.Response resp;
-    try {
-      resp = await http.post(url,
-          body: transmitirModelToJson(transmitir),
-          headers: <String, String>{
-            HttpHeaders.authorizationHeader: prefs.token,
-            'Content-Type': 'application/json; charset=UTF-8',
-          });
-      print(resp.body);
-      if (resp.statusCode == 200 || resp.statusCode == 202) {
-        return true;
-        // return resp.body == 'true' ? true : false;
-      } else if (resp.statusCode == 500) {
-        Navigator.of(context).pop();
-        DBLogProvider.db.nuevoLog(creaLogError(
-            'VentaProvider', 'transmitirVentas', resp.body.toString()));
-        showAlert(
-            context,
-            'Problemas con la transmisión las Ventas, Vuelva a intentar.',
-            Icons.error);
-      }
-    } catch (error) {
-      Navigator.of(context).pop();
-      DBLogProvider.db.nuevoLog(
-          creaLogError('VentaProvider', 'transmitirVentas', error.toString()));
-      showAlert(
-          context,
-          'Problemas con al transmisión las Ventas, Vuelva a intentar.',
-          Icons.error);
-    }
-
-
-
-    return false;
-  }
 }
