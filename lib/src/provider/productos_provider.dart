@@ -1,4 +1,5 @@
 import 'package:dipalza_movil/src/log/db_log_provider.dart';
+import 'package:dipalza_movil/src/model/numerado_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +20,6 @@ class ProductosProvider {
       final resp = await http.get(url, headers: {'Accept-Charset': 'utf-8', 'Authorization': 'Bearer $token',});
       return productosModelFromJson(resp.body);
     } catch (error) {
-
       return [];
     }
   }

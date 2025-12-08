@@ -1,10 +1,7 @@
 import 'dart:convert';
 
-import 'package:dipalza_movil/src/bloc/condicion_venta_bloc.dart';
 import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
-import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
-import 'package:dipalza_movil/src/model/registro_item_resp_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart';
@@ -13,12 +10,11 @@ import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'dart:developer' as developer;
 
-import '../services/locator.dart';
-
+import '../model/numerado_model.dart';
+import 'package:dipalza_movil/src/share/app.navigator.dart';
 class VentaProvider {
   
   static final VentaProvider ventaProvider = VentaProvider._();
-  final CondicionVentaBloc _condicionVentaBloc = locator<CondicionVentaBloc>();
 
   VentaProvider._() {
     //
@@ -53,7 +49,6 @@ class VentaProvider {
     final prefs = new PreferenciasUsuario();
 
     final json = ventaDetalleModelToJson(registro);
-    print(json);
     Uri url = Uri.http(prefs.urlServicio, '/api/ventas/detalleVenta');
     http.Response resp;
     try {
@@ -64,7 +59,6 @@ class VentaProvider {
             'Content-Type': 'application/json; charset=UTF-8',
             'Accept-Charset': 'utf-8'
           });
-      print(resp.body);
       if (resp.statusCode == 200 || resp.statusCode == 202) {
         String responseBody = utf8.decode(resp.bodyBytes);
         return  VentaModel.fromJson(responseBody);
@@ -76,10 +70,6 @@ class VentaProvider {
     }
   }
 
-
-  /* ================= LISTADOS =================== */
-
-
   Future<bool> removeVenta(int ventaId) async {
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio, '/api/ventas/${ventaId}');
@@ -89,13 +79,10 @@ class VentaProvider {
           'Content-Type': 'application/json; charset=UTF-8',
           'Accept-Charset': 'utf-8'
         });
-    if (resp.statusCode == 200 || resp.statusCode == 202) {
-      String responseBody = utf8.decode(resp.bodyBytes);
-      VentaModel ventaModel =  VentaModel.fromJson(responseBody);
+    if (resp.statusCode >= 200 || resp.statusCode < 300) {
       return true;
     }
-
-    // En lugar de retornar null, lanza un error
+    developer.log("No se ha eliminado la venta ${ventaId}");
     return false;
   }
 
@@ -114,7 +101,6 @@ class VentaProvider {
       return ventaModel;
     }
 
-    // En lugar de retornar null, lanza un error
     developer.log("No se ha eliminado el item de venta ${itemVentaId}");
     throw Exception("No se ha eliminado el item de venta ${itemVentaId}: ${resp.statusCode} ${resp.body}");
   }
@@ -124,12 +110,12 @@ class VentaProvider {
   /*
   * Metodo Encargado de realizar la llamada al Servicio para remover un Item(Producto) a una futura venta de un cliente.
   */
-  Future<bool> removerItem(ProductosModel producto, BuildContext context,
-      ProductosVentaBloc productoVentaBloc) async
+  Future<bool> removerItem(VentaDetalleModel detalleVenta, BuildContext context,
+      VentaDetalleBloc productoVentaBloc) async
   {
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio,
-        '/removeregisteritem/' + producto.registroItemResp!.indice.toString());
+        '/eliminarItemVenta/' + detalleVenta.id.toString());
     print('URL Remover Item: ' + url.toString());
 
     http.Response resp;
@@ -139,17 +125,17 @@ class VentaProvider {
         'Accept-Charset': 'utf-8'
       });
     } catch (error) {
-      Navigator.of(context).pop();
+      AppNavigator.pop();
       showAlert(context,
           'Problemas al eliminar un Producto, Vuelva a intentar.', Icons.error);
       return false;
     }
 
     if (resp.statusCode == 200 || resp.statusCode == 202) {
-      productoVentaBloc.eliminarProducto(producto);
+      productoVentaBloc.eliminarVentaDetalle(detalleVenta);
       return true;
     } else if (resp.statusCode == 500) {
-      Navigator.of(context).pop();
+      AppNavigator.pop();
       showAlert(context, 'Problemas al elimar un Producto, Vuelva a intentar.',
           Icons.error);
       return false;
@@ -228,4 +214,19 @@ class VentaProvider {
     return [];
   }
 
+
+
+  Future<NumeradoModel> actualizarNumerado(NumeradoModel numerado) async {
+    try {
+      final prefs = new PreferenciasUsuario();
+      final token = prefs.token;
+      final json = numeradoModelToJson(numerado);
+      Uri url = Uri.http(prefs.urlServicio, '/api/ventas/updateNumerado');
+      final resp = await http.put(url, headers: {'Accept-Charset': 'utf-8', 'Content-Type': 'application/json','Authorization': 'Bearer $token',}, body: json);
+      return numeradoModelFromJson(resp.body);
+    } catch (error) {
+      developer.log("No se ha podido actualizar el estado del numerado:" + error.toString());
+      throw error;
+    }
+  }
 }

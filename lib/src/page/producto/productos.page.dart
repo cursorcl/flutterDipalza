@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 
 import '../../provider/productos_provider.dart';
+import '../../share/app.navigator.dart';
 import '../../widget/connectivity_banner.widget.dart';
 
 class ProductosPage extends StatefulWidget {
@@ -242,58 +243,15 @@ class _ProductosPageState extends State<ProductosPage> {
         ),
           onTap: () {
             if (widget.isForSelection) {
-              Navigator.pop(context, producto);
+              AppNavigator.pop(producto);
             } else {
               // Tu acción original
             }
           }
-/*        trailing: IconButton(
-          icon: const Icon(Icons.arrow_forward_ios),
-          onPressed: () {},
-        ),*/
       ),
     );
   }
 
-/*
-  Column btnLoad(ProductosModel producto) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        TextButton(
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                  side: BorderSide(color: Colors.grey)),
-              padding: EdgeInsets.all(4.0),
-            ),
-            onPressed: () => getListaProductos(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(
-                  height: 2.0,
-                ),
-                Icon(
-                  Icons.autorenew,
-                  size: 18.0,
-                ),
-                Text(
-                  getValorNumero(producto.stock > 0 ? producto.stock : 0) +
-                      ' Unidades',
-                  style: TextStyle(
-                      color: producto.stock > 0 ? Colors.green : Colors.red,
-                      fontSize: 12.0),
-                ),
-                SizedBox(
-                  height: 2.0,
-                ),
-              ],
-            )),
-      ],
-    );
-  }
-*/
 
   Future<void> getListaProductosRefrescar() async {
     // Solo le decimos al BLoC que recargue. El StreamBuilder se encargará del resto.

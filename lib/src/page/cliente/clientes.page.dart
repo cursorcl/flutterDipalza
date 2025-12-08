@@ -5,6 +5,7 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 
+import '../../share/app.navigator.dart';
 import '../../widget/connectivity_banner.widget.dart';
 
 class ClientesPage extends StatefulWidget {
@@ -199,7 +200,7 @@ class _ClientesPageState extends State<ClientesPage> {
               // Cambia la acción según el modo
               if (widget.isForSelection) {
               // --- NUEVA ACCIÓN: Devuelve el cliente ---
-              Navigator.pop(context, cliente);
+              AppNavigator.pop( cliente);
               } else {
               // --- TU ACCIÓN ORIGINAL ---
               // TODO Debo presentar sus ventas anteriores
@@ -209,7 +210,7 @@ class _ClientesPageState extends State<ClientesPage> {
             }),
         onTap: () {
           if (widget.isForSelection) {
-            Navigator.pop(context, cliente);
+            AppNavigator.pop(cliente);
           } else {
             // Tu acción original
           }

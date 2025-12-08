@@ -5,12 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../model/rutas_model.dart';
+import '../../share/app.navigator.dart';
+import '../../share/app_routes.dart';
 import '../../share/prefs_usuario.dart';
 import '../../utils/jwt_util.dart';
 import '../../utils/utils.dart';
 import '../../widget/connectivity_banner.widget.dart';
-import '../rutas/rutas.page.dart';
-import 'package:intl/intl.dart';
 
 enum ConnectionStatus { unknown, ok, invalid }
 
@@ -82,10 +82,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   Future<void> _pickRuta() async {
     // TODO: reemplace por su carga real de rutas
     final List<RutasModel> listaRutas = [];
-    final seleccion = await Navigator.push<RutasModel>(
-      context,
-      MaterialPageRoute(builder: (context) =>RutasPage()), // RutasPage(listaRutas: listaRutas)),
-    );
+    final seleccion =await AppNavigator.pushNamed<RutasModel>(AppRoutes.rutas); // RutasPage(listaRutas: listaRutas)),
     if (seleccion != null) {
       setState(() => _rutaSeleccionada = seleccion);
       _prefs.ruta = seleccion.codigo; // mismo setter que usa LoginPage
@@ -224,7 +221,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         if (formKey.currentState!.validate()) {
                           final v = _parsePct(controller.text);
                           onSave(v);
-                          Navigator.pop(ctx);
+                          AppNavigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('$titulo actualizado a ${_fmtPct(v)}')),
                           );
@@ -385,7 +382,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         if (!mounted) return;
                         setState(() {}); // refresca la ficha principal
                         if (!ctx.mounted) return;
-                        Navigator.pop(ctx);
+                        AppNavigator.pop(ctx);
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Dirección guardada')));
                       },
@@ -555,11 +552,11 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                   content: const Text('¿Desea cerrar la sesión?'),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
+                      onPressed: () => AppNavigator.pop(false),
                       child: const Text('Cancelar'),
                     ),
                     FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
+                      onPressed: () => AppNavigator.pop( true),
                       child: const Text('Cerrar sesión'),
                     ),
                   ],

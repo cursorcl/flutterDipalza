@@ -65,7 +65,7 @@ class _RutasPageState extends State<RutasPage> {
         trailing:
         IconButton(icon: Icon(Icons.arrow_forward_ios), onPressed: () {}),
         onTap: () {
-          Navigator.pop(context, ruta);
+          Navigator.of(context).pop(ruta);
         },
       ),
     );

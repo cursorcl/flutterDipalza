@@ -5,18 +5,21 @@ import 'package:dipalza_movil/src/model/rutas_model.dart';
 import 'package:dipalza_movil/src/provider/login_provider.dart';
 import 'package:dipalza_movil/src/provider/vendedor_provider.dart';
 import 'package:dipalza_movil/src/services/connectivity_service.dart';
+import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart' as alertUtil;
 import 'package:intl/intl.dart'; // <-- NUEVO: Importar paquete de formato
 import 'package:provider/provider.dart';
+import '../../share/app_routes.dart';
 import '../../validacion/rut_validator.dart';
 import 'package:dipalza_movil/src/model/login_response_model.dart';
 import 'package:dipalza_movil/src/model/respuesta_model.dart';
 
 import '../../widget/fondo.widget.dart';
 import '../../widget/version_widget.dart';
+import '../home/home2.page.dart';
 import '../rutas/rutas.page.dart';
 
 
@@ -204,10 +207,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget _crearSelectorRutas(BuildContext context, LoginBloc bloc) {
     return InkWell(
       onTap: _isLoading ? null : () async {
-        final List<RutasModel> listaRutas = []; // TODO: Cargar la lista de rutas
-        final rutaSeleccionada = await Navigator.push<RutasModel>(
-          context,
-          MaterialPageRoute(builder: (context) => RutasPage()), //RutasPage(listaRutas: listaRutas)),
+        final rutaSeleccionada = await Navigator.of(context)
+            .push(
+          MaterialPageRoute(
+            builder: (context) => const RutasPage()),
         );
         if (rutaSeleccionada != null) {
           setState(() => _rutaSeleccionada = rutaSeleccionada);
@@ -327,7 +330,7 @@ class _LoginPageState extends State<LoginPage> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         TextButton(
-          onPressed: () => Navigator.pushNamed(context, 'config'),
+          onPressed: () => AppNavigator.pushNamed(AppRoutes.config),
           child: const Text('Configurar'),
         ),
         TextButton(

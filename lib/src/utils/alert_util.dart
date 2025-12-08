@@ -1,6 +1,8 @@
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../share/app.navigator.dart';
+
 void showAlert(BuildContext context, String mensaje, IconData icono) {
   showDialog<String>(
     context: context,
@@ -21,7 +23,7 @@ void showAlert(BuildContext context, String mensaje, IconData icono) {
               'Cerrar',
               style: TextStyle(color: colorRojoBase()),
             ),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => AppNavigator.pop(),
           )
         ],
       );
@@ -68,7 +70,7 @@ Widget showAlertDialog(BuildContext context, String mensaje, IconData icono) {
           'Cerrar',
           style: TextStyle(color: colorRojoBase()),
         ),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () => AppNavigator.pop(),
       )
     ],
   );

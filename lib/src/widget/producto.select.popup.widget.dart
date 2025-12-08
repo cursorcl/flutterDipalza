@@ -10,11 +10,12 @@ import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../model/venta_model.dart';
+import '../share/app.navigator.dart';
 
 // ignore: must_be_immutable
 class ProductoSelectPopUpWidget extends StatefulWidget {
   ProductosModel producto;
-  ProductosVentaBloc productosVentaBloc;
+  VentaDetalleBloc productosVentaBloc;
   ClientesModel cliente;
   CondicionVentaModel condicionVenta;
   String fecha;
@@ -158,7 +159,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
             onPressed: () {
               _cantidadCtrl.text = '';
               _descuentoCtrl.text = '0';
-              Navigator.of(context).pop();
+              AppNavigator.pop();
             },
           ),
           SizedBox(width: 10.0), // Espacio entre botones
@@ -213,6 +214,6 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
     // _cantidadCtrl.text = '';
     // widget.productosVentaBloc.agregarProducto(producto);
     setState(() {});
-    Navigator.of(context).pop();
+    AppNavigator.pop();
   }
 }

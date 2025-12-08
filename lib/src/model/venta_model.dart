@@ -52,7 +52,7 @@ class VentaModel {
         fecha: DateTime.parse(json["fecha"]),
         rutCliente: json["rutCliente"],
         codigoCliente: json["codigoCliente"],
-        nombreCliente: json["nombreCliente"],
+        nombreCliente: json["nombreCliente"]== null ? "" : json["nombreCliente"],
         codigoVendedor: json["codigoVendedor"],
         tipoVendedor: json["tipoVendedor"],
         nombreVendedor: json['nombreVendedor'],

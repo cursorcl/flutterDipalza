@@ -1,41 +1,41 @@
 import 'dart:async';
-import 'package:dipalza_movil/src/model/producto_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
 import 'package:rxdart/rxdart.dart';
 
-class ProductosVentaBloc {
-  static final ProductosVentaBloc _singleton =
-      new ProductosVentaBloc._internal();
+class VentaDetalleBloc {
+  static final VentaDetalleBloc _singleton =
+      new VentaDetalleBloc._internal();
 
-  factory ProductosVentaBloc() {
+  factory VentaDetalleBloc() {
     return _singleton;
   }
 
-  ProductosVentaBloc._internal() {
-    _productosVentaController.value = [];
+  VentaDetalleBloc._internal() {
+    _ventaDetalleController.value = [];
   }
 
-  final _productosVentaController = BehaviorSubject<List<ProductosModel>>();
-  Stream<List<ProductosModel>> get productosStream =>
-      _productosVentaController.stream;
+  final _ventaDetalleController = BehaviorSubject<List<VentaDetalleModel>>();
+  Stream<List<VentaDetalleModel>> get productosStream =>
+      _ventaDetalleController.stream;
 
-  List<ProductosModel> get listaProductos => _productosVentaController.value;
+  List<VentaDetalleModel> get listaVentaDetalles => _ventaDetalleController.value;
 
-  agregarProducto(ProductosModel producto) {
-    _productosVentaController.value.add(producto);
+  agregarVentaDetalle(VentaDetalleModel producto) {
+    _ventaDetalleController.value.add(producto);
   }
 
-  eliminarProducto(ProductosModel producto) {
-    _productosVentaController.value.remove(producto);
+  eliminarVentaDetalle(VentaDetalleModel producto) {
+    _ventaDetalleController.value.remove(producto);
   }
 
-  limpiarProductos() {
-    _productosVentaController.value.clear();
+  limpiarVentaDetalles() {
+    _ventaDetalleController.value.clear();
   }
 
-  List<ProductosModel> get listaVentaProductos =>
-      _productosVentaController.value;
+  List<VentaDetalleModel> get listaVentaProductos =>
+      _ventaDetalleController.value;
 
   dispose() {
-    _productosVentaController.close();
+    _ventaDetalleController.close();
   }
 }

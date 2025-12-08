@@ -1,10 +1,10 @@
 import 'package:dipalza_movil/src/model/configuracion_model.dart';
-import 'package:dipalza_movil/src/page/home/home.page.dart';
+import 'package:dipalza_movil/src/page/login/auth_gate.dart';
 import 'package:dipalza_movil/src/provider/login_provider.dart';
 import 'package:dipalza_movil/src/provider/parametros_provider.dart';
-import 'package:dipalza_movil/src/router/routers.dart';
 import 'package:dipalza_movil/src/services/connectivity_service.dart';
 import 'package:dipalza_movil/src/services/locator.dart';
+import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Crear tu ColorScheme personalizado
-    final appColorScheme = AppTheme.createAppColors(
+    AppTheme.createAppColors(
       brightness: Brightness.light,
     );
 
@@ -72,11 +72,14 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Diplaza App.',
           initialRoute: 'login',
-          routes: getApplicationRoutes(),
+          //routes: getApplicationRoutes(),
+          home: const AuthGate(),
+          /*
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute(
                 builder: (BuildContext context) => HomePage());
           },
+           */
           // Usar tu tema personalizado
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,

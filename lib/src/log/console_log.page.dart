@@ -37,7 +37,7 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
             IconButton(
               icon: Icon(Icons.close),
               color: Colors.red[300],
-              onPressed: () => Navigator.pushReplacementNamed(context, 'login'),
+              onPressed: () => Navigator.of(context).pushReplacementNamed('login'),
             ),
           ],
         ),

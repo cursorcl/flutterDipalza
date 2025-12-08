@@ -1,23 +1,27 @@
 import 'dart:developer' as developer;
 
+import 'package:dipalza_movil/src/model/numerado_model.dart';
+import 'package:dipalza_movil/src/model/venta_detalle_pieza_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
+import 'package:dipalza_movil/src/page/home/home2.page.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
+import 'package:dipalza_movil/src/share/app_routes.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/alert_util.dart';
 import 'package:flutter/material.dart';
 
-// Asumiendo que esta es la ruta a tu BLoC
 import '../../bloc/productos_bloc.dart';
 import '../../model/producto_model.dart';
 import '../../model/venta_detalle_model.dart';
 import '../../provider/productos_provider.dart';
+import '../../share/app.navigator.dart';
 import '../producto/productos.page.dart';
 
 class VentaEdicionItemDetalle extends StatefulWidget {
+  final VentaModel? actualVenta;
   final VentaDetalleModel? actualVentaDetalle; // si viene nulo, es nuevo
-  final int? ventaId;
 
-  const VentaEdicionItemDetalle({Key? key, this.actualVentaDetalle, this.ventaId}) : super(key: key);
+  const VentaEdicionItemDetalle({Key? key, this.actualVenta, this.actualVentaDetalle}) : super(key: key);
 
   @override
   _VentaEdicionItemDetalleState createState() => _VentaEdicionItemDetalleState();
@@ -27,25 +31,20 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   final ProductosProvider _productosProvider = ProductosProvider.productosProvider;
   final ProductsBloc _productosBloc = ProductsBloc();
 
-  // ---
-
-  // Controllers
   late TextEditingController _productoController;
   late TextEditingController _cantidadController;
   late TextEditingController _descuentoController;
 
-  // late TextEditingController _stockController; // (No se usaba, la he eliminado)
-
-  // Focus Nodes (Añadido _productoFocusNode)
   late FocusNode _productoFocusNode;
   late FocusNode _cantidadFocusNode;
   late FocusNode _descuentoFocusNode;
   late FocusNode _guardarFocusNode;
 
-  // Estado del BLoC
+  ProductosModel? productoEnVenta = null;
+  List<VentaDetallePiezaModel> numeradosEnVenta = [];
+
   bool _isBlocReady = false;
 
-  // Estado del Producto
   String? _productoId;
   double _precioUnitario = 0;
   double _valorFinal = 0;
@@ -58,48 +57,49 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   double _porcentajeIVA = 0;
   bool _estaCargandoStock = false;
 
+  // Se utiliza para colocar rojo el borde del campo cantidad si excede el stock
+  bool _excedeStock = false;
+
   @override
   void initState() {
     super.initState();
-    // 1. LLAMA A LA CONFIGURACIÓN ASÍNCRONA (para evitar error ValueStream)
     _setupPagina();
   }
 
-  /// Configuración asíncrona de la página
   Future<void> _setupPagina() async {
-    // 2. ESPERA A QUE EL BLOC ESTÉ LISTO
-    //    (Requiere 'initialLoadDone' en tu ProductsBloc)
     await _productosBloc.initialLoadDone;
 
     final pref = PreferenciasUsuario();
     final d = widget.actualVentaDetalle;
 
-    // 3. INICIALIZA FOCUS NODES
     _productoFocusNode = FocusNode();
     _cantidadFocusNode = FocusNode();
     _descuentoFocusNode = FocusNode();
     _guardarFocusNode = FocusNode();
 
-    // 4. INICIALIZA CONTROLLERS
-    _cantidadController = TextEditingController(text: d?.cantidad.toString() ?? '1'); // '1' por defecto
+    _cantidadController = TextEditingController(text: d?.cantidad.toString() ?? '0');
     _descuentoController = TextEditingController(text: d?.totalDescuento.toString() ?? '0'); // '0' por defecto
 
-    // 5. LÓGICA DE CARGA DE PRODUCTO (Modo Edición)
     if (d != null) {
       final String claveBusqueda = d.idProducto;
+      productoEnVenta = _productosBloc.searchProduct(claveBusqueda);
+      if (productoEnVenta != null) {
+        _productoId = productoEnVenta!.articulo;
+        _productoController = TextEditingController(text: productoEnVenta!.descripcion);
+        _precioUnitario = productoEnVenta!.ventaneto;
+        _esNumerado = productoEnVenta!.numbered;
+        _unidadProducto = productoEnVenta!.unidad;
+        _porcentajeILA = productoEnVenta!.porcila;
 
-      // 6. USA TU MÉTODO 'searchProduct'
-      final productoCache = _productosBloc.searchProduct(claveBusqueda);
+        // tengo que generar la lista de piezas que ya tiene la venta.
+        // ojo con esto, esta lista sirve mientras que no cambie el código de producto.
+        if (_esNumerado) {
+          for (var item in d.piezasDetalle) {
+            numeradosEnVenta.add(item);
+          }
+        }
 
-      if (productoCache != null) {
-        _productoId = productoCache.articulo;
-        _productoController = TextEditingController(text: productoCache.descripcion);
-        _precioUnitario = productoCache.ventaneto;
-        _esNumerado = productoCache.numbered;
-        _unidadProducto = productoCache.unidad;
-        _porcentajeILA = productoCache.porcila;
-
-        _cargarStockProducto(productoCache.articulo);
+        _cargarStockProducto(productoEnVenta!.articulo);
       } else {
         _productoController = TextEditingController(text: d.nombreProducto);
         _precioUnitario = d.precioUnitario;
@@ -107,25 +107,26 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       }
       _porcentajeIVA = d.porcentajeIva;
     } else {
-      // Modo Nuevo
+      productoEnVenta = null;
       _productoController = TextEditingController(text: '');
       _porcentajeIVA = pref.iva;
     }
-
-    // 7. AÑADE LISTENERS PARA "SELECCIONAR TODO"
     _addSelectAllListener(_productoFocusNode, _productoController);
     _addSelectAllListener(_cantidadFocusNode, _cantidadController);
     _addSelectAllListener(_descuentoFocusNode, _descuentoController);
 
     _recalcularTotal();
-
-    // 8. AVISA A LA UI QUE PUEDE DIBUJARSE
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.actualVentaDetalle == null)
+        FocusScope.of(context).requestFocus(_productoFocusNode);
+      else
+        FocusScope.of(context).requestFocus(_cantidadFocusNode);
+    });
     setState(() {
       _isBlocReady = true;
     });
   }
 
-  /// Helper para añadir listener de "Seleccionar Todo"
   void _addSelectAllListener(FocusNode node, TextEditingController controller) {
     node.addListener(() {
       if (node.hasFocus) {
@@ -151,7 +152,6 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
   @override
   Widget build(BuildContext context) {
-    // MUESTRA LOADER MIENTRAS EL BLOC NO ESTÉ LISTO
     if (!_isBlocReady) {
       return Scaffold(
         appBar: AppBar(
@@ -164,7 +164,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       );
     }
     final double cantidadActual = double.tryParse(_cantidadController.text) ?? 0;
-    final bool isDecrementDisabled = cantidadActual <= 1;
+    final bool isDecrementDisabled = cantidadActual <= 0;
     final double descuentoActual = double.tryParse(_descuentoController.text) ?? 0;
     final bool isDescuentoDecrementDisabled = descuentoActual <= 0;
     final bool isDescuentoIncrementDisabled = descuentoActual >= 50;
@@ -181,81 +181,80 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // --- 1. WIDGET DE AUTOCOMPLETE PARA PRODUCTO ---
-            Autocomplete<ProductosModel>(
-              // Función que construye las opciones
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text == '') {
-                  return const Iterable<ProductosModel>.empty();
-                }
-                return _productosBloc.searchProducts(textEditingValue.text);
-              },
-
-              displayStringForOption: (ProductosModel option) => option.descripcion,
-
-              onSelected: (ProductosModel seleccion) {
-                _actualizarProductoSeleccionado(seleccion);
-                _cargarStockProducto(seleccion.articulo);
-              },
-
-              // Cómo construir el TextField
-              fieldViewBuilder:
-                  (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                // Sincroniza el controller de Autocomplete con el nuestro
-                _productoController = fieldTextEditingController;
-                _productoFocusNode = fieldFocusNode;
-                // Vuelve a añadir el listener "Seleccionar Todo"
-                _addSelectAllListener(_productoFocusNode, _productoController);
-
-                return TextField(
-                  controller: _productoController,
-                  focusNode: _productoFocusNode,
-                  decoration: InputDecoration(
-                    labelText: 'Buscar por Código o Nombre',
-                    hintText: 'Escriba para buscar...',
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.search),
-                      tooltip: 'Buscar en lista completa',
-                      onPressed: _buscarProducto,
-                    ),
-                  ),
-                  textInputAction: TextInputAction.search,
-                  onSubmitted: (term) => _buscarProductoPorTermino(term),
-                );
-              },
-
-              // Personalización de la lista de opciones
-              optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<ProductosModel> onSelected, Iterable<ProductosModel> options) {
-                return Align(
-                  alignment: Alignment.topLeft,
-                  child: Material(
-                    elevation: 4.0,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: 200),
-                      child: ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: options.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final ProductosModel option = options.elementAt(index);
-                          return InkWell(
-                            onTap: () {
-                              onSelected(option);
-                            },
-                            child: ListTile(
-                              title: Text(option.descripcion),
-                              subtitle: Text("Código: ${option.articulo}"),
-                            ),
-                          );
-                        },
+            if (widget.actualVentaDetalle == null)
+              Autocomplete<ProductosModel>(
+                initialValue: TextEditingValue(text: _productoController.text),
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<ProductosModel>.empty();
+                  }
+                  return _productosBloc.searchProducts(textEditingValue.text);
+                },
+                displayStringForOption: (ProductosModel option) => option.descripcion,
+                onSelected: (ProductosModel seleccion) {
+                  _actualizarProductoSeleccionado(seleccion);
+                  _cargarStockProducto(seleccion.articulo);
+                },
+                fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted) {
+                  // Sincroniza el controller de Autocomplete con el nuestro
+                  _productoController = fieldTextEditingController;
+                  _productoFocusNode = fieldFocusNode;
+                  _addSelectAllListener(_productoFocusNode, _productoController);
+                  return TextField(
+                    controller: _productoController,
+                    focusNode: _productoFocusNode,
+                    decoration: InputDecoration(
+                      labelText: 'Buscar por Código o Nombre',
+                      hintText: 'Escriba para buscar...',
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.search),
+                        tooltip: 'Buscar en lista completa',
+                        onPressed: _buscarProducto,
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (term) => _buscarProductoPorTermino(term),
+                  );
+                },
+                optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<ProductosModel> onSelected, Iterable<ProductosModel> options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4.0,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxHeight: 200),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: options.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final ProductosModel option = options.elementAt(index);
+                            return InkWell(
+                              onTap: () {
+                                onSelected(option);
+                              },
+                              child: ListTile(
+                                title: Text(option.descripcion),
+                                subtitle: Text("Código: ${option.articulo}"),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              )
+            else
+              TextField(
+                controller: _productoController,
+                focusNode: _productoFocusNode,
+                enabled: false,
+                decoration: InputDecoration(
+                  labelText: 'Producto',
+                ),
+              ),
             const SizedBox(height: 16),
-
-            // --- 2. SPINNER DE CANTIDAD ---
             Row(
               children: [
                 IconButton(
@@ -269,11 +268,15 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                     controller: _cantidadController,
                     focusNode: _cantidadFocusNode,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _excedeStock ? Colors.red : Colors.black),
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Cantidad',
-                      labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                      labelStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,
+                        color: _excedeStock ? Colors.red : Colors.black,
+                      ),
                     ),
                     onChanged: (_) => _recalcularTotal(),
                     onSubmitted: (_) => FocusScope.of(context).requestFocus(_descuentoFocusNode),
@@ -286,7 +289,6 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                 ),
               ],
             ),
-
             if (_esNumerado)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
@@ -295,10 +297,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                   style: TextStyle(color: Colors.grey[700]),
                 ),
               ),
-
             const SizedBox(height: 16),
-
-            // --- 3. CAMPO DE DESCUENTO (con seleccionar todo) ---
             Row(
               children: [
                 IconButton(
@@ -328,11 +327,9 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                 ),
               ],
             ),
-
             const Spacer(),
             _buildResumenInferior(),
             const SizedBox(height: 24),
-            // --- BOTÓN GUARDAR ---
             ElevatedButton.icon(
               icon: Icon(Icons.save),
               label: Text('Guardar'),
@@ -352,25 +349,59 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     );
   }
 
-  /// MÉTODOS PARA EL SPINNER
-  void _incrementarCantidad() {
+  void _incrementarCantidad() async {
     double cantidad = double.tryParse(_cantidadController.text) ?? 0;
     cantidad++;
+    if (_esNumerado) {
+      if (cantidad < productoEnVenta!.numerados.length) {
+        // tengo que marcar el siguiente numerado en la BD como reservado
+        int idx = (cantidad - 1).toInt();
+        productoEnVenta!.numerados[idx].estado = "R";
+        NumeradoModel item = await VentaProvider.ventaProvider.actualizarNumerado(productoEnVenta!.numerados[idx]);
+        // actaulizo el estado en mi lista de numerados asociado al producto
+        productoEnVenta!.numerados[idx] = item;
+        // se crea el registro asociado para la pieza
+        VentaDetallePiezaModel piezaModel = new VentaDetallePiezaModel(
+            detalleVentaId: widget.actualVentaDetalle != null ? widget.actualVentaDetalle!.id : -1, inventarioId: item.id, peso: item.peso);
+        // se agrega a la lista de numerados en la venta.
+        numeradosEnVenta.add(piezaModel);
+        setState(() {
+          _pesoTotal += productoEnVenta!.numerados[idx].peso;
+        });
+      }
+    }
     _cantidadController.text = cantidad.toString();
+    setState(() {
+      _excedeStock = cantidad > _stockDisponible;
+    });
+
     _recalcularTotal();
   }
 
-  void _decrementarCantidad() {
+  void _decrementarCantidad() async {
     double cantidad = double.tryParse(_cantidadController.text) ?? 0;
-    if (cantidad > 1) {
-      // No permite bajar de 1
+    if (cantidad >= 1) {
       cantidad--;
       _cantidadController.text = cantidad.toString();
+      if (_esNumerado) {
+        if (cantidad < productoEnVenta!.numerados.length) {
+          int idx = (cantidad).toInt();
+          productoEnVenta!.numerados[idx].estado = "D";
+          NumeradoModel item = await VentaProvider.ventaProvider.actualizarNumerado(productoEnVenta!.numerados[idx]);
+          productoEnVenta!.numerados[idx] = item;
+          numeradosEnVenta.removeAt(idx);
+          setState(() {
+            _pesoTotal -= productoEnVenta!.numerados[idx].peso;
+          });
+        }
+      }
+      setState(() {
+        _excedeStock = cantidad > _stockDisponible;
+      });
       _recalcularTotal();
     }
   }
 
-  /// MÉTODOS PARA EL SPINNER
   void _incrementarDescuento() {
     double descuento = double.tryParse(_descuentoController.text) ?? 0;
     descuento++;
@@ -386,7 +417,6 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     _recalcularTotal();
   }
 
-  /// Construye el Card de resumen en la parte inferior
   Widget _buildResumenInferior() {
     String formatCurrency(double value) => '\$${value.toStringAsFixed(2)}';
     String formatNumber(double value) => value.toStringAsFixed(2);
@@ -430,7 +460,6 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     );
   }
 
-  /// Widget helper para las filas del resumen
   Widget _buildResumenRow(String label, String value, {Color valueColor = Colors.black, bool isBold = false, double fontSize = 16}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -455,31 +484,34 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   }
 
   void _buscarProducto() async {
-    final productoSeleccionado = await Navigator.push(
-      context,
+    productoEnVenta = await AppNavigator.pushNamed(AppRoutes.productosSeleccion);
+    /*
+    productoEnVenta = await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const ProductosPage(isForSelection: true)),
     );
+     */
 
-    if (productoSeleccionado != null && productoSeleccionado is ProductosModel) {
-      _actualizarProductoSeleccionado(productoSeleccionado);
-      _cargarStockProducto(productoSeleccionado.articulo);
+    if (productoEnVenta != null && productoEnVenta is ProductosModel) {
+      _actualizarProductoSeleccionado(productoEnVenta);
+      _cargarStockProducto(productoEnVenta!.articulo);
     }
   }
 
   Future<void> _cargarStockProducto(String codigo) async {
     setState(() => _estaCargandoStock = true);
     try {
-      final productoFresco = await _productosProvider.obtenerProducto(codigo);
+      productoEnVenta = await _productosProvider.obtenerProducto(codigo);
 
-      if (productoFresco != null) {
-        // USA TU MÉTODO 'updatePorduct'
-        _productosBloc.updatePorduct(productoFresco);
-
-        // Faltaba actualizar el estado para mostrar el stock
+      if (productoEnVenta != null) {
+        _productosBloc.updatePorduct(productoEnVenta!);
         setState(() {
-          _stockDisponible = productoFresco.stock;
-          _unidadProducto = productoFresco.unidad;
-          _porcentajeILA = productoFresco.porcila; // Usando 'porcila'
+          if (_esNumerado) {
+            _stockDisponible = productoEnVenta!.pieces;
+          } else {
+            _stockDisponible = productoEnVenta!.stock;
+          }
+          _unidadProducto = productoEnVenta!.unidad;
+          _porcentajeILA = productoEnVenta!.porcila; // Usando 'porcila'
         });
       }
     } catch (e) {
@@ -490,11 +522,9 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     }
   }
 
-  /// Busca un producto por el término ingresado (código o nombre)
   void _buscarProductoPorTermino(String termino) async {
     if (termino.isEmpty) return;
 
-    // USA TU MÉTODO 'searchProduct'
     final productoEncontrado = _productosBloc.searchProduct(termino);
 
     if (productoEncontrado != null) {
@@ -505,22 +535,23 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     }
   }
 
-  /// Helper para actualizar el estado con un producto seleccionado
   void _actualizarProductoSeleccionado(dynamic producto) {
     setState(() {
       _productoId = producto.articulo;
       _productoController.text = producto.descripcion;
       _precioUnitario = producto.ventaneto;
-      _esNumerado = producto.numbered; // Tu archivo usaba 'pieces > 0'
+      _esNumerado = producto.numbered;
       _pesoTotal = 0;
 
       _unidadProducto = producto.unidad;
       _porcentajeILA = producto.porcila;
       _stockDisponible = 0; // Se resetea
       _estaCargandoStock = true; // Se pone a cargar
+      // al cambiar el código de producto se debe limpiar la lista de piezas asociadas que tiene el registro.
+      numeradosEnVenta.clear();
       _recalcularTotal();
-
       FocusScope.of(context).requestFocus(_cantidadFocusNode);
+
     });
   }
 
@@ -565,7 +596,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       _porcentajeILA = producto.porcila;
       final unidad = producto.unidad;
       final precioUnitatio = producto.ventaneto;
-      final subtotal = cantidad * precioUnitatio;
+      final subtotal = (_esNumerado ? _pesoTotal : cantidad) * precioUnitatio;
       final totalDescuento = subtotal * (porcentajeDescuento / 100);
       final total = subtotal - totalDescuento;
 
@@ -573,7 +604,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
       final stockReal = producto.stock;
       setState(() => _stockDisponible = stockReal);
-      final ventaId = widget.actualVentaDetalle == null ? widget.ventaId : widget.actualVentaDetalle!.ventaId;
+      final ventaId = widget.actualVenta == null ? -1 : widget.actualVenta!.id;
 
       final porcIva = 19.0;
       final totalIva = total * porcIva / 100;
@@ -582,7 +613,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
       final detalle = VentaDetalleModel(
           id: widget.actualVentaDetalle == null ? -1 : widget.actualVentaDetalle!.id,
-          ventaId: ventaId!,
+          ventaId: ventaId,
           idProducto: producto.articulo,
           nombreProducto: producto.descripcion,
           cantidad: cantidad,
@@ -597,11 +628,11 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           unidad: unidad,
           piezas: 0,
           // TODO me falta validar las piezas
-          piezasDetalle: const [] // TODO me falta seleccionar las piezas
-          );
-      developer.log("Enviando a grabar detalle venta: $detalle");
+          piezasDetalle: numeradosEnVenta.isEmpty ? [] : numeradosEnVenta);
+      String json = ventaDetalleModelToJson(detalle);
+      developer.log("Enviando a grabar detalle venta $json");
       final VentaModel ventaModel = await VentaProvider.ventaProvider.saveItemVenta(detalle);
-      Navigator.pop(context, ventaModel);
+      AppNavigator.pop( ventaModel);
     } catch (e, s) {
       showAlertDialog(context, s.toString(), Icons.error);
     }

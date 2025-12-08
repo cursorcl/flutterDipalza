@@ -8,15 +8,33 @@ VentaDetallePiezaModel ventaDetallePiezaModelFromJson(String str) => VentaDetall
 String ventaDetalleItemModelToJson(VentaDetallePiezaModel data) => json.encode(data.toJson());
 
 class VentaDetallePiezaModel {
-  VentaDetallePiezaModel({this.id = -1, required this.peso, required this.invId, required this.creadoEn});
+  VentaDetallePiezaModel({
+    this.id = -1,
+    required this.detalleVentaId,
+    required this.peso,
+    required this.inventarioId,
+    DateTime? creadoEn,
+  }) : creadoEn = creadoEn ?? DateTime.now();
 
   int id;
+  int detalleVentaId;
   double peso;
-  int invId;
+  int inventarioId;
   DateTime creadoEn;
 
   factory VentaDetallePiezaModel.fromJson(Map<String, dynamic> json) =>
-      VentaDetallePiezaModel(id: json['id'], peso: json["peso"], invId: json["invId"], creadoEn: json["creadoEn"]);
+      VentaDetallePiezaModel(
+          id: json['id'],
+          peso: json["peso"],
+          detalleVentaId: json["detalleVentaId"],
+          inventarioId: json["inventarioId"],
+          creadoEn: DateTime.parse(json["creadoEn"]));
 
-  Map<String, dynamic> toJson() => {"id": id, "peso": peso, "invId": invId, "creadoEn": creadoEn};
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "peso": peso,
+    "detalleVentaId": detalleVentaId,
+    "inventarioId": inventarioId,
+    "creadoEn": creadoEn.toIso8601String(),
+  };
 }

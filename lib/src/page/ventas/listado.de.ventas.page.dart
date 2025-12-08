@@ -1,40 +1,62 @@
 import 'package:dipalza_movil/src/model/venta_model.dart';
-import 'package:dipalza_movil/src/page/ventas/venta.page.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
+import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+
+import '../../share/app_routes.dart';
 import '../../widget/connectivity_banner.widget.dart';
 import '../../widget/fondo.widget.dart';
-import 'listaventas.detalle.page.dart';
+import '../home/home2.page.dart';
 
-class ListaVentasPage extends StatefulWidget {
-  const ListaVentasPage({Key? key}) : super(key: key);
+class ListadeDeVentasPage extends StatefulWidget {
+  const ListadeDeVentasPage({Key? key}) : super(key: key);
 
   @override
-  _ListaVentasPageState createState() => _ListaVentasPageState();
+  _ListadoDeVentasPageState createState() => _ListadoDeVentasPageState();
 }
 
-class _ListaVentasPageState extends State<ListaVentasPage> {
+class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
+  late Future<List<VentaModel>> _listaVentasFuture;
   int cantidadVentas = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarVentas();
+  }
+
+  void _cargarVentas() {
+    setState(() {
+      _listaVentasFuture = VentaProvider.ventaProvider.obtenerListaVentas();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-          backgroundColor: colorRojoBase(),
-          title: Container(
-            child: Center(
-              child: Text(
-                'Ventas',
-                style: TextStyle(color: Colors.white),
-              ),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        backgroundColor: colorRojoBase(),
+        title: Text(
+              'Ventas',
+              style: TextStyle(color: Colors.white),
             ),
-          ),
-),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _goToVentaPage(context, null);
+          AppNavigator.pushNamed(
+            AppRoutes.nuevaVenta,
+          ).then((valor) {
+            if (valor == true) {
+              setState(() {
+                // Esto forzará al FutureBuilder a recargarse
+              });
+            }
+          });
         },
         child: const Icon(Icons.add),
         backgroundColor: colorRojoBase(), // Usa tu color
@@ -45,7 +67,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
 
   Widget _creaListaVentas(BuildContext context) {
     return FutureBuilder(
-      future: VentaProvider.ventaProvider.obtenerListaVentas(),
+      future: _listaVentasFuture,
       builder: (BuildContext context, AsyncSnapshot<List<VentaModel>> snapshot) {
         if (snapshot.hasData) {
           final nuevaCant = snapshot.data!.length;
@@ -132,7 +154,16 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             ),
             SlidableAction(
               onPressed: (context) {
-                _goToVentaPage(context, itemVenta);
+                AppNavigator.pushNamed(
+                  AppRoutes.modificarVenta,
+                  arguments: {'ventaEnEdicion': itemVenta},
+                ).then((valor) {
+                  if (valor == true) {
+                    setState(() {
+                      // Esto forzará al FutureBuilder a recargarse
+                    });
+                  }
+                });
               },
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
@@ -141,7 +172,6 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             ),
           ],
         ),
-
         child: Card(
           child: ListTile(
             tileColor: Colors.grey[100],
@@ -187,22 +217,37 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             trailing: IconButton(
                 icon: Icon(Icons.arrow_forward_ios),
                 onPressed: () {
-                  Navigator.push(
-                    context,
+                  AppNavigator.pushNamed(AppRoutes.ventaDetalle, arguments: {
+                    'ventaModel': itemVenta,
+                    'esEdicion': false
+                  });
+/*
+                  Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => ListaVentasDetallePage(ventaModel: itemVenta, esEdicion: false),
+                      builder: (context) => ListadoDetalleDeUnaVentaPage(ventaModel: itemVenta, esEdicion: false),
                     ),
                   );
+*/
                 }),
           ),
         ));
   }
 
   void _goToVentaPage(BuildContext context, VentaModel? venta) {
-    Navigator.push(
-      context,
+      AppNavigator.pushNamed(
+        AppRoutes.nuevaVenta,
+        arguments: {'ventaEnEdicion': venta},
+      ).then((valor) {
+        if (valor == true) {
+          setState(() {
+            // Esto forzará al FutureBuilder a recargarse
+          });
+        }
+      });
+    /*
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => PaginaVenta(ventaEnEdicion: venta),
+        builder: (context) => VentaEncabezadoEdicionPage(ventaEnEdicion: venta),
       ),
     ).then((valor) {
       if (valor == true) {
@@ -211,6 +256,7 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
         });
       }
     });
+     */
   }
 
   Future<void> _showDialogRemoveItemVenta(BuildContext context, VentaModel venta) async {
@@ -231,43 +277,35 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
             TextButton(
               child: const Text('Cancelar'),
               onPressed: () {
-                Navigator.of(context).pop();
+                AppNavigator.pop();
               },
             ),
             TextButton(
               child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                // --- AQUÍ VA TU LÓGICA DE BORRADO ---
-                print('Eliminando venta ID: ${venta.id}');
-
-                // 1. Llama a tu provider:
-                final result = VentaProvider.ventaProvider.removeVenta(venta.id);
-                if(result == false)
-                  {
-                    ScaffoldMessenger.of(context)
-                      ..hideCurrentSnackBar()
-                      ..showSnackBar(
-                        SnackBar(
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.red,
-                          content: Row(
-                            children: [
-                              Icon(Icons.error, color: Colors.white),
-                              const SizedBox(width: 12),
-                              Expanded(child: Text("No se ha podido eliminar la venta!!", style: TextStyle(color: Colors.white))),
-                            ],
-                          ),
-                          duration: const Duration(seconds: 2),
+              onPressed: () async {
+                final result = await VentaProvider.ventaProvider.removeVenta(venta.id);
+                if (result == false) {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: Colors.red,
+                        content: Row(
+                          children: [
+                            Icon(Icons.error, color: Colors.white),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text("No se ha podido eliminar la venta!!", style: TextStyle(color: Colors.white))),
+                          ],
                         ),
-                      );
-                  }
-
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                }
 
                 // 2. Cierra el diálogo y refresca la lista
                 Navigator.of(context).pop();
-                setState(() {
-                  // Refresca el FutureBuilder
-                });
+                _cargarVentas();
               },
             ),
           ],
@@ -275,6 +313,4 @@ class _ListaVentasPageState extends State<ListaVentasPage> {
       },
     );
   }
-
 }
-
