@@ -1,5 +1,3 @@
-
-
 import 'log_model.dart';
 
 LogModel creaLogInfo(String clase, String metodo, String info) {

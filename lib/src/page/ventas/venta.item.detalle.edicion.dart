@@ -17,14 +17,18 @@ class VentaEdicionItemDetalle extends StatefulWidget {
   final VentaModel? actualVenta;
   final VentaDetalleModel? actualVentaDetalle; // si viene nulo, es nuevo
 
-  const VentaEdicionItemDetalle({Key? key, this.actualVenta, this.actualVentaDetalle}) : super(key: key);
+  const VentaEdicionItemDetalle(
+      {Key? key, this.actualVenta, this.actualVentaDetalle})
+      : super(key: key);
 
   @override
-  _VentaEdicionItemDetalleState createState() => _VentaEdicionItemDetalleState();
+  _VentaEdicionItemDetalleState createState() =>
+      _VentaEdicionItemDetalleState();
 }
 
 class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
-  final ProductosProvider _productosProvider = ProductosProvider.productosProvider;
+  final ProductosProvider _productosProvider =
+      ProductosProvider.productosProvider;
   final ProductsBloc _productosBloc = ProductsBloc();
 
   late TextEditingController _productoController;
@@ -73,21 +77,24 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     _descuentoFocusNode = FocusNode();
     _guardarFocusNode = FocusNode();
 
-    _cantidadController = TextEditingController(text: d?.cantidad.toString() ?? '0');
-    _descuentoController = TextEditingController(text: d?.totalDescuento.toString() ?? '0'); // '0' por defecto
+    _cantidadController =
+        TextEditingController(text: d?.cantidad.toString() ?? '0');
+    _descuentoController = TextEditingController(
+        text: d?.totalDescuento.toString() ?? '0'); // '0' por defecto
 
     if (d != null) {
       final String claveBusqueda = d.idProducto;
       productoEnVenta = _productosBloc.searchProduct(claveBusqueda);
       if (productoEnVenta != null) {
         _productoId = productoEnVenta!.articulo;
-        _productoController = TextEditingController(text: productoEnVenta!.descripcion);
+        _productoController =
+            TextEditingController(text: productoEnVenta!.descripcion);
         _precioUnitario = productoEnVenta!.ventaneto;
         _esNumerado = productoEnVenta!.numbered;
         _unidadProducto = productoEnVenta!.unidad;
         _porcentajeILA = productoEnVenta!.porcila;
         if (_esNumerado) {
-          _cantidadController.text = d!.piezas.toString();
+          _cantidadController.text = d.piezas.toString();
         }
         _cargarStockProducto(productoEnVenta!.articulo);
       } else {
@@ -145,17 +152,21 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     if (!_isBlocReady) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(widget.actualVentaDetalle == null ? 'Agregar producto' : 'Editar detalle'),
+          title: Text(widget.actualVentaDetalle == null
+              ? 'Agregar producto'
+              : 'Editar detalle'),
           backgroundColor: Colors.redAccent,
         ),
-        body: Center(
+        body: const Center(
           child: CircularProgressIndicator(),
         ),
       );
     }
-    final double cantidadActual = double.tryParse(_cantidadController.text) ?? 0;
+    final double cantidadActual =
+        double.tryParse(_cantidadController.text) ?? 0;
     final bool isDecrementDisabled = cantidadActual <= 0;
-    final double descuentoActual = double.tryParse(_descuentoController.text) ?? 0;
+    final double descuentoActual =
+        double.tryParse(_descuentoController.text) ?? 0;
     final bool isDescuentoDecrementDisabled = descuentoActual <= 0;
     final bool isDescuentoIncrementDisabled = descuentoActual >= 50;
 
@@ -165,7 +176,9 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text(widget.actualVentaDetalle == null ? 'Agregar producto' : 'Editar detalle'),
+          title: Text(widget.actualVentaDetalle == null
+              ? 'Agregar producto'
+              : 'Editar detalle'),
           backgroundColor: Colors.redAccent,
         ),
         body: SingleChildScrollView(
@@ -175,30 +188,37 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
               left: 16.0,
               right: 16.0,
               top: 16.0,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16.0, // ← espacio para el teclado
+              bottom: MediaQuery.of(context).viewInsets.bottom +
+                  16.0, // ← espacio para el teclado
             ),
             child: Column(
               children: [
                 if (widget.actualVentaDetalle == null)
                   Autocomplete<ProductosModel>(
-                    initialValue: TextEditingValue(text: _productoController.text),
+                    initialValue:
+                        TextEditingValue(text: _productoController.text),
                     optionsBuilder: (TextEditingValue textEditingValue) {
                       if (textEditingValue.text == '') {
                         return const Iterable<ProductosModel>.empty();
                       }
-                      return _productosBloc.searchProducts(textEditingValue.text);
+                      return _productosBloc
+                          .searchProducts(textEditingValue.text);
                     },
-                    displayStringForOption: (ProductosModel option) => option.descripcion,
+                    displayStringForOption: (ProductosModel option) =>
+                        option.descripcion,
                     onSelected: (ProductosModel seleccion) {
                       _actualizarProductoSeleccionado(seleccion);
                       _cargarStockProducto(seleccion.articulo);
                     },
-                    fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode,
+                    fieldViewBuilder: (BuildContext context,
+                        TextEditingController fieldTextEditingController,
+                        FocusNode fieldFocusNode,
                         VoidCallback onFieldSubmitted) {
                       // Sincroniza el controller de Autocomplete con el nuestro
                       _productoController = fieldTextEditingController;
                       _productoFocusNode = fieldFocusNode;
-                      _addSelectAllListener(_productoFocusNode, _productoController);
+                      _addSelectAllListener(
+                          _productoFocusNode, _productoController);
                       return TextField(
                         controller: _productoController,
                         focusNode: _productoFocusNode,
@@ -206,7 +226,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                           labelText: 'Buscar por Código o Nombre',
                           hintText: 'Escriba para buscar...',
                           suffixIcon: IconButton(
-                            icon: Icon(Icons.search),
+                            icon: const Icon(Icons.search),
                             tooltip: 'Buscar en lista completa',
                             onPressed: _buscarProducto,
                           ),
@@ -215,25 +235,29 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                         onSubmitted: (term) => _buscarProductoPorTermino(term),
                       );
                     },
-                    optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<ProductosModel> onSelected, Iterable<ProductosModel> options) {
+                    optionsViewBuilder: (BuildContext context,
+                        AutocompleteOnSelected<ProductosModel> onSelected,
+                        Iterable<ProductosModel> options) {
                       return Align(
                         alignment: Alignment.topLeft,
                         child: Material(
                           elevation: 4.0,
                           child: ConstrainedBox(
-                            constraints: BoxConstraints(maxHeight: 200),
+                            constraints: const BoxConstraints(maxHeight: 200),
                             child: ListView.builder(
                               padding: EdgeInsets.zero,
                               itemCount: options.length,
                               itemBuilder: (BuildContext context, int index) {
-                                final ProductosModel option = options.elementAt(index);
+                                final ProductosModel option =
+                                    options.elementAt(index);
                                 return InkWell(
                                   onTap: () {
                                     onSelected(option);
                                   },
                                   child: ListTile(
                                     title: Text(option.descripcion),
-                                    subtitle: Text("Código: ${option.articulo}"),
+                                    subtitle:
+                                        Text("Código: ${option.articulo}"),
                                   ),
                                 );
                               },
@@ -248,7 +272,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                     controller: _productoController,
                     focusNode: _productoFocusNode,
                     enabled: false,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Producto',
                     ),
                   ),
@@ -256,17 +280,21 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.remove_circle, size: 30),
+                      icon: const Icon(Icons.remove_circle, size: 30),
                       color: Colors.redAccent,
                       disabledColor: Colors.grey[400],
-                      onPressed: isDecrementDisabled ? null : _decrementarCantidad,
+                      onPressed:
+                          isDecrementDisabled ? null : _decrementarCantidad,
                     ),
                     Expanded(
                       child: TextField(
                         controller: _cantidadController,
                         focusNode: _cantidadFocusNode,
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _excedeStock ? Colors.red : Colors.black),
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: _excedeStock ? Colors.red : Colors.black),
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: 'Cantidad',
@@ -277,12 +305,14 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                           ),
                         ),
                         onChanged: (_) => _recalcularTotal(),
-                        onSubmitted: (_) => FocusScope.of(context).requestFocus(_descuentoFocusNode),
+                        onSubmitted: (_) => FocusScope.of(context)
+                            .requestFocus(_descuentoFocusNode),
                         textInputAction: TextInputAction.next,
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.add_circle, color: Colors.green, size: 30),
+                      icon:
+                          const Icon(Icons.add_circle, color: Colors.green, size: 30),
                       onPressed: _incrementarCantidad,
                     ),
                   ],
@@ -299,10 +329,12 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.remove_circle, size: 30),
+                      icon: const Icon(Icons.remove_circle, size: 30),
                       color: Colors.redAccent,
                       disabledColor: Colors.grey[400],
-                      onPressed: isDescuentoDecrementDisabled ? null : _decrementarDescuento,
+                      onPressed: isDescuentoDecrementDisabled
+                          ? null
+                          : _decrementarDescuento,
                     ),
                     Expanded(
                       child: TextField(
@@ -310,26 +342,30 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                         focusNode: _descuentoFocusNode,
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        decoration: InputDecoration(labelText: 'Descuento (%)'),
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                        decoration: const InputDecoration(labelText: 'Descuento (%)'),
                         onChanged: (_) => _recalcularTotal(),
-                        onSubmitted: (_) => FocusScope.of(context).requestFocus(_guardarFocusNode),
+                        onSubmitted: (_) => FocusScope.of(context)
+                            .requestFocus(_guardarFocusNode),
                         textInputAction: TextInputAction.next,
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.add_circle, size: 30),
+                      icon: const Icon(Icons.add_circle, size: 30),
                       color: Colors.green,
                       disabledColor: Colors.grey[400],
-                      onPressed: isDescuentoIncrementDisabled ? null : _incrementarDescuento,
+                      onPressed: isDescuentoIncrementDisabled
+                          ? null
+                          : _incrementarDescuento,
                     ),
                   ],
                 ),
                 _buildResumenInferior(),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  icon: Icon(Icons.save),
-                  label: Text('Guardar'),
+                  icon: const Icon(Icons.save),
+                  label: const Text('Guardar'),
                   focusNode: _guardarFocusNode,
                   onPressed: enabled ? _guardar : null,
                   style: ElevatedButton.styleFrom(
@@ -337,7 +373,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.grey[400],
                     disabledForegroundColor: Colors.grey[800],
-                    minimumSize: Size(double.infinity, 45),
+                    minimumSize: const Size(double.infinity, 45),
                   ),
                 ),
               ],
@@ -354,7 +390,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
         _pesoTotal = 0;
         var lista = productoEnVenta!.numerados;
         if (lista.length > 0) {
-          _pesoTotal = this._pesoPromedio * cantidad;
+          _pesoTotal = _pesoPromedio * cantidad;
         }
       });
     }
@@ -376,7 +412,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           _pesoTotal = 0;
           var lista = productoEnVenta!.numerados;
           if (lista.length > 0) {
-            _pesoTotal = this._pesoPromedio * cantidad;
+            _pesoTotal = _pesoPromedio * cantidad;
           }
         });
       }
@@ -415,7 +451,9 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           children: [
             _buildResumenRow(
               'Stock:',
-              _estaCargandoStock ? 'Cargando...' : '${formatNumber(_stockDisponible)} ($_unidadProducto)',
+              _estaCargandoStock
+                  ? 'Cargando...'
+                  : '${formatNumber(_stockDisponible)} ($_unidadProducto)',
               valueColor: _stockDisponible > 0 ? Colors.blueAccent : Colors.red,
             ),
             _buildResumenRow(
@@ -425,13 +463,14 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
             _buildResumenRow(
               'Descuento:',
               formatCurrency(_valorDescuento),
-              valueColor: _valorDescuento > 0 ? Colors.orange[700]! : Colors.grey[700]!,
+              valueColor:
+                  _valorDescuento > 0 ? Colors.orange[700]! : Colors.grey[700]!,
             ),
             _buildResumenRow(
               '% ILA asociado:',
               '${formatNumber(_porcentajeILA)}%',
             ),
-            Divider(height: 24, thickness: 1),
+            const Divider(height: 24, thickness: 1),
             _buildResumenRow(
               'Total Item:',
               formatCurrency(_valorFinal),
@@ -445,7 +484,10 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     );
   }
 
-  Widget _buildResumenRow(String label, String value, {Color valueColor = Colors.black, bool isBold = false, double fontSize = 16}) {
+  Widget _buildResumenRow(String label, String value,
+      {Color valueColor = Colors.black,
+      bool isBold = false,
+      double fontSize = 16}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -469,7 +511,8 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   }
 
   void _buscarProducto() async {
-    productoEnVenta = await AppNavigator.pushNamed<ProductosModel?>(AppRoutes.productosSeleccion);
+    productoEnVenta = await AppNavigator.pushNamed<ProductosModel?>(
+        AppRoutes.productosSeleccion);
     /*
     productoEnVenta = await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const ProductosPage(isForSelection: true)),
@@ -491,13 +534,18 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
         _productosBloc.updatePorduct(productoEnVenta!);
         if (_esNumerado) {
           var lista = productoEnVenta!.numerados;
-          this._pesoPromedio = lista.length == 0 ? 0 : lista.map((nn) => nn.peso).reduce((a, b) => a + b) / lista.length;
+          _pesoPromedio = lista.length == 0
+              ? 0
+              : lista.map((nn) => nn.peso).reduce((a, b) => a + b) /
+                  lista.length;
         }
         setState(() {
           if (_esNumerado) {
-            _stockDisponible = productoEnVenta!.pieces - productoEnVenta!.piezasVentas;
+            _stockDisponible =
+                productoEnVenta!.pieces - productoEnVenta!.piezasVentas;
           } else {
-            _stockDisponible = productoEnVenta!.stock - productoEnVenta!.stockVentas;
+            _stockDisponible =
+                productoEnVenta!.stock - productoEnVenta!.stockVentas;
           }
           _unidadProducto = productoEnVenta!.unidad;
           _porcentajeILA = productoEnVenta!.porcila; // Usando 'porcila'
@@ -609,7 +657,9 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       }
 
       final detalle = VentaDetalleModel(
-          id: widget.actualVentaDetalle == null ? -1 : widget.actualVentaDetalle!.id,
+          id: widget.actualVentaDetalle == null
+              ? -1
+              : widget.actualVentaDetalle!.id,
           ventaId: ventaId,
           idProducto: producto.articulo,
           nombreProducto: producto.descripcion,
@@ -628,7 +678,8 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           piezasDetalle: []);
       String json = ventaDetalleModelToJson(detalle);
       developer.log("Enviando a grabar detalle venta $json");
-      final VentaModel ventaModel = await VentaProvider.ventaProvider.saveItemVenta(detalle);
+      final VentaModel ventaModel =
+          await VentaProvider.ventaProvider.saveItemVenta(detalle);
       AppNavigator.pop(ventaModel);
     } catch (e, s) {
       showAlertDialog(context, s.toString(), Icons.error);

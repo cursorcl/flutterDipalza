@@ -25,10 +25,10 @@ class HomePageBarraInferior extends StatefulWidget {
 class _HomePageBarraInferiorState extends State<HomePageBarraInferior> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    ListadeDeVentasPage(),
-    ProductosPage(),
-    ClientesPage(),
-    ConfiguracionPage(),
+    const ListadeDeVentasPage(),
+    const ProductosPage(),
+    const ClientesPage(),
+    const ConfiguracionPage(),
   ];
 
   @override
@@ -54,10 +54,14 @@ class _HomePageBarraInferiorState extends State<HomePageBarraInferior> {
               setState(() => _currentIndex = i);
             },
             destinations: const [
-              NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Ventas'),
-              NavigationDestination(icon: Icon(Icons.inventory_2), label: 'Productos'),
-              NavigationDestination(icon: Icon(Icons.person), label: 'Clientes'),
-              NavigationDestination(icon: Icon(Icons.settings), label: 'Config'),
+              NavigationDestination(
+                  icon: Icon(Icons.shopping_cart), label: 'Ventas'),
+              NavigationDestination(
+                  icon: Icon(Icons.inventory_2), label: 'Productos'),
+              NavigationDestination(
+                  icon: Icon(Icons.person), label: 'Clientes'),
+              NavigationDestination(
+                  icon: Icon(Icons.settings), label: 'Config'),
             ],
           ),
         ));
@@ -68,7 +72,8 @@ class _HomePageBarraInferiorState extends State<HomePageBarraInferior> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirmar salida'),
-        content: const Text('¿Desea cerrar la sesión y salir de la aplicación?'),
+        content:
+            const Text('¿Desea cerrar la sesión y salir de la aplicación?'),
         actions: [
           TextButton(
             onPressed: () => AppNavigator.pop(false),

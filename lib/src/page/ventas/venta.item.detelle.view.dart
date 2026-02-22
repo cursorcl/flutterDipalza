@@ -10,8 +10,6 @@ class VentaDetalleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     // --- Estilos de Texto ---
     const estiloNombreProd = TextStyle(
       fontWeight: FontWeight.bold,
@@ -38,19 +36,21 @@ class VentaDetalleTile extends StatelessWidget {
 
     // --- Lógica de Strings ---
     // 1. Crear el string de cantidad + piezas
-    String cantidadConPiezas = (AppFormatters.formatoCantidad.format(item.cantidad)  + ' ' + item.unidad.toLowerCase()).trim();
+    String cantidadConPiezas =
+        (AppFormatters.formatoCantidad.format(item.cantidad) +
+                ' ' +
+                item.unidad.toLowerCase())
+            .trim();
     if (item.piezas > 0) {
       cantidadConPiezas += ' (${item.piezas} pz)';
     }
 
     return Card(
-
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // --- LÍNEA 1: Nombre Producto | Cantidad ---
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,8 +91,8 @@ class VentaDetalleTile extends StatelessWidget {
                     '- ${AppFormatters.formatoMoneda.format(item.totalDescuento)}',
                     style: estiloDescuento,
                   )
-                else Text('- \$0',  style: estiloDescuento  )
-                ,
+                else
+                  Text('- \$0', style: estiloDescuento),
               ],
             ),
 

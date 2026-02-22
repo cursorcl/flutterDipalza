@@ -23,7 +23,8 @@ class ConnectivityService with ChangeNotifier {
     _checkStatus();
 
     // Y luego establece un timer para que revise periódicamente
-    _timer = Timer.periodic(const Duration(seconds: 15), (_) async => _checkStatus());
+    _timer = Timer.periodic(
+        const Duration(seconds: 15), (_) async => _checkStatus());
   }
 
   Future<void> _checkStatus() async {
@@ -51,7 +52,7 @@ class ConnectivityService with ChangeNotifier {
     // Es buena idea tener estas URLs en un archivo de configuración central
     final prefs = PreferenciasUsuario();
 
-    Uri url = Uri.http(prefs.urlServicio,"/ping");
+    Uri url = Uri.http(prefs.urlServicio, "/ping");
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 5));
       return response.statusCode == 200;

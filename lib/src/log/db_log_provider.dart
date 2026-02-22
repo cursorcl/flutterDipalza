@@ -23,9 +23,11 @@ class DBLogProvider {
     return opened;
   }
 
-  Future<Database> initDB() async { // <-- tipado
+  Future<Database> initDB() async {
+    // <-- tipado
     // Asegúrese en main() de llamar a: WidgetsFlutterBinding.ensureInitialized();
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, 'EmmaLogDB.db');
 
     return openDatabase(
@@ -53,13 +55,17 @@ class DBLogProvider {
   Future<List<LogModel>> getTodos() async {
     final db = await database;
     final resp = await db.query('logger', orderBy: 'id DESC');
-    return resp.isNotEmpty ? resp.map((c) => LogModel.fromJson(c)).toList() : <LogModel>[];
+    return resp.isNotEmpty
+        ? resp.map((c) => LogModel.fromJson(c)).toList()
+        : <LogModel>[];
   }
 
   Future<List<LogModel>> getLogs(int cantidad) async {
     final db = await database;
     final resp = await db.query('logger', limit: cantidad, orderBy: 'id DESC');
-    return resp.isNotEmpty ? resp.map((c) => LogModel.fromJson(c)).toList() : <LogModel>[];
+    return resp.isNotEmpty
+        ? resp.map((c) => LogModel.fromJson(c)).toList()
+        : <LogModel>[];
   }
 
   Future<List<LogModel>> getLogPaginados(LogModel ultimo, int cantidad) async {
@@ -69,7 +75,9 @@ class DBLogProvider {
       'SELECT * FROM logger WHERE id <> ? AND id <= ? ORDER BY id DESC LIMIT ?',
       [ultimo.id, ultimo.id, cantidad],
     );
-    return resp.isNotEmpty ? resp.map((c) => LogModel.fromJson(c)).toList() : <LogModel>[];
+    return resp.isNotEmpty
+        ? resp.map((c) => LogModel.fromJson(c)).toList()
+        : <LogModel>[];
   }
 
   Future<int> deleteAll() async {

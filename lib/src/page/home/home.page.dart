@@ -23,17 +23,15 @@ class HomePage extends StatefulWidget {
 
   @override
   State<HomePage> createState() => _HomePageState();
-
-
 }
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    ListadeDeVentasPage(),
-    ProductosPage(),
-    ClientesPage(),
-    ConfiguracionPage(),
+    const ListadeDeVentasPage(),
+    const ProductosPage(),
+    const ClientesPage(),
+    const ConfiguracionPage(),
   ];
 
   @override
@@ -101,7 +99,8 @@ class _HomePageState extends State<HomePage> {
                   decoration: BoxDecoration(color: Colors.red), // Tu color base
                   accountName: Text('Usuario Dipalza'),
                   accountEmail: Text('vendedor@dipalza.cl'),
-                  currentAccountPicture: CircleAvatar(child: Icon(Icons.person)),
+                  currentAccountPicture:
+                      CircleAvatar(child: Icon(Icons.person)),
                 ),
                 ListTile(
                   leading: const Icon(Icons.shopping_cart),
@@ -139,12 +138,14 @@ class _HomePageState extends State<HomePage> {
     setState(() => _currentIndex = index);
     Navigator.pop(context); // Cierra el drawer automáticamente
   }
+
   Future<bool?> _confirmarSalida(BuildContext context) {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirmar salida'),
-        content: const Text('¿Desea cerrar la sesión y salir de la aplicación?'),
+        content:
+            const Text('¿Desea cerrar la sesión y salir de la aplicación?'),
         actions: [
           TextButton(
             onPressed: () => AppNavigator.pop(false),

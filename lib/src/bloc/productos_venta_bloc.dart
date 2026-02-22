@@ -4,8 +4,7 @@ import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
 import 'package:rxdart/rxdart.dart';
 
 class VentaDetalleBloc {
-  static final VentaDetalleBloc _singleton =
-      new VentaDetalleBloc._internal();
+  static final VentaDetalleBloc _singleton = new VentaDetalleBloc._internal();
 
   factory VentaDetalleBloc() {
     return _singleton;
@@ -19,7 +18,8 @@ class VentaDetalleBloc {
   Stream<List<VentaDetalleModel>> get productosStream =>
       _ventaDetalleController.stream;
 
-  List<VentaDetalleModel> get listaVentaDetalles => _ventaDetalleController.value;
+  List<VentaDetalleModel> get listaVentaDetalles =>
+      _ventaDetalleController.value;
 
   agregarVentaDetalle(VentaDetalleModel producto) {
     _ventaDetalleController.value.add(producto);

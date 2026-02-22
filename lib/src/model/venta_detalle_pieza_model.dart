@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 List<VentaDetallePiezaModel> listVentaDetallePiezaModel(String str) =>
-    List<VentaDetallePiezaModel>.from(json.decode(str).map((x) => VentaDetallePiezaModel.fromJson(x)));
+    List<VentaDetallePiezaModel>.from(
+        json.decode(str).map((x) => VentaDetallePiezaModel.fromJson(x)));
 
-VentaDetallePiezaModel ventaDetallePiezaModelFromJson(String str) => VentaDetallePiezaModel.fromJson(json.decode(str));
+VentaDetallePiezaModel ventaDetallePiezaModelFromJson(String str) =>
+    VentaDetallePiezaModel.fromJson(json.decode(str));
 
-String ventaDetalleItemModelToJson(VentaDetallePiezaModel data) => json.encode(data.toJson());
+String ventaDetalleItemModelToJson(VentaDetallePiezaModel data) =>
+    json.encode(data.toJson());
 
 class VentaDetallePiezaModel {
   VentaDetallePiezaModel({
@@ -31,10 +34,10 @@ class VentaDetallePiezaModel {
           creadoEn: DateTime.parse(json["creadoEn"]));
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "peso": peso,
-    "detalleVentaId": detalleVentaId,
-    "inventarioId": inventarioId,
-    "creadoEn": creadoEn.toIso8601String(),
-  };
+        "id": id,
+        "peso": peso,
+        "detalleVentaId": detalleVentaId,
+        "inventarioId": inventarioId,
+        "creadoEn": creadoEn.toIso8601String(),
+      };
 }

@@ -2,11 +2,15 @@ import 'dart:convert';
 
 import 'package:dipalza_movil/src/model/venta_detalle_pieza_model.dart';
 
-List<VentaDetalleModel> listVentaDetalleModel(String str) => List<VentaDetalleModel>.from(json.decode(str).map((x) => VentaDetalleModel.fromJson(x)));
+List<VentaDetalleModel> listVentaDetalleModel(String str) =>
+    List<VentaDetalleModel>.from(
+        json.decode(str).map((x) => VentaDetalleModel.fromJson(x)));
 
-VentaDetalleModel ventaDetalleModelFromJson(String str) => VentaDetalleModel.fromJson(json.decode(str));
+VentaDetalleModel ventaDetalleModelFromJson(String str) =>
+    VentaDetalleModel.fromJson(json.decode(str));
 
-String ventaDetalleModelToJson(VentaDetalleModel data) => json.encode(data.toJson());
+String ventaDetalleModelToJson(VentaDetalleModel data) =>
+    json.encode(data.toJson());
 
 class VentaDetalleModel {
   VentaDetalleModel(
@@ -44,7 +48,8 @@ class VentaDetalleModel {
   int piezas;
   List<VentaDetallePiezaModel> piezasDetalle;
 
-  factory VentaDetalleModel.fromJson(Map<String, dynamic> json) => VentaDetalleModel(
+  factory VentaDetalleModel.fromJson(Map<String, dynamic> json) =>
+      VentaDetalleModel(
         id: json['id'],
         ventaId: json["ventaId"],
         idProducto: json["idProducto"],
@@ -60,7 +65,11 @@ class VentaDetalleModel {
         totalDescuento: json["totalDescuento"],
         unidad: json["unidad"] == null ? '' : json["unidad"],
         piezas: json["piezas"],
-        piezasDetalle: (json['piezasDetalle'] as List?)?.map((e) => VentaDetallePiezaModel.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
+        piezasDetalle: (json['piezasDetalle'] as List?)
+                ?.map((e) =>
+                    VentaDetallePiezaModel.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const [],
       );
 
   Map<String, dynamic> toJson() => {

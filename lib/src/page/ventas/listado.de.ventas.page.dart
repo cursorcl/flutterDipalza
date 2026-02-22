@@ -42,12 +42,11 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
           onPressed: () {
             AppScaffoldKey.homeKey.currentState?.openDrawer();
             //Scaffold.of(context).openDrawer();
-
           },
         ),
         centerTitle: true,
         backgroundColor: colorRojoBase(),
-        title: Text(
+        title: const Text(
           'Ventas',
           style: TextStyle(color: Colors.white),
         ),
@@ -74,7 +73,8 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
   Widget _creaListaVentas(BuildContext context) {
     return FutureBuilder(
       future: _listaVentasFuture,
-      builder: (BuildContext context, AsyncSnapshot<List<VentaModel>> snapshot) {
+      builder:
+          (BuildContext context, AsyncSnapshot<List<VentaModel>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
@@ -84,7 +84,8 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
               children: [
                 const Icon(Icons.error_outline, color: Colors.red, size: 60),
                 const SizedBox(height: 10),
-                const Text('Ocurrió un error al cargar:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Ocurrió un error al cargar:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
@@ -100,8 +101,7 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
               ],
             ),
           );
-        } else
-          if (snapshot.hasData) {
+        } else if (snapshot.hasData) {
           final nuevaCant = snapshot.data!.length;
           // Solo si cambió, actualiza el estado del padre post-frame
           if (nuevaCant != cantidadVentas) {
@@ -111,26 +111,29 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
             });
           }
           return Stack(children: <Widget>[
-            Positioned.fill(
+            const Positioned.fill(
               child: FondoWidget(),
             ),
             Positioned.fill(
                 child: Column(
               children: <Widget>[
-                ConnectivityBanner(),
-                Expanded(child: ListView(children: _widgetListOfItemVenta(context, snapshot.data!))),
+                const ConnectivityBanner(),
+                Expanded(
+                    child: ListView(
+                        children:
+                            _widgetListOfItemVenta(context, snapshot.data!))),
               ],
             ))
           ]);
+        } else {
+          return const Center(child: Text("Sin información disponible"));
         }
-          else {
-            return const Center(child: Text("Sin información disponible"));
-          }
       },
     );
   }
 
-  List<Widget> _widgetListOfItemVenta(BuildContext context, List<VentaModel> listaVenta) {
+  List<Widget> _widgetListOfItemVenta(
+      BuildContext context, List<VentaModel> listaVenta) {
     final List<Widget> _listItem = [];
     if (listaVenta.length == 0) {
       _listItem.add(_widgetEmptyItem());
@@ -144,7 +147,7 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
   }
 
   Widget _widgetEmptyItem() {
-    return Card(
+    return const Card(
       child: ListTile(
         leading: CircleAvatar(
           radius: 20,
@@ -207,7 +210,7 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
             tileColor: Colors.grey[100],
             leading: CircleAvatar(
               radius: 15,
-              child: Icon(Icons.insert_chart),
+              child: const Icon(Icons.insert_chart),
               backgroundColor: HexColor('#455a64'),
               foregroundColor: Colors.white,
             ),
@@ -216,18 +219,19 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
               children: <Widget>[
                 Text(itemVenta.nombreCliente,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13.0,
                     )),
-                SizedBox(
+                const SizedBox(
                   height: 2.0,
                 ),
                 Text(getFormatRut(itemVenta.rutCliente),
                     style: TextStyle(
-                        fontWeight: FontWeight.normal, color: Colors.grey[700], fontSize: 13
-                    )),
-                SizedBox(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey[700],
+                        fontSize: 13)),
+                const SizedBox(
                   height: 5.0,
                 ),
               ],
@@ -239,39 +243,27 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: TextStyle(
-                      fontWeight: FontWeight.normal, color: Colors.grey[700], fontSize: 10
-                    )),
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey[700],
+                        fontSize: 10)),
                 Expanded(child: Container()),
                 Text(getValorModena(itemVenta.total, 0),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16
-                    ))
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16))
               ],
             ),
             trailing: IconButton(
-                icon: Icon(Icons.arrow_forward_ios),
+                icon: const Icon(Icons.arrow_forward_ios),
                 onPressed: () {
-                  AppNavigator.pushNamed(AppRoutes.ventaDetalle, arguments: {'ventaModel': itemVenta, 'esEdicion': false});
+                  AppNavigator.pushNamed(AppRoutes.ventaDetalle,
+                      arguments: {'ventaModel': itemVenta, 'esEdicion': false});
                 }),
           ),
         ));
   }
 
-  void _goToVentaPage(BuildContext context, VentaModel? venta) {
-    AppNavigator.pushNamed(
-      AppRoutes.nuevaVenta,
-      arguments: {'ventaEnEdicion': venta},
-    ).then((valor) {
-      if (valor == true) {
-        setState(() {
-          // Esto forzará al FutureBuilder a recargarse
-        });
-      }
-    });
-  }
-
-  Future<void> _showDialogRemoveItemVenta(BuildContext context, VentaModel venta) async {
+  Future<void> _showDialogRemoveItemVenta(
+      BuildContext context, VentaModel venta) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -280,7 +272,8 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('¿Estás seguro de que deseas eliminar la venta de "${venta.nombreCliente ?? 'Cliente'}"?'),
+                Text(
+                    '¿Estás seguro de que deseas eliminar la venta de "${venta.nombreCliente}"?'),
                 const Text('Esta acción no se puede deshacer.'),
               ],
             ),
@@ -293,24 +286,29 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
               },
             ),
             TextButton(
-              child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+              child:
+                  const Text('Eliminar', style: TextStyle(color: Colors.red)),
               onPressed: () async {
-                final result = await VentaProvider.ventaProvider.removeVenta(venta.id);
+                final result =
+                    await VentaProvider.ventaProvider.removeVenta(venta.id);
                 if (result == false) {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         behavior: SnackBarBehavior.floating,
                         backgroundColor: Colors.red,
                         content: Row(
                           children: [
                             Icon(Icons.error, color: Colors.white),
-                            const SizedBox(width: 12),
-                            Expanded(child: Text("No se ha podido eliminar la venta!!", style: TextStyle(color: Colors.white))),
+                            SizedBox(width: 12),
+                            Expanded(
+                                child: Text(
+                                    "No se ha podido eliminar la venta!!",
+                                    style: TextStyle(color: Colors.white))),
                           ],
                         ),
-                        duration: const Duration(seconds: 2),
+                        duration: Duration(seconds: 2),
                       ),
                     );
                 }

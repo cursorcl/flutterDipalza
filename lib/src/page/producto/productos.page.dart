@@ -9,23 +9,20 @@ import '../../share/app.navigator.dart';
 import '../../widget/connectivity_banner.widget.dart';
 
 class ProductosPage extends StatefulWidget {
-
   final bool isForSelection;
 
-  const ProductosPage({Key? key, this.isForSelection = false}) : super(key: key);
+  const ProductosPage({Key? key, this.isForSelection = false})
+      : super(key: key);
 
   @override
   _ProductosPageState createState() => _ProductosPageState();
 }
 
 class _ProductosPageState extends State<ProductosPage> {
-
   final ProductsBloc _productsBloc = new ProductsBloc();
   TextEditingController controller = new TextEditingController();
-  List<ProductosModel> _searchResult = [];
+  final List<ProductosModel> _searchResult = [];
   bool _showSearch = false;
-
-
 
   @override
   void initState() {
@@ -39,7 +36,7 @@ class _ProductosPageState extends State<ProductosPage> {
       appBar: AppBar(
         backgroundColor: colorRojoBase(),
         title: Container(
-          child: Center(
+          child: const Center(
             child: Text(
               'Productos',
               style: TextStyle(color: Colors.white),
@@ -60,14 +57,14 @@ class _ProductosPageState extends State<ProductosPage> {
       ),
       body: Stack(
         children: <Widget>[
-          Positioned.fill(
+          const Positioned.fill(
             child: FondoWidget(),
           ),
           Positioned.fill(
             child: Column(
               children: <Widget>[
                 // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
-                ConnectivityBanner(),
+                const ConnectivityBanner(),
                 // El input de búsqueda (se mostrará o no)
                 _showSearch ? _creaInputBuscar(context) : Container(),
                 Expanded(
@@ -76,8 +73,9 @@ class _ProductosPageState extends State<ProductosPage> {
                     stream: _productsBloc.productsStream,
                     builder: (context, snapshot) {
                       // 2. MANEJO DE ESTADOS DEL STREAM
-                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                        return Center(child: CircularProgressIndicator());
+                      if (snapshot.connectionState == ConnectionState.waiting &&
+                          !snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       if (snapshot.hasError) {
@@ -85,7 +83,8 @@ class _ProductosPageState extends State<ProductosPage> {
                       }
 
                       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text('No existen Productos a mostrar.'));
+                        return const Center(
+                            child: Text('No existen Productos a mostrar.'));
                       }
 
                       // 3. LA LISTA COMPLETA VIENE DIRECTAMENTE DEL STREAM
@@ -105,13 +104,16 @@ class _ProductosPageState extends State<ProductosPage> {
       ),
     );
   }
+
   List<ProductosModel> _filtrarLista(List<ProductosModel> listaCompleta) {
     if (controller.text.isEmpty) {
       return listaCompleta;
     } else {
       _searchResult.clear();
       listaCompleta.forEach((producto) {
-        if (producto.descripcion.toUpperCase().contains(controller.text.toUpperCase()) ||
+        if (producto.descripcion
+                .toUpperCase()
+                .contains(controller.text.toUpperCase()) ||
             producto.articulo == controller.text) {
           _searchResult.add(producto);
         }
@@ -119,25 +121,26 @@ class _ProductosPageState extends State<ProductosPage> {
       return _searchResult;
     }
   }
+
   Widget _creaInputBuscar(BuildContext context) {
     return AnimatedOpacity(
       opacity: _showSearch ? 1.0 : 0.0,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       child: Container(
         color: colorRojoBase(),
         child: new Padding(
           padding: const EdgeInsets.all(8.0),
           child: new Card(
             child: new ListTile(
-              leading: new Icon(Icons.search),
+              leading: const Icon(Icons.search),
               title: new TextField(
                 controller: controller,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                     hintText: 'Buscar', border: InputBorder.none),
                 onChanged: onSearchTextChanged,
               ),
               trailing: new IconButton(
-                icon: new Icon(Icons.cancel),
+                icon: const Icon(Icons.cancel),
                 onPressed: () {
                   controller.clear();
                   onSearchTextChanged('');
@@ -153,15 +156,14 @@ class _ProductosPageState extends State<ProductosPage> {
     );
   }
 
-  onSearchTextChanged(String text)  {
-      setState(() {});
-    }
-
+  onSearchTextChanged(String text) {
+    setState(() {});
+  }
 
   Widget _creaListaProductos(
       BuildContext context, List<ProductosModel> listaProducto) {
     if (listaProducto.length == 0) {
-      return Center(
+      return const Center(
         child: Text('No existen Productos a mostrar.'),
       );
     }
@@ -181,76 +183,83 @@ class _ProductosPageState extends State<ProductosPage> {
     final stock = producto.stock > 0 ? producto.stock : 0;
     return Card(
       child: ListTile(
-        leading: CircleAvatar(
-          radius: 20,
-          child: Icon(Icons.card_giftcard),
-          backgroundColor: colorRojoBase(),
-          foregroundColor: Colors.white,
-        ),
-        title: Text(
-          producto.descripcion,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15.0,
-            color: Colors.black,
+          leading: CircleAvatar(
+            radius: 20,
+            child: const Icon(Icons.card_giftcard),
+            backgroundColor: colorRojoBase(),
+            foregroundColor: Colors.white,
           ),
-        ),
-        subtitle: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                const Text(
-                  'Precio:',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const Spacer(),
-                Text(
-                  '\$${producto.ventaneto.toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                ),
-              ],
+          title: Text(
+            producto.descripcion,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15.0,
+              color: Colors.black,
             ),
-            Row(
-              children: [
-                const Text(
-                  'Stock:',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const Spacer(),
-                Text(
-                  '${stock.toStringAsFixed(2)} ${producto.unidad}',
-                  style:  TextStyle(fontWeight: FontWeight.bold, color: stock > 0 ? Colors.blueAccent : Colors.red,),
-                ),
-              ],
-            ),
-            if(producto.numbered)
+          ),
+          subtitle: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Row(
                 children: [
                   const Text(
-                    'Piezas:',
+                    'Precio:',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const Spacer(),
                   Text(
-                    '${producto.pieces.toStringAsFixed(0)}',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: producto.pieces > 0 ? Colors.blueAccent : Colors.red,),
+                    '\$${producto.ventaneto.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.blueAccent),
                   ),
                 ],
               ),
-          ],
-        ),
+              Row(
+                children: [
+                  const Text(
+                    'Stock:',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${stock.toStringAsFixed(2)} ${producto.unidad}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: stock > 0 ? Colors.blueAccent : Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+              if (producto.numbered)
+                Row(
+                  children: [
+                    const Text(
+                      'Piezas:',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${producto.pieces.toStringAsFixed(0)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: producto.pieces > 0
+                            ? Colors.blueAccent
+                            : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
           onTap: () {
             if (widget.isForSelection) {
               AppNavigator.pop(producto);
             } else {
               // Tu acción original
             }
-          }
-      ),
+          }),
     );
   }
-
 
   Future<void> getListaProductosRefrescar() async {
     // Solo le decimos al BLoC que recargue. El StreamBuilder se encargará del resto.

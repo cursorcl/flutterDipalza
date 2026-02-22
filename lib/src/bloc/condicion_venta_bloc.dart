@@ -8,13 +8,15 @@ import 'package:rxdart/rxdart.dart';
 
 // MODIFICADO: Ya no es un Singleton, es una clase normal.
 class CondicionVentaBloc {
-
   // El BehaviorSubject sigue siendo una excelente elección.
-  final _condicionVentaController = BehaviorSubject<List<CondicionVentaModel>>();
+  final _condicionVentaController =
+      BehaviorSubject<List<CondicionVentaModel>>();
 
   // Streams y getters públicos se mantienen igual.
-  Stream<List<CondicionVentaModel>> get condicionVentaStream => _condicionVentaController.stream;
-  List<CondicionVentaModel> get listaCondicionVenta => _condicionVentaController.value;
+  Stream<List<CondicionVentaModel>> get condicionVentaStream =>
+      _condicionVentaController.stream;
+  List<CondicionVentaModel> get listaCondicionVenta =>
+      _condicionVentaController.value;
 
   // MODIFICADO: El constructor ahora es público y simple.
   CondicionVentaBloc() {
@@ -25,7 +27,8 @@ class CondicionVentaBloc {
   Future<void> obtenerListaCondicionesVenta() async {
     // Añadimos un try-catch por robustez.
     try {
-      final data = await CondicionVentaProvider.condicionVentaProvider.obtenerListaCondicionVenta();
+      final data = await CondicionVentaProvider.condicionVentaProvider
+          .obtenerListaCondicionVenta();
       if (!_condicionVentaController.isClosed) {
         _condicionVentaController.sink.add(data);
       }

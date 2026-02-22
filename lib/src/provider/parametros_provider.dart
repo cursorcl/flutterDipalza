@@ -36,10 +36,9 @@ class ParametrosProvider {
       final response = await _dio.get('/configurationa');
       final List<dynamic> data = response.data;
       return data.map((json) => ConfiguracionModel.fromJson(json)).toList();
-
     } catch (error) {
-      DBLogProvider.db.nuevoLog(
-          creaLogError('ParametrosProvider', 'obtenerConfiguraciones', error.toString()));
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'ParametrosProvider', 'obtenerConfiguraciones', error.toString()));
       return [];
     }
   }
@@ -57,10 +56,8 @@ class ParametrosProvider {
             'Content-Type': 'application/json; charset=UTF-8',
           });
     } catch (error) {
-      DBLogProvider.db.nuevoLog(
-          creaLogError('ParametrosProvider', 'registrarUbicacion', error.toString()));
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'ParametrosProvider', 'registrarUbicacion', error.toString()));
     }
-
   }
-
 }

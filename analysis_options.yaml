@@ -1,5 +1,9 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  errors:
+    include_file_not_found: ignore
+
 linter:
   rules:
     - avoid_print

@@ -25,18 +25,18 @@ class AppRouter {
 
     // --- RUTAS DE ENTRADA ---
       case 'home': // Asegúrate de tener esta constante o usar string
-        return MaterialPageRoute(builder: (_) =>  HomePage());
+        return MaterialPageRoute(builder: (_) =>  const HomePage());
 
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) =>  LoginPage());
 
     // --- RUTAS PRINCIPALES (Si se navegaran directamente) ---
       case AppRoutes.listadoVentas:
-        return MaterialPageRoute(builder: (_) => ListadeDeVentasPage());
+        return MaterialPageRoute(builder: (_) => const ListadeDeVentasPage());
 
     // --- PANTALLAS SECUNDARIAS ---
       case AppRoutes.rutas:
-        return MaterialPageRoute(builder: (_) => RutasPage());
+        return MaterialPageRoute(builder: (_) => const RutasPage());
 
       case AppRoutes.productosSeleccion:
         return MaterialPageRoute<ProductosModel?>(builder: (_) => const ProductosPage(isForSelection: true));
@@ -47,7 +47,7 @@ class AppRouter {
     // --- RUTAS CON ARGUMENTOS (Lógica movida desde tu Home) ---
 
       case AppRoutes.nuevaVenta:
-        return MaterialPageRoute(builder: (_) => VentaEncabezadoEdicionPage());
+        return MaterialPageRoute(builder: (_) => const VentaEncabezadoEdicionPage());
 
       case AppRoutes.modificarVenta:
         if (args is Map<String, dynamic>) {
@@ -89,7 +89,7 @@ class AppRouter {
         return _errorRoute("Faltan argumentos en Última Venta");
         
       case AppRoutes.config:
-        return MaterialPageRoute(builder: (_) => ConfiguracionPage());
+        return MaterialPageRoute(builder: (_) => const ConfiguracionPage());
         
     // DEFAULT
       default:

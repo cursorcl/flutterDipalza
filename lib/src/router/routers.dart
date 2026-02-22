@@ -13,15 +13,14 @@ Map<String, WidgetBuilder> getApplicationRoutes() {
   return <String, WidgetBuilder>{
     // 'estadistica': (BuildContext context) => EstadisticaPage(),
 
-    '/': (BuildContext context) => HomePage(),
+    '/': (BuildContext context) => const HomePage(),
     'login': (BuildContext context) => LoginPage(),
-    'config': (BuildContext context) => ConfiguracionPage(),
-    'clientes': (BuildContext context) => ClientesPage(),
-    'home': (BuildContext context) => HomePage(),
-    'productos': (BuildContext context) => ProductosPage(),
-    'listadoDeVentas': (BuildContext context) => ListadeDeVentasPage(),
+    'config': (BuildContext context) => const ConfiguracionPage(),
+    'clientes': (BuildContext context) => const ClientesPage(),
+    'home': (BuildContext context) => const HomePage(),
+    'productos': (BuildContext context) => const ProductosPage(),
+    'listadoDeVentas': (BuildContext context) => const ListadeDeVentasPage(),
     'consoleLog': (BuildContext context) => ConsoleLogPage(),
-    'nuevaVenta': (BuildContext context) => VentaEncabezadoEdicionPage(),
+    'nuevaVenta': (BuildContext context) => const VentaEncabezadoEdicionPage(),
   };
-
 }

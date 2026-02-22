@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dipalza_movil/src/model/login.model.dart';
 import 'package:dipalza_movil/src/model/respuesta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -9,22 +7,24 @@ import 'package:http/http.dart' as http;
 class VenderdorProvider {
   Future<RespuestaModel> loginUsuario(String usuario, String password) async {
     final prefs = new PreferenciasUsuario();
-    Codec<String, String> stringToBase64 = utf8.fuse(base64);
 
     final url = Uri.http(prefs.urlServicio, '/auth/login');
     final login = LoginModel();
-    
+
     login.username = getFormatRutToService(usuario);
     login.password = password; //stringToBase64.encode(password);
-    
+
     http.Response resp;
-    try { // loginModelToJson
+    try {
+      // loginModelToJson
       final json = loginModelToJson(login);
-      resp = await http.post(url,
-      headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: json).timeout(Duration(seconds: 15));
+      resp = await http
+          .post(url,
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+              },
+              body: json)
+          .timeout(const Duration(seconds: 15));
     } catch (error) {
       return RespuestaModel(
           status: 500,
@@ -47,6 +47,4 @@ class VenderdorProvider {
 
     return RespuestaModel(status: resp.statusCode, detalle: resp.body);
   }
-
- 
 }

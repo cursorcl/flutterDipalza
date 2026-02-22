@@ -91,7 +91,7 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     // Diseño de tu Splash Screen
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.white, // O el color de tu marca
       body: Center(
         child: Column(
@@ -99,11 +99,11 @@ class _AuthGateState extends State<AuthGate> {
           children: [
             // Pega aquí tu Logo si tienes uno:
             // Image.asset('assets/img/logo_dipalza.png', width: 150),
-            const Icon(Icons.shield_moon, size: 80, color: Colors.blue), // Placeholder
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            const Text(
+            Icon(Icons.shield_moon, size: 80, color: Colors.blue), // Placeholder
+            SizedBox(height: 24),
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
               "Iniciando sistema...",
               style: TextStyle(color: Colors.grey),
             )

@@ -17,7 +17,8 @@ class ClientesProvider {
     //
   }
 
-  Future<List<ClientesModel>> obtenerListaClientes(String codVendedor, String codRuta, BuildContext context) async {
+  Future<List<ClientesModel>> obtenerListaClientes(
+      String codVendedor, String codRuta, BuildContext context) async {
     try {
       final response = await _dio.get('/api/clientes/ruta/$codRuta');
       final List<dynamic> data = response.data;
@@ -31,9 +32,13 @@ class ClientesProvider {
   Future<List<ClientesModel>> obtenerListaClientesv2() async {
     final prefs = new PreferenciasUsuario();
 
-    Uri url = Uri.http(prefs.urlServicio, '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
+    Uri url = Uri.http(prefs.urlServicio,
+        '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
 
-    final resp = await http.get(url, headers: {HttpHeaders.authorizationHeader: prefs.access_token, 'Accept-Charset': 'utf-8'});
+    final resp = await http.get(url, headers: {
+      HttpHeaders.authorizationHeader: prefs.access_token,
+      'Accept-Charset': 'utf-8'
+    });
 
     if (resp.statusCode == 200 || resp.statusCode == 202) {
       String responseBody = utf8.decode(resp.bodyBytes);
@@ -42,7 +47,8 @@ class ClientesProvider {
     return clientesModelFromJson('[]');
   }
 
-  Future<ClientesModel> obtenerClienteByRutCodigo(String rut, String codigo) async {
+  Future<ClientesModel> obtenerClienteByRutCodigo(
+      String rut, String codigo) async {
     final prefs = new PreferenciasUsuario();
 
     var params = prefs.urlServicio.split(":");
@@ -55,7 +61,10 @@ class ClientesProvider {
     );
     if (codigo.trim() != "") url.replace(queryParameters: {'codigo': codigo});
 
-    final resp = await http.get(url, headers: {HttpHeaders.authorizationHeader: 'Bearer ${prefs.access_token}', 'Accept-Charset': 'utf-8'});
+    final resp = await http.get(url, headers: {
+      HttpHeaders.authorizationHeader: 'Bearer ${prefs.access_token}',
+      'Accept-Charset': 'utf-8'
+    });
 
     if (resp.statusCode == 200 || resp.statusCode == 202) {
       String responseBody = utf8.decode(resp.bodyBytes);

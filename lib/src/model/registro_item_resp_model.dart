@@ -28,7 +28,7 @@ class RegistroItemRespModel {
     required this.numeros,
     required this.correlativos,
     required this.pesos,
-     this.fecha,
+    this.fecha,
   });
 
   int indice;

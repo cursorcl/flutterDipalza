@@ -11,7 +11,7 @@ class ConsoleLogPage extends StatefulWidget {
 class _ConsoleLogPageState extends State<ConsoleLogPage> {
   late LogModel ultimoLog;
   final List<Container> _logs = <Container>[];
-  ScrollController _scrollController = new ScrollController();
+  final ScrollController _scrollController = new ScrollController();
 
   @override
   void initState() {
@@ -33,24 +33,25 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: Text('Console LOG'),
+          title: const Text('Console LOG'),
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.close),
+              icon: const Icon(Icons.close),
               color: Colors.red[300],
-              onPressed: () => Navigator.of(context).pushReplacementNamed('login'),
+              onPressed: () =>
+                  Navigator.of(context).pushReplacementNamed('login'),
             ),
           ],
         ),
         body: Container(
           color: Colors.black,
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
           child: ListView.builder(
             controller: _scrollController,
             itemBuilder: (context, int index) => _logs[index],
             itemCount: _logs.length,
             reverse: true,
-            padding: new EdgeInsets.all(.0),
+            padding: const EdgeInsets.all(.0),
           ),
         ),
       ),
@@ -60,7 +61,7 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
   void _loadLogs() async {
     final List<LogModel> listaLogs = await DBLogProvider.db.getLogs(20);
 
-    if ( listaLogs.isNotEmpty) {
+    if (listaLogs.isNotEmpty) {
       ultimoLog = listaLogs[listaLogs.length - 1];
     }
 
@@ -73,7 +74,7 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
     final List<LogModel> listaLogs =
         await DBLogProvider.db.getLogPaginados(ultimoLog, 10);
 
-    if ( listaLogs.isNotEmpty) {
+    if (listaLogs.isNotEmpty) {
       ultimoLog = listaLogs[listaLogs.length - 1];
     }
 
@@ -85,11 +86,11 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
   void _creaTextoLog(LogModel item) {
     setState(() {
       var texto = Container(
-        padding: EdgeInsets.symmetric(vertical: 10.0),
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: Text(
           item.log,
           maxLines: 1000,
-          style: TextStyle(color: Colors.white, fontSize: 11.0),
+          style: const TextStyle(color: Colors.white, fontSize: 11.0),
         ),
       );
       _logs.insert(0, texto);
@@ -99,11 +100,11 @@ class _ConsoleLogPageState extends State<ConsoleLogPage> {
   void _creaTextoLogHistorico(LogModel item) {
     setState(() {
       var texto = Container(
-        padding: EdgeInsets.symmetric(vertical: 10.0),
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: Text(
           item.log,
           maxLines: 1000,
-          style: TextStyle(color: Colors.white, fontSize: 11.0),
+          style: const TextStyle(color: Colors.white, fontSize: 11.0),
         ),
       );
       _logs.insert(_logs.length, texto);

@@ -18,31 +18,31 @@ class AppTheme {
       colorScheme: appColors.toColorScheme(),
 
       // APPBAR
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         foregroundColor: Colors.white,
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.w500,
         ),
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: Colors.white,
           size: 24,
         ),
       ),
 
       // CARDS
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         elevation: 2,
         color: Colors.white,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
 
       // FLOATING ACTION BUTTON
@@ -77,7 +77,8 @@ class AppTheme {
         errorMaxLines: 2,
         labelStyle: const TextStyle(color: Colors.grey),
         hintStyle: const TextStyle(color: Colors.grey),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       ),
 
       // ELEVATED BUTTONS
@@ -145,8 +146,8 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: appColors.toColorScheme().copyWith(
-        brightness: Brightness.dark,
-      ),
+            brightness: Brightness.dark,
+          ),
 
       // ... configuración similar pero para tema oscuro
       scaffoldBackgroundColor: AppColorScheme.grisOscuro,
@@ -154,14 +155,15 @@ class AppTheme {
   }
 
   // MÉTODO PARA CREAR APPCOLORS CON EL TEMA
-  static AppColorScheme createAppColors({Brightness brightness = Brightness.light}) {
+  static AppColorScheme createAppColors(
+      {Brightness brightness = Brightness.light}) {
     return brightness == Brightness.light
         ? AppColorScheme.fromSeed(
-      seedColor: AppColorScheme.naranjaCorporativo,
-      brightness: brightness,
-    )
+            seedColor: AppColorScheme.naranjaCorporativo,
+            brightness: brightness,
+          )
         : AppColorScheme.fromSeedDark(
-      seedColor: AppColorScheme.naranjaCorporativo,
-    );
+            seedColor: AppColorScheme.naranjaCorporativo,
+          );
   }
 }

@@ -1,79 +1,69 @@
 ---
-description: Auditoría de code smells en proyecto Flutter (reporte priorizado + CSV)
+description: Corregir code smells detectados (Flutter) con cambios mínimos y validación
 ---
 
 OBJETIVO:
-Detectar deuda técnica, problemas de mantenibilidad, rendimiento y arquitectura en el proyecto Flutter SIN modificar archivos.
+Corregir los code smells detectados en el reporte anterior con cambios mínimos y seguros.
 
-PASOS A EJECUTAR:
+PERMISOS Y SEGURIDAD:
+- Se permiten modificaciones SOLO con aprobación (edit/write están en "ask").
+- Antes de editar o crear archivos: solicitar aprobación explícita.
 
-1) Preparación del entorno
-    - flutter pub get
+REGLAS:
+- Cambios pequeños, agrupados por tipo (evitar “refactors masivos”).
+- No cambiar comportamiento funcional salvo que sea imprescindible; si lo es, explicarlo.
+- Validar al final; si la validación falla, revertir el último cambio y explicar.
 
-2) Verificación de formato (no aplicar cambios)
-    - dart format --output=none --set-exit-if-changed .
+PASOS:
 
-3) Análisis estático
-    - flutter analyze
+1) Preparación
+   - flutter pub get
 
-4) Pruebas automatizadas
-    - flutter test
+2) Correcciones seguras y mecánicas (prioridad alta)
+   - Aplicar correcciones automáticas conservadoras:
+      - dart fix --apply
+   - Normalizar formato (aplica cambios de formato):
+      - dart format .
 
-5) Métricas de complejidad y smells
-    - dart run dart_code_metrics:metrics lib
+3) Correcciones guiadas por análisis
+   - Ejecutar:
+      - flutter analyze
+   - Corregir hallazgos (imports, dead code, lints, null-safety, etc.) manteniendo cambios mínimos.
 
-6) (Opcional si existe)
-    - dart run dart_code_metrics:check-unused-files lib
+4) Correcciones por métricas (si existe dart_code_metrics)
+   - Detectar si está instalado (sin modificar nada):
+      - Revisar pubspec.yaml / pubspec.lock (presencia de "dart_code_metrics")
+   - Si está instalado:
+      - dart run dart_code_metrics:metrics lib
+      - (Opcional) dart run dart_code_metrics:check-unused-files lib
+      - Si hay violaciones por complejidad/anidamiento/parámetros:
+         - Refactorizar con técnicas seguras:
+            - extraer métodos/widgets
+            - early returns para reducir nesting
+            - dividir funciones largas
+         - Evitar cambios de arquitectura no solicitados.
+   - Si NO está instalado:
+      - Omitir este paso y reportar: "dart_code_metrics no está instalado; se ejecutó auditoría basada en flutter analyze."
 
-ANÁLISIS REQUERIDO:
+5) Validación obligatoria (con fallback si no hay tests)
+   - Siempre:
+      - flutter analyze
+   - Detectar si existen tests:
+      - Buscar archivos test/**/*_test.dart
+   - Si existen tests:
+      - flutter test
+   - Si NO existen tests:
+      - Ejecutar una validación alternativa de compilación (según plataforma disponible):
+         - flutter build apk  (si Android está configurado)
+         - o flutter build ios (si iOS está configurado)
+      - Reportar explícitamente que no hay cobertura de pruebas y recomendar verificación manual (smoke test).
 
-Identificar y priorizar especialmente:
+6) Entregables
+   - Resumen de cambios por archivo (qué se cambió y por qué)
+   - Lista de smells corregidos y cuáles quedaron pendientes (con motivo)
+   - Recomendaciones de siguientes pasos (si algunos requieren decisiones de arquitectura)
 
-- Widgets demasiado grandes o complejos
-- Métodos con alta complejidad ciclomática
-- Anidamiento excesivo
-- Lógica de negocio dentro de UI
-- Uso incorrecto de setState
-- Falta de const en widgets inmutables
-- Código duplicado
-- Imports innecesarios o archivos no usados
-- Violaciones de lints importantes
-- Problemas potenciales de rendimiento
-
-REPORTE A GENERAR:
-
-1) Resumen con todos los hallazgos
-
-2) Tabla detallada con:
-
-- Archivo
-- Línea aproximada
-- Tipo de smell
-- Severidad (Alta / Media / Baja)
-- Descripción
-- Causa probable
-- Refactor sugerido
-- Riesgo del cambio
-
-3) Generar archivo:
-
-reporte_smells.csv
-
-Columnas del CSV:
-
-Archivo,Línea,Tipo,Severidad,Descripción,Causa probable,Refactor sugerido,Riesgo
-
-4) Priorizar por severidad e impacto.
-
-REGLAS IMPORTANTES:
-
-- NO modificar archivos del proyecto
-- NO aplicar refactors automáticamente
-- NO ejecutar comandos destructivos
-- Solicitar aprobación antes de cualquier intento de edición
-
-Al finalizar, indicar:
-
-- Ubicación del CSV generado
-- Número total de smells detectados
-- Módulos más afectados
+IMPORTANTE:
+- No crear PR automáticamente.
+- No hacer commits automáticamente (a menos que yo lo pida explícitamente).
+- Solicitar confirmación antes de cualquier cambio grande (p. ej. mover carpetas, renombrar APIs públicas, cambios de arquitectura).

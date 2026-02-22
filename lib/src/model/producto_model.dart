@@ -2,13 +2,17 @@ import 'dart:convert';
 
 import 'package:dipalza_movil/src/model/numerado_model.dart';
 
-List<ProductosModel> productosModelFromJson(String str) => List<ProductosModel>.from(json.decode(str).map((x) => ProductosModel.fromJson(x)));
+List<ProductosModel> productosModelFromJson(String str) =>
+    List<ProductosModel>.from(
+        json.decode(str).map((x) => ProductosModel.fromJson(x)));
 
-ProductosModel productoModelFromJson(String str) => ProductosModel.fromJson(json.decode(str));
+ProductosModel productoModelFromJson(String str) =>
+    ProductosModel.fromJson(json.decode(str));
 
 String productoModelToJson(ProductosModel data) => json.encode(data.toJson());
 
-String productosModelToJson(List<ProductosModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String productosModelToJson(List<ProductosModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class ProductosModel {
   ProductosModel(
@@ -22,8 +26,8 @@ class ProductosModel {
       required this.numbered,
       required this.codigoila,
       required this.pieces,
-        required this.stockVentas,
-        required this.piezasVentas,
+      required this.stockVentas,
+      required this.piezasVentas,
       required this.numerados});
 
   String articulo;
@@ -53,9 +57,7 @@ class ProductosModel {
       codigoila: json["codigoila"] ?? "",
       pieces: json["pieces"] == null ? 0 : json["pieces"],
       stockVentas: json["stockVentas"] == null ? 0 : json["stockVentas"],
-      piezasVentas: json["piezasVentas"] == null ? 0 : json["piezasVentas"]
-  );
-
+      piezasVentas: json["piezasVentas"] == null ? 0 : json["piezasVentas"]);
 
   Map<String, dynamic> toJson() => {
         "articulo": articulo,
@@ -80,7 +82,23 @@ class ProductosModel {
   }
 }
 
-enum Unidad { UNI, CAJ, EMPTY, DIS, UNIDAD_UNI, UN, KIL, BOL, UNIDAD_CAJ, PAC, UNIDAD_KIL, LT, BID, KI, CAL }
+enum Unidad {
+  UNI,
+  CAJ,
+  EMPTY,
+  DIS,
+  UNIDAD_UNI,
+  UN,
+  KIL,
+  BOL,
+  UNIDAD_CAJ,
+  PAC,
+  UNIDAD_KIL,
+  LT,
+  BID,
+  KI,
+  CAL
+}
 
 final unidadValues = EnumValues({
   "BID": Unidad.BID,

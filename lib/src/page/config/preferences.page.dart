@@ -49,9 +49,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   bool get _canShowLogout {
     if (_prefs.access_token.isEmpty) return false;
     // Elige UNA de las dos líneas según tu tipo de token:
-    return !isJwtExpired(_prefs.access_token);                          // JWT
+    return !isJwtExpired(_prefs.access_token); // JWT
   }
-
 
   @override
   void dispose() {
@@ -78,7 +77,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   }
 
   Future<void> _pickRuta() async {
-    final seleccion = await AppNavigator.pushNamed(AppRoutes.rutas); // RutasPage(listaRutas: listaRutas)),
+    final seleccion = await AppNavigator.pushNamed(
+        AppRoutes.rutas); // RutasPage(listaRutas: listaRutas)),
     if (seleccion != null) {
       setState(() => _rutaSeleccionada = seleccion);
       _prefs.ruta = seleccion.codigo; // mismo setter que usa LoginPage
@@ -110,8 +110,6 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     return null; // válido
   }
 
-
-
   /// Quita esquema y trailing slash. Devuelve 'host:puerto'.
   String toStoreFormat(String input) {
     var t = input.trim();
@@ -132,28 +130,28 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   }
   // ---------- Prueba de conexión (HEAD/GET /health o raíz) ----------
 
-  Future<bool> _pingServer(String baseUrl, {Duration timeout = const Duration(seconds: 4)}) async {
+  Future<bool> _pingServer(String baseUrl,
+      {Duration timeout = const Duration(seconds: 4)}) async {
     final uri = Uri.parse(baseUrl);
 
     final u = uri.replace(path: '/ping');
 
-      try {
-        final client = HttpClient()..connectionTimeout = timeout;
-        final request = await client.getUrl(u).timeout(timeout);
-        request.headers.set(HttpHeaders.userAgentHeader, 'DipalzaApp/1.0');
-        final response = await request.close().timeout(timeout);
-        // Códigos 2xx o 3xx consideramos OK
-        if (response.statusCode >= 200 && response.statusCode < 400) {
-          client.close(force: true);
-          return true;
-        }
+    try {
+      final client = HttpClient()..connectionTimeout = timeout;
+      final request = await client.getUrl(u).timeout(timeout);
+      request.headers.set(HttpHeaders.userAgentHeader, 'DipalzaApp/1.0');
+      final response = await request.close().timeout(timeout);
+      // Códigos 2xx o 3xx consideramos OK
+      if (response.statusCode >= 200 && response.statusCode < 400) {
         client.close(force: true);
-      } catch (_) {
-        // probar siguiente candidato
+        return true;
       }
+      client.close(force: true);
+    } catch (_) {
+      // probar siguiente candidato
+    }
     return false;
   }
-
 
   String _fmtPct(double v) => '${_pct.format(v)} %';
 
@@ -198,7 +196,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: controller,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9\.,]')),
                   ],
@@ -219,7 +218,9 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                           onSave(v);
                           AppNavigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$titulo actualizado a ${_fmtPct(v)}')),
+                            SnackBar(
+                                content: Text(
+                                    '$titulo actualizado a ${_fmtPct(v)}')),
                           );
                         }
                       },
@@ -331,34 +332,36 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         onPressed: _probando
                             ? null
                             : () async {
-                          final error = _validateUrl(_urlController.text);
-                          if (error != null) {
-                            if (!ctx.mounted) return;
-                            ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text(error)));
-                            return;
-                          }
-                          setState(() => _probando = true);
-                          final ok =
-                          await _pingServer(_urlController.text);
-                          if (!mounted) return;
-                          setState(() {
-                            _probando = false;
-                            _status =
-                            ok ? ConnectionStatus.ok : ConnectionStatus.invalid;
-                          });
-                          if (!ctx.mounted) return;
-                          ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-                              content: Text(ok
-                                  ? 'Conexión verificada'
-                                  : 'No se pudo conectar')));
-                        },
+                                final error = _validateUrl(_urlController.text);
+                                if (error != null) {
+                                  if (!ctx.mounted) return;
+                                  ScaffoldMessenger.of(ctx).showSnackBar(
+                                      SnackBar(content: Text(error)));
+                                  return;
+                                }
+                                setState(() => _probando = true);
+                                final ok =
+                                    await _pingServer(_urlController.text);
+                                if (!mounted) return;
+                                setState(() {
+                                  _probando = false;
+                                  _status = ok
+                                      ? ConnectionStatus.ok
+                                      : ConnectionStatus.invalid;
+                                });
+                                if (!ctx.mounted) return;
+                                ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                                    content: Text(ok
+                                        ? 'Conexión verificada'
+                                        : 'No se pudo conectar')));
+                              },
                         icon: _probando
                             ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
                             : const Icon(Icons.wifi_tethering),
                         label: const Text('Probar conexión'),
                       ),
@@ -380,7 +383,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                         if (!ctx.mounted) return;
                         AppNavigator.pop(ctx);
                         ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Dirección guardada')));
+                            const SnackBar(
+                                content: Text('Dirección guardada')));
                       },
                       icon: const Icon(Icons.save),
                       label: const Text('Guardar'),
@@ -432,8 +436,6 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -455,7 +457,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       body: ListView(
         children: [
           // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
-          ConnectivityBanner(),
+          const ConnectivityBanner(),
           // -------- Conexión --------
           _sectionHeader('Conexión'),
           Card(
@@ -499,8 +501,11 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                   leading: const Icon(Icons.map_outlined),
                   title: const Text('Ruta'),
                   subtitle: Text(
-                    _rutaSeleccionada?.descripcion ?? _rutaSeleccionada?.codigo ?? 'Seleccione una ruta',
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                    _rutaSeleccionada?.descripcion ??
+                        _rutaSeleccionada?.codigo ??
+                        'Seleccione una ruta',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _pickRuta,
@@ -512,8 +517,11 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                   leading: const Icon(Icons.today),
                   title: const Text('Fecha de trabajo'),
                   subtitle: Text(
-                    _fechaTrabajo != null ? _fmt(_fechaTrabajo!) : 'Seleccione fecha',
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                    _fechaTrabajo != null
+                        ? _fmt(_fechaTrabajo!)
+                        : 'Seleccione fecha',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: const Icon(Icons.edit_calendar),
                   onTap: _pickFechaTrabajo,
@@ -535,36 +543,36 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
           ),
 
           // -------- Cuenta --------
-          if(_canShowLogout) ...[
-          _sectionHeader('Cuenta'),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Cerrar sesión'),
-            onTap: () async {
-              final salir = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Confirmar'),
-                  content: const Text('¿Desea cerrar la sesión?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () =>Navigator.of(ctx).pop(false),
-                      child: const Text('Cancelar'),
-                    ),
-                    FilledButton(
-                      onPressed: () =>  Navigator.of(ctx).pop(true),
-                      child: const Text('Cerrar sesión'),
-                    ),
-                  ],
-                ),
-              );
-              if (salir == true && mounted) {
-                // Limpia tokens/estado y navega a login
-                _prefs.access_token = '';
-                AppNavigator.goToLogin();
-              }
-            },
-          ),
+          if (_canShowLogout) ...[
+            _sectionHeader('Cuenta'),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Cerrar sesión'),
+              onTap: () async {
+                final salir = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Confirmar'),
+                    content: const Text('¿Desea cerrar la sesión?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('Cancelar'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        child: const Text('Cerrar sesión'),
+                      ),
+                    ],
+                  ),
+                );
+                if (salir == true && mounted) {
+                  // Limpia tokens/estado y navega a login
+                  _prefs.access_token = '';
+                  AppNavigator.goToLogin();
+                }
+              },
+            ),
           ],
           // -------- Acerca de --------
           _sectionHeader('Acerca de'),

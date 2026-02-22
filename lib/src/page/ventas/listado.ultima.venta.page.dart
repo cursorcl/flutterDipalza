@@ -14,13 +14,16 @@ import '../../widget/fondo.widget.dart';
 class ListadoDetalleDeUltimaVentaPage extends StatefulWidget {
   final VentaModel? ventaModel;
 
-  const ListadoDetalleDeUltimaVentaPage({Key? key, this.ventaModel}) : super(key: key);
+  const ListadoDetalleDeUltimaVentaPage({Key? key, this.ventaModel})
+      : super(key: key);
 
   @override
-  _ListadoDetalleDeUltimaVentaPageState createState() => _ListadoDetalleDeUltimaVentaPageState();
+  _ListadoDetalleDeUltimaVentaPageState createState() =>
+      _ListadoDetalleDeUltimaVentaPageState();
 }
 
-class _ListadoDetalleDeUltimaVentaPageState extends State<ListadoDetalleDeUltimaVentaPage> {
+class _ListadoDetalleDeUltimaVentaPageState
+    extends State<ListadoDetalleDeUltimaVentaPage> {
   late VentaModel? _venta;
   int cantidadVentas = 0;
   List<VentaDetalleModel> ventas = [];
@@ -43,20 +46,22 @@ class _ListadoDetalleDeUltimaVentaPageState extends State<ListadoDetalleDeUltima
           ),
           backgroundColor: colorRojoBase(),
           title: Text(
-            this._venta!.nombreCliente,
-            style: TextStyle(color: Colors.white),
+            _venta!.nombreCliente,
+            style: const TextStyle(color: Colors.white),
           ),
         ),
         body: Stack(children: <Widget>[
-          Positioned.fill(
+          const Positioned.fill(
             child: FondoWidget(),
           ),
           Positioned.fill(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                this._createHeaderVenta(),
-                Expanded(child: _creaListaVentasDetalle(context) // si hay ID → carga desde backend
+                _createHeaderVenta(),
+                Expanded(
+                    child: _creaListaVentasDetalle(
+                        context) // si hay ID → carga desde backend
                     ),
               ],
             ),
@@ -66,21 +71,24 @@ class _ListadoDetalleDeUltimaVentaPageState extends State<ListadoDetalleDeUltima
 
   Widget _creaListaVentasDetalle(BuildContext context) {
     return FutureBuilder(
-      future: VentaProvider.ventaProvider.obtenerListaVentasDetalle(this._venta!.id),
-      builder: (BuildContext context, AsyncSnapshot<List<VentaDetalleModel>> snapshot) {
+      future: VentaProvider.ventaProvider
+          .obtenerListaVentasDetalle(_venta!.id),
+      builder: (BuildContext context,
+          AsyncSnapshot<List<VentaDetalleModel>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasData) {
-          return  Column(
-              children: <Widget>[
-                ConnectivityBanner(),
-                Expanded(child: ListView(children: _ventasDetalleItems(context, snapshot.data!))),
-              ],
-            )
-          ;
+          return Column(
+            children: <Widget>[
+              const ConnectivityBanner(),
+              Expanded(
+                  child: ListView(
+                      children: _ventasDetalleItems(context, snapshot.data!))),
+            ],
+          );
         } else {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         }
@@ -88,7 +96,8 @@ class _ListadoDetalleDeUltimaVentaPageState extends State<ListadoDetalleDeUltima
     );
   }
 
-  List<Widget> _ventasDetalleItems(BuildContext context, List<VentaDetalleModel> listaVenta) {
+  List<Widget> _ventasDetalleItems(
+      BuildContext context, List<VentaDetalleModel> listaVenta) {
     final List<Widget> _listItem = [];
     if (listaVenta.length == 0) {
       _listItem.add(_createEmptyCard());
@@ -112,77 +121,78 @@ class _ListadoDetalleDeUltimaVentaPageState extends State<ListadoDetalleDeUltima
             padding: const EdgeInsets.all(12.0),
             child: Column(children: [
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(
+                const Text(
                   'Condicion de Venta',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.black54,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Text(
-                  this._venta!.nombreCondicionVenta,
-                  style: TextStyle(
+                  _venta!.nombreCondicionVenta,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ]),
-              SizedBox(
+              const SizedBox(
                 height: 4,
               ),
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(
+                const Text(
                   'Descuento',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.black54,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Text(
-                  AppFormatters.formatoMoneda.format(this._venta!.totalDescuento),
-                  style: TextStyle(
+                  AppFormatters.formatoMoneda
+                      .format(_venta!.totalDescuento),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ]),
-              SizedBox(
+              const SizedBox(
                 height: 4,
               ),
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(
+                const Text(
                   'Total Neto',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.black54,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Text(
-                  AppFormatters.formatoMoneda.format(this._venta!.totalNeto),
-                  style: TextStyle(
+                  AppFormatters.formatoMoneda.format(_venta!.totalNeto),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ]),
-              SizedBox(
+              const SizedBox(
                 height: 4,
               ),
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(
+                const Text(
                   'Fecha',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.black54,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Text(
-                  AppFormatters.formatoFecha.format(this._venta!.fecha),
-                  style: TextStyle(
+                  AppFormatters.formatoFecha.format(_venta!.fecha),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -192,7 +202,7 @@ class _ListadoDetalleDeUltimaVentaPageState extends State<ListadoDetalleDeUltima
   }
 
   Widget _createEmptyCard() {
-    return Card(
+    return const Card(
       child: ListTile(
         leading: CircleAvatar(
           radius: 20,

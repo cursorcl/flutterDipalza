@@ -39,7 +39,8 @@ class PreferenciasUsuario {
 
   set access_token(String value) {
     _tokenInMemory = value; // Actualizamos memoria
-    _storage.write(key: 'token', value: value); // Guardamos seguro asíncronamente
+    _storage.write(
+        key: 'token', value: value); // Guardamos seguro asíncronamente
   }
 
   String get refreshToken => _refreshTokenInMemory;
@@ -129,7 +130,8 @@ class PreferenciasUsuario {
     if (fechaGuardada == null) {
       return DateTime.now().add(const Duration(days: 1));
     }
-    return DateTime.tryParse(fechaGuardada) ?? DateTime.now().add(const Duration(days: 1));
+    return DateTime.tryParse(fechaGuardada) ??
+        DateTime.now().add(const Duration(days: 1));
   }
 
   set fechaFacturacion(DateTime value) {
@@ -137,7 +139,7 @@ class PreferenciasUsuario {
   }
 
   double get iva {
-    return  _prefs.getDouble('iva') ?? 19.0;
+    return _prefs.getDouble('iva') ?? 19.0;
   }
 
   set iva(double value) {

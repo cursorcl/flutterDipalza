@@ -110,7 +110,7 @@ class VentaProvider {
      */
 
     try {
-      final response = await _dio.delete('/api/ventas/${ventaId}');
+      await _dio.delete('/api/ventas/${ventaId}');
       return true;
     } catch (error) {
       developer.log("No se ha eliminado el item de venta ${ventaId}");
@@ -118,7 +118,7 @@ class VentaProvider {
     }
   }
 
-   Future<void> removeItemVenta(int itemVentaId) async {
+  Future<void> removeItemVenta(int itemVentaId) async {
     /*
     final prefs = new PreferenciasUsuario();
     Uri url = Uri.http(prefs.urlServicio, '/api/ventas/eliminarItemVenta/${itemVentaId}');
@@ -138,9 +138,9 @@ class VentaProvider {
     */
 
     try {
-      final response = await _dio.delete('/api/ventas/eliminarItemVenta/${itemVentaId}');
+      await _dio.delete('/api/ventas/eliminarItemVenta/${itemVentaId}');
 
-      return; // VentaModel.fromJson(response.data);
+      return;
     } on DioException catch (e) {
       developer.log("No se ha eliminado el item de venta ${itemVentaId}");
 
@@ -188,16 +188,20 @@ class VentaProvider {
      */
 
     final prefs = new PreferenciasUsuario();
-    var fechaFacturacion = prefs.fechaFacturacion.toIso8601String().split('T').first;
+    var fechaFacturacion =
+        prefs.fechaFacturacion.toIso8601String().split('T').first;
     try {
-
-      final response = await _dio.get('/api/ventas/vendedor/${prefs.vendedor}/fecha', queryParameters: {'fecha': fechaFacturacion});
+      final response = await _dio.get(
+          '/api/ventas/vendedor/${prefs.vendedor}/fecha',
+          queryParameters: {'fecha': fechaFacturacion});
 
       final List<dynamic> data = response.data;
 
       return data.map((json) => VentaModel.fromMap(json)).toList();
     } on DioException catch (e) {
-      developer.log("No se ha podido obtener la ventas para el vendedor ${prefs.vendedor} el día ${fechaFacturacion}  ", error: e);
+      developer.log(
+          "No se ha podido obtener la ventas para el vendedor ${prefs.vendedor} el día ${fechaFacturacion}  ",
+          error: e);
     }
     return [];
   }
@@ -235,17 +239,16 @@ class VentaProvider {
     */
 
     try {
-
       final response = await _dio.get('/api/ventas/${ventaId}/detalles');
 
       final List<dynamic> data = response.data;
 
       return data.map((json) => VentaDetalleModel.fromJson(json)).toList();
     } on DioException catch (e) {
-      developer.log("Ocurrió un error al cargar las ventas detalle.  ", error: e);
+      developer.log("Ocurrió un error al cargar las ventas detalle.  ",
+          error: e);
     }
     return [];
-
   }
 
   Future<NumeradoModel> actualizarNumerado(NumeradoModel numerado) async {
@@ -269,15 +272,13 @@ class VentaProvider {
     }
      */
 
-
     try {
-      final response = await _dio.post(
-        '/api/ventas/updateNumerado',
-        data: numeradoModelToJson(numerado)
-      );
+      final response = await _dio.post('/api/ventas/updateNumerado',
+          data: numeradoModelToJson(numerado));
       return numeradoModelFromJson(response.data);
     } on DioException catch (e) {
-      developer.log("No se ha podido actualizar el estado del numerado:" + e.toString());
+      developer.log(
+          "No se ha podido actualizar el estado del numerado:" + e.toString());
 
       final statusCode = e.response?.statusCode;
       final data = e.response?.data;
@@ -317,18 +318,21 @@ class VentaProvider {
 
     try {
       final clientIdQuery = {"rut": cliente.rut, "codigo": cliente.codigo};
-      final response = await _dio.post(
-          '/api/ventas/ultimaventacliente',
+      final response = await _dio.post('/api/ventas/ultimaventacliente',
           data: jsonEncode(clientIdQuery));
 
       return VentaModel.fromJson(response.data);
     } on DioException catch (e) {
-      developer.log("Se ha producido un error al obtener la última venta del cliente ${cliente.razon}", error: e);
-      throw Exception("Se ha producido un error al obtener la última venta del cliente ${cliente.razon}: ${e}");
+      developer.log(
+          "Se ha producido un error al obtener la última venta del cliente ${cliente.razon}",
+          error: e);
+      throw Exception(
+          "Se ha producido un error al obtener la última venta del cliente ${cliente.razon}: ${e}");
     }
   }
 
-  Future<VentaModel> cambiarEstadoVenta(VentaModel venta, EstadoVenta estadoVenta) async {
+  Future<VentaModel> cambiarEstadoVenta(
+      VentaModel venta, EstadoVenta estadoVenta) async {
     /*
     final prefs = new PreferenciasUsuario();
     final token = prefs.access_token;
@@ -354,15 +358,20 @@ class VentaProvider {
      */
 
     try {
-      final estadoVentaQuery = {"idVenta": venta.id, "estadoVenta": estadoVenta.name};
-      final response = await _dio.post(
-          '/api/ventas/updateEstadoVenta',
+      final estadoVentaQuery = {
+        "idVenta": venta.id,
+        "estadoVenta": estadoVenta.name
+      };
+      final response = await _dio.post('/api/ventas/updateEstadoVenta',
           data: jsonEncode(estadoVentaQuery));
 
       return VentaModel.fromMap(response.data);
     } on DioException catch (e) {
-      developer.log("Se ha producido un error al actualiar el estado de la venta ${venta.id}", error: e);
-      throw Exception("Se ha producido un error al actualiar el estado de la ventae ${venta.id}: ${e}");
+      developer.log(
+          "Se ha producido un error al actualiar el estado de la venta ${venta.id}",
+          error: e);
+      throw Exception(
+          "Se ha producido un error al actualiar el estado de la ventae ${venta.id}: ${e}");
     }
   }
 }

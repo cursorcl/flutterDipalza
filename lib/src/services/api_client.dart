@@ -13,7 +13,7 @@ class ApiClient {
 
   ApiClient._internal() {
     dio = Dio(BaseOptions(
-      baseUrl: "http://" + this.pref.urlServicio,
+      baseUrl: "http://" + pref.urlServicio,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
     ));
@@ -24,10 +24,8 @@ class ApiClient {
       onRequest: (options, handler) async {
         // 1. Inyectar el token actual antes de cada petición
         final token =  pref.access_token;
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        return handler.next(options);
+        options.headers['Authorization'] = 'Bearer $token';
+              return handler.next(options);
       },
       onError: (DioException e, handler) async {
         // Si el error es 403 (Prohibido/Expirado)

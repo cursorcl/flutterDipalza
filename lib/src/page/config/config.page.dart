@@ -26,7 +26,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       appBar: AppBar(
         backgroundColor: colorRojoBase(),
         title: Container(
-          child: Center(
+          child: const Center(
             child: Text(
               'Configuración',
               style: TextStyle(color: Colors.white),
@@ -43,7 +43,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       ),
       body: Stack(
         children: <Widget>[
-          FondoWidget(),
+          const FondoWidget(),
           _crearListaConfig(context),
         ],
       ),
@@ -63,7 +63,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
               backgroundColor: color, //colorRojoBase(),
               foregroundColor: Colors.white,
             ),
-            title: Stack(
+            title: const Stack(
               children: <Widget>[
                 Text('Dirección Servidor',
                     style: TextStyle(fontWeight: FontWeight.bold)),
@@ -72,14 +72,14 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                SizedBox(
+                const SizedBox(
                   height: 10.0,
                 ),
                 Text(_prefs.urlServicio)
               ],
             ),
             trailing: IconButton(
-                icon: Icon(Icons.arrow_forward_ios), onPressed: _showMyDialog),
+                icon: const Icon(Icons.arrow_forward_ios), onPressed: _showMyDialog),
           ),
         )
       ],
@@ -93,9 +93,9 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Ingresar Dirección Servidor'),
+          title: const Text('Ingresar Dirección Servidor'),
           elevation: 24.0,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(20.0))),
           content: SingleChildScrollView(
             child: ListBody(
@@ -116,14 +116,14 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancelar'),
+              child: const Text('Cancelar'),
               onPressed: () {
                 setState(() {});
                 AppNavigator.pop();
               },
             ),
             TextButton(
-              child: Text('Guardar'),
+              child: const Text('Guardar'),
               onPressed: () {
                 _prefs.urlServicio = _urlServicio.text;
                 setState(() {});

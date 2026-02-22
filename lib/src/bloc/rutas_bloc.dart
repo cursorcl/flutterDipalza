@@ -5,8 +5,6 @@ import 'package:dipalza_movil/src/provider/rutas_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class RutasBloc {
-
-
   // El singleton
   static final RutasBloc _singleton = new RutasBloc._internal();
   // El Behavior que mantiene el ultimo valor
@@ -27,7 +25,8 @@ class RutasBloc {
 
   // Método que actualiza el valor del behavior
   obtenerListaRutas() async {
-    _rutasController.sink.add(await RutasProvider.rutasProvider.obtenerListaRutas());
+    _rutasController.sink
+        .add(await RutasProvider.rutasProvider.obtenerListaRutas());
   }
 
   // Cargar rutas iniciales
@@ -43,10 +42,11 @@ class RutasBloc {
       return;
     }
 
-    final rutasFiltradas = _rutasOriginales.where((ruta) =>
-    ruta.descripcion.toLowerCase().contains(query.toLowerCase()) ||
-        ruta.codigo.toLowerCase().contains(query.toLowerCase())
-    ).toList();
+    final rutasFiltradas = _rutasOriginales
+        .where((ruta) =>
+            ruta.descripcion.toLowerCase().contains(query.toLowerCase()) ||
+            ruta.codigo.toLowerCase().contains(query.toLowerCase()))
+        .toList();
 
     _rutasController.sink.add(rutasFiltradas);
   }

@@ -42,7 +42,11 @@ class RUTValidator {
     }
 
     final resultado = 11 - (suma % 11);
-    final dvEsperado = resultado == 11 ? '0' : resultado == 10 ? 'K' : '$resultado';
+    final dvEsperado = resultado == 11
+        ? '0'
+        : resultado == 10
+            ? 'K'
+            : '$resultado';
 
     return dv == dvEsperado;
   }
@@ -59,6 +63,10 @@ class RUTValidator {
     }
 
     final resultado = 11 - (suma % 11);
-    return resultado == 11 ? '0' : resultado == 10 ? 'K' : '$resultado';
+    return resultado == 11
+        ? '0'
+        : resultado == 10
+            ? 'K'
+            : '$resultado';
   }
 }

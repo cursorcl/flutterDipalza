@@ -19,7 +19,8 @@ class AppColors extends InheritedWidget {
   ///
   /// Uso: final colors = AppColors.of(context);
   static AppColorScheme of(BuildContext context) {
-    final AppColors? result = context.dependOnInheritedWidgetOfExactType<AppColors>();
+    final AppColors? result =
+        context.dependOnInheritedWidgetOfExactType<AppColors>();
     assert(result != null, 'No AppColors found in context');
     return result!.colorScheme;
   }
@@ -28,7 +29,8 @@ class AppColors extends InheritedWidget {
   ///
   /// Uso: final colors = AppColors.read(context);
   static AppColorScheme read(BuildContext context) {
-    final AppColors? result = context.getInheritedWidgetOfExactType<AppColors>();
+    final AppColors? result =
+        context.getInheritedWidgetOfExactType<AppColors>();
     assert(result != null, 'No AppColors found in context');
     return result!.colorScheme;
   }

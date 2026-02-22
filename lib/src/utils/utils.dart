@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../validacion/rut_validator.dart';
 
-
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
     hexColor = hexColor.toUpperCase().replaceAll("#", "");
@@ -25,16 +24,17 @@ HexColor colorIconHome() {
 HexColor colorRojoBase() {
   return HexColor('#f44336');
 }
+
 HexColor colorVerdeBase() {
   return HexColor('#004300');
 }
+
 /// Formatea un valor como CLP con separador y sin decimales
 String getValorModena(double valor, int decimal) {
   final format = NumberFormat.currency(
     locale: 'es_CL',
     symbol: '',
     decimalDigits: decimal,
-
   );
   return '\$${format.format(valor)}';
 }

@@ -1,22 +1,24 @@
-
 import 'dart:convert';
 
-TransmitirModel transmitirModelFromJson(String str) => TransmitirModel.fromJson(json.decode(str));
+TransmitirModel transmitirModelFromJson(String str) =>
+    TransmitirModel.fromJson(json.decode(str));
 
-String transmitirModelToJson(TransmitirModel data) => json.encode(data.toJson());
+String transmitirModelToJson(TransmitirModel data) =>
+    json.encode(data.toJson());
 
 class TransmitirModel {
-    TransmitirModel({
-        required this.codigo,
-    });
+  TransmitirModel({
+    required this.codigo,
+  });
 
-    String codigo;
+  String codigo;
 
-    factory TransmitirModel.fromJson(Map<String, dynamic> json) => TransmitirModel(
+  factory TransmitirModel.fromJson(Map<String, dynamic> json) =>
+      TransmitirModel(
         codigo: json["codigo"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "codigo": codigo,
-    };
+      };
 }

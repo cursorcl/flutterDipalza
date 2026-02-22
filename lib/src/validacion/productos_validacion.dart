@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 
 class ProductosValidator {
- 
-
   final validaProductos = StreamTransformer<List<ProductosModel>,
       List<ProductosModel>>.fromHandlers(handleData: (productos, sink) {
     final List<ProductosModel> newList = [];
@@ -22,6 +20,4 @@ class ProductosValidator {
 
     sink.add(newList);
   });
-
-
 }

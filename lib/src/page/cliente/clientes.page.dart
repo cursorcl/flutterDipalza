@@ -11,7 +11,6 @@ import '../../share/app.navigator.dart';
 import '../../widget/connectivity_banner.widget.dart';
 
 class ClientesPage extends StatefulWidget {
-
   final bool isForSelection;
 
   const ClientesPage({Key? key, this.isForSelection = false}) : super(key: key);
@@ -22,13 +21,14 @@ class ClientesPage extends StatefulWidget {
 
 class _ClientesPageState extends State<ClientesPage> {
   TextEditingController controller = new TextEditingController();
-  List<ClientesModel> _searchResult = [];
+  final List<ClientesModel> _searchResult = [];
   List<ClientesModel> _listaClientes = [];
   bool _verBuscar = false;
 
   Future<Null> getListaClientes() async {
     final prefs = new PreferenciasUsuario();
-    _listaClientes = await ClientesProvider.clientesProvider.obtenerListaClientes(prefs.vendedor, prefs.ruta, context);
+    _listaClientes = await ClientesProvider.clientesProvider
+        .obtenerListaClientes(prefs.vendedor, prefs.ruta, context);
     setState(() {});
   }
 
@@ -52,7 +52,7 @@ class _ClientesPageState extends State<ClientesPage> {
         automaticallyImplyLeading: false,
         backgroundColor: colorRojoBase(),
         title: Container(
-          child: Center(
+          child: const Center(
             child: Text(
               'Clientes',
               style: TextStyle(color: Colors.white),
@@ -72,15 +72,18 @@ class _ClientesPageState extends State<ClientesPage> {
         ],
       ),
       body: Stack(children: <Widget>[
-        Positioned.fill(
+        const Positioned.fill(
           child: FondoWidget(),
         ),
         Positioned.fill(
           child: Column(
             children: <Widget>[
-              ConnectivityBanner(),
+              const ConnectivityBanner(),
               _verBuscar ? _creaInputBuscar(context) : Container(),
-              Expanded(child: searchResult ? _creaListaClientes(context, _searchResult) : _creaListaClientes(context, _listaClientes))
+              Expanded(
+                  child: searchResult
+                      ? _creaListaClientes(context, _searchResult)
+                      : _creaListaClientes(context, _listaClientes))
             ],
           ),
         ),
@@ -91,21 +94,22 @@ class _ClientesPageState extends State<ClientesPage> {
   Widget _creaInputBuscar(BuildContext context) {
     return AnimatedOpacity(
       opacity: _verBuscar ? 1.0 : 0.0,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       child: Container(
         color: colorRojoBase(),
         child: new Padding(
           padding: const EdgeInsets.all(8.0),
           child: new Card(
             child: new ListTile(
-              leading: new Icon(Icons.search),
+              leading: const Icon(Icons.search),
               title: new TextField(
                 controller: controller,
-                decoration: new InputDecoration(hintText: 'Buscar', border: InputBorder.none),
+                decoration: const InputDecoration(
+                    hintText: 'Buscar', border: InputBorder.none),
                 onChanged: onSearchTextChanged,
               ),
               trailing: new IconButton(
-                icon: new Icon(Icons.cancel),
+                icon: const Icon(Icons.cancel),
                 onPressed: () {
                   controller.clear();
                   onSearchTextChanged('');
@@ -135,7 +139,8 @@ class _ClientesPageState extends State<ClientesPage> {
     setState(() {});
   }
 
-  Widget _creaListaClientes(BuildContext context, List<ClientesModel> listaCliente) {
+  Widget _creaListaClientes(
+      BuildContext context, List<ClientesModel> listaCliente) {
     if (listaCliente.length == 0) return _createEmptyCard();
 
     return RefreshIndicator(
@@ -154,11 +159,11 @@ class _ClientesPageState extends State<ClientesPage> {
         child: ListTile(
       leading: CircleAvatar(
         radius: 25,
-        child: Icon(Icons.account_box),
+        child: const Icon(Icons.account_box),
         backgroundColor: colorRojoBase(),
         foregroundColor: Colors.white,
       ),
-      title: Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
+      title: const Text('No existen Clientes para la conbinación Vendedor / Ruta.'),
     ));
   }
 
@@ -167,7 +172,7 @@ class _ClientesPageState extends State<ClientesPage> {
       child: ListTile(
         leading: CircleAvatar(
           radius: 25,
-          child: Icon(Icons.account_box),
+          child: const Icon(Icons.account_box),
           backgroundColor: colorRojoBase(),
           foregroundColor: Colors.white,
         ),
@@ -176,45 +181,46 @@ class _ClientesPageState extends State<ClientesPage> {
           children: <Widget>[
             Text(cliente.razon,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 13.0,
                 )),
-            SizedBox(
+            const SizedBox(
               height: 2.0,
             ),
             Text(getFormatRut(cliente.rut),
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12.0,
                 )),
-            SizedBox(
+            const SizedBox(
               height: 5.0,
             )
           ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[Text(cliente.direccion, style: TextStyle(fontSize: 12.0)), Text(cliente.telefono, style: TextStyle(fontSize: 12.0))],
+          children: <Widget>[
+            Text(cliente.direccion, style: const TextStyle(fontSize: 12.0)),
+            Text(cliente.telefono, style: const TextStyle(fontSize: 12.0))
+          ],
         ),
         trailing: IconButton(
-            icon: Icon(Icons.remove_red_eye_outlined),
+            icon: const Icon(Icons.remove_red_eye_outlined),
             onPressed: () async {
-              var ventaModel = await VentaProvider.ventaProvider.obtenerUltimaVenta(cliente);
-              if(ventaModel == null)
-                {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Este cliente no tiene ventas asociadas.'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                  return; // No navega
-                }
-              else {
-                AppNavigator.pushNamed(AppRoutes.listadoUltimaVenta, arguments: {
-                  'ventaModel': ventaModel
-                });
+              var ventaModel =
+                  await VentaProvider.ventaProvider.obtenerUltimaVenta(cliente);
+              if (ventaModel == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Este cliente no tiene ventas asociadas.'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                return; // No navega
+              } else {
+                AppNavigator.pushNamed(AppRoutes.listadoUltimaVenta,
+                    arguments: {'ventaModel': ventaModel});
               }
             }),
         onTap: () {

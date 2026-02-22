@@ -1,10 +1,14 @@
 import 'dart:convert';
 
-List<NumeradoModel> numeradosModelFromJson(String str) => List<NumeradoModel>.from(json.decode(str).map((x) => NumeradoModel.fromJson(x)));
+List<NumeradoModel> numeradosModelFromJson(String str) =>
+    List<NumeradoModel>.from(
+        json.decode(str).map((x) => NumeradoModel.fromJson(x)));
 
-NumeradoModel numeradoModelFromJson(String str) => NumeradoModel.fromJson(json.decode(str));
+NumeradoModel numeradoModelFromJson(String str) =>
+    NumeradoModel.fromJson(json.decode(str));
 
-String numeradosModelToJson(List<NumeradoModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String numeradosModelToJson(List<NumeradoModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 String numeradoModelToJson(NumeradoModel data) => json.encode(data.toJson());
 

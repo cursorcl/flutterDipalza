@@ -18,7 +18,6 @@ import 'package:provider/provider.dart';
 
 import 'src/bloc/condicion_venta_bloc.dart';
 
-
 // 1. Función global para el servicio
 @pragma('vm:entry-point')
 Future<bool> onStart(ServiceInstance service) async {
@@ -27,14 +26,15 @@ Future<bool> onStart(ServiceInstance service) async {
   await prefs.initPrefs();
   final apiClient = ApiClient();
 
-
   late LocationSettings locationSettings;
   if (defaultTargetPlatform == TargetPlatform.iOS) {
     locationSettings = AppleSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 10,
-      pauseLocationUpdatesAutomatically: false, // CRÍTICO: Evita que iOS detenga el GPS
-      showBackgroundLocationIndicator: true,    // Muestra la barra azul de "App usando GPS"
+      pauseLocationUpdatesAutomatically:
+          false, // CRÍTICO: Evita que iOS detenga el GPS
+      showBackgroundLocationIndicator:
+          true, // Muestra la barra azul de "App usando GPS"
     );
   } else {
     locationSettings = AndroidSettings(
@@ -46,20 +46,16 @@ Future<bool> onStart(ServiceInstance service) async {
 
   // Timer cada 5 minutos
   Timer.periodic(const Duration(minutes: 5), (timer) async {
-
     try {
-    Position position = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings
-    );
+      Position position = await Geolocator.getCurrentPosition(
+          locationSettings: locationSettings);
 
-
-    // Enviamos a tu API usando el ApiClient que ya tiene el renovarToken
-    await apiClient.dio.post('/api/ubicacion', data: {
-      'latitud': position.latitude,
-      'longitud': position.longitude,
-      'fecha': DateTime.now().toIso8601String(),
-    });
-
+      // Enviamos a tu API usando el ApiClient que ya tiene el renovarToken
+      await apiClient.dio.post('/api/ubicacion', data: {
+        'latitud': position.latitude,
+        'longitud': position.longitude,
+        'fecha': DateTime.now().toIso8601String(),
+      });
     } catch (e) {
       print("Error en rastreo iOS: $e");
     }
@@ -86,7 +82,6 @@ Future<void> initializeService() async {
     ),
   );
 }
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,10 +125,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Diplaza App.',
-
       navigatorKey: AppNavigator.navigatorKey,
       onGenerateRoute: AppRouter.generateRoute,
-
       home: const AuthGate(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -141,4 +134,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

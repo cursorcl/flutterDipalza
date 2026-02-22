@@ -18,15 +18,15 @@ class ListadoDetalleDeUnaVentaPage extends StatefulWidget {
   final VentaModel ventaModel;
   final bool esEdicion;
 
-
-  const ListadoDetalleDeUnaVentaPage({Key? key, required this.ventaModel, this.esEdicion = false}) : super(key: key);
+  const ListadoDetalleDeUnaVentaPage(
+      {Key? key, required this.ventaModel, this.esEdicion = false})
+      : super(key: key);
 
   @override
   _ListaVentasPageState createState() => _ListaVentasPageState();
 }
 
 class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
-
   late Future<List<VentaDetalleModel>> _futureBuildeDetallesDeVenta;
   late VentaModel _venta;
   int cantidadVentas = 0;
@@ -46,10 +46,8 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
       if (!mounted) return;
 
       if (rutas.isNotEmpty) {
-        var ruta = rutas.firstWhere(
-                (r) => r.codigo == _venta.codigoRuta,
-            orElse: () => rutas.first
-        );
+        var ruta = rutas.firstWhere((r) => r.codigo == _venta.codigoRuta,
+            orElse: () => rutas.first);
         createConduccion(ruta.codigoConduccion);
       }
     } catch (e) {
@@ -62,64 +60,67 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: !widget.esEdicion,
-        leading: widget.esEdicion ? null : BackButton(
-          onPressed: () {
-            // Aquí pones tu ruta específica
-            AppNavigator.pushNamed(AppRoutes.listadoVentas);
-          },
-        ),
+        leading: widget.esEdicion
+            ? null
+            : BackButton(
+                onPressed: () {
+                  // Aquí pones tu ruta específica
+                  AppNavigator.pushNamed(AppRoutes.listadoVentas);
+                },
+              ),
         backgroundColor: colorRojoBase(),
         title: Text(
-          this._venta != null ? 'Venta #${this._venta?.id == -1 ? 'Nueva' : this._venta?.id}' : 'Nueva Venta',
-          style: TextStyle(color: Colors.white),
+          'Venta #${_venta.id == -1 ? 'Nueva' : _venta.id}',
+          style: const TextStyle(color: Colors.white),
         ),
-        actions: !widget.esEdicion ? [] : [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0), // Margen para que no toque los bordes
-            child: TextButton.icon(
-              onPressed: _finalizarVenta,
-              icon: const Icon(Icons.check_circle_outline, size: 20),
-              label: const Text("Finalizar"),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.white.withOpacity(0.15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+        actions: !widget.esEdicion
+            ? []
+            : [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 8.0), // Margen para que no toque los bordes
+                  child: TextButton.icon(
+                    onPressed: _finalizarVenta,
+                    icon: const Icon(Icons.check_circle_outline, size: 20),
+                    label: const Text("Finalizar"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white.withOpacity(0.15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-            ),
-          ),
-        ],
+              ],
       ),
-      floatingActionButton: widget.esEdicion ?
-      FloatingActionButton(
-          elevation: 10,
-          tooltip: 'Agregar Item',
-          child: const Icon(Icons.add),
-          backgroundColor: colorRojoBase(),
-          onPressed: () {
-            _inicializarNuevaVenta(context);
-          })
-          : null
-      ,
+      floatingActionButton: widget.esEdicion
+          ? FloatingActionButton(
+              elevation: 10,
+              tooltip: 'Agregar Item',
+              child: const Icon(Icons.add),
+              backgroundColor: colorRojoBase(),
+              onPressed: () {
+                _inicializarNuevaVenta(context);
+              })
+          : null,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: this._venta?.id != -1
+            child: _venta.id != -1
                 ? RefreshIndicator(
-              onRefresh: () async {
-                _recargarDetalleDeVentas();
-                await _futureBuildeDetallesDeVenta;
-              },
-              // El hijo del RefreshIndicator es tu lista
-              child: _creaListaVentasDetalle(context),
-            )
+                    onRefresh: () async {
+                      _recargarDetalleDeVentas();
+                      await _futureBuildeDetallesDeVenta;
+                    },
+                    // El hijo del RefreshIndicator es tu lista
+                    child: _creaListaVentasDetalle(context),
+                  )
                 : _buildNuevaVenta(context),
           ),
-
-
         ],
       ), // si no hay ID → muestra inicial vacío
     );
@@ -128,7 +129,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
   Widget _buildNuevaVenta(BuildContext context) {
     return Stack(
       children: [
-        Positioned.fill(child: FondoWidget()),
+        const Positioned.fill(child: FondoWidget()),
         Positioned.fill(
           child: Column(
             children: [
@@ -150,25 +151,29 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
   Widget _creaListaVentasDetalle(BuildContext context) {
     return FutureBuilder(
       future: _futureBuildeDetallesDeVenta,
-      builder: (BuildContext context, AsyncSnapshot<List<VentaDetalleModel>> snapshot) {
+      builder: (BuildContext context,
+          AsyncSnapshot<List<VentaDetalleModel>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasData) {
           return Stack(children: <Widget>[
-            Positioned.fill(
+            const Positioned.fill(
               child: FondoWidget(),
             ),
             Positioned.fill(
                 child: Column(
-                  children: <Widget>[
-                    ConnectivityBanner(),
-                    Expanded(child: ListView(children: _createWidgetVentasDetalleItems(context, snapshot.data!))),
-                  ],
-                ))
+              children: <Widget>[
+                const ConnectivityBanner(),
+                Expanded(
+                    child: ListView(
+                        children: _createWidgetVentasDetalleItems(
+                            context, snapshot.data!))),
+              ],
+            ))
           ]);
         } else {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         }
@@ -176,7 +181,8 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
     );
   }
 
-  List<Widget> _createWidgetVentasDetalleItems(BuildContext context, List<VentaDetalleModel> listaVenta) {
+  List<Widget> _createWidgetVentasDetalleItems(
+      BuildContext context, List<VentaDetalleModel> listaVenta) {
     final List<Widget> _listItem = [];
     if (listaVenta.length == 0) {
       _listItem.add(_createEmptyCard());
@@ -184,33 +190,35 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
       listaVenta.forEach((itemVenta) {
         final slidableItem = Slidable(
           key: ValueKey(itemVenta.id),
-          endActionPane: widget.esEdicion ? ActionPane(
-            motion: const StretchMotion(), // Un efecto visual
-            children: [
-              // --- BOTÓN ELIMINAR ---
-              SlidableAction(
-                onPressed: (context) {
-                  // Llama a tu función de lógica
-                  _eliminarItem(context, itemVenta);
-                },
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                icon: Icons.delete,
-                label: 'Eliminar',
-              ),
-              // --- BOTÓN MODIFICAR ---
-              SlidableAction(
-                onPressed: (context) {
-                  // Llama a tu función de lógica
-                  _modificarItem(context, itemVenta);
-                },
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                icon: Icons.edit,
-                label: 'Modificar',
-              ),
-            ],
-          ) : null,
+          endActionPane: widget.esEdicion
+              ? ActionPane(
+                  motion: const StretchMotion(), // Un efecto visual
+                  children: [
+                    // --- BOTÓN ELIMINAR ---
+                    SlidableAction(
+                      onPressed: (context) {
+                        // Llama a tu función de lógica
+                        _eliminarItem(context, itemVenta);
+                      },
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      label: 'Eliminar',
+                    ),
+                    // --- BOTÓN MODIFICAR ---
+                    SlidableAction(
+                      onPressed: (context) {
+                        // Llama a tu función de lógica
+                        _modificarItem(context, itemVenta);
+                      },
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      icon: Icons.edit,
+                      label: 'Modificar',
+                    ),
+                  ],
+                )
+              : null,
 
           // El hijo es tu widget original
           child: VentaDetalleTile(item: itemVenta),
@@ -223,7 +231,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
   }
 
   Widget _createEmptyCard() {
-    return Card(
+    return const Card(
       child: ListTile(
         leading: CircleAvatar(
           radius: 20,
@@ -249,13 +257,12 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
   void _inicializarNuevaVenta(BuildContext context) {
     // Lógica para navegar a una pantalla de edición
 
-    AppNavigator.pushNamed(AppRoutes.ventaItemEdicion, arguments: {
-      'actualVenta': this._venta
-    }).then((ventaActualizada) {
+    AppNavigator.pushNamed(AppRoutes.ventaItemEdicion,
+        arguments: {'actualVenta': _venta}).then((ventaActualizada) {
       if (ventaActualizada != null) {
         setState(() {
-          this._venta = ventaActualizada as VentaModel;
-          _futureBuildeDetallesDeVenta = Future.value( this._venta.detalles);
+          _venta = ventaActualizada as VentaModel;
+          _futureBuildeDetallesDeVenta = Future.value(_venta.detalles);
         });
       }
     });
@@ -265,26 +272,26 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
 
   void _modificarItem(BuildContext context, VentaDetalleModel item) {
     AppNavigator.pushNamed(AppRoutes.ventaItemEdicion,
-        arguments: {
-          'actualVentaDetalle': item,
-          'actualVenta': this._venta
-        }
-    ).then((ventaActualizada) {
+            arguments: {'actualVentaDetalle': item, 'actualVenta': _venta})
+        .then((ventaActualizada) {
       if (ventaActualizada != null) {
         setState(() {
           // haga lo que corresponda con el modelo devuelto
-          this._venta = ventaActualizada as VentaModel;
+          _venta = ventaActualizada as VentaModel;
         });
       }
     });
   }
 
   Future<VentaDetalleModel> createConduccion(String codigoConduccion) async {
-    var conducciones = await ConduccionProvider.conduccionProvider.obtenerListaConduccion();
-    var conduccion = conducciones.firstWhere((conduccion) => conduccion.codigo == codigoConduccion, orElse: () => conducciones.first);
+    var conducciones =
+        await ConduccionProvider.conduccionProvider.obtenerListaConduccion();
+    var conduccion = conducciones.firstWhere(
+        (conduccion) => conduccion.codigo == codigoConduccion,
+        orElse: () => conducciones.first);
 
     return VentaDetalleModel(
-        ventaId: this._venta.id,
+        ventaId: _venta.id,
         idProducto: conduccion.codigo,
         nombreProducto: conduccion.descripcion,
         cantidad: 1,
@@ -297,16 +304,12 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
         totalIva: 0,
         totalIla: 0,
         piezas: 0,
-        unidad: 'UND'
-    );
+        unidad: 'UND');
   }
 
   Future<void> _finalizarVenta() async {
-    _venta = await VentaProvider.ventaProvider.cambiarEstadoVenta(this._venta, EstadoVenta.FINISHED);
-
-    if (_venta == null) {
-      return;
-    }
+    _venta = await VentaProvider.ventaProvider
+        .cambiarEstadoVenta(_venta, EstadoVenta.FINISHED);
     AppNavigator.popUntilFirst();
     //AppNavigator.popUntil(AppRoutes.listadoVentas);
     //AppNavigator.pop(true);
@@ -319,17 +322,19 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
       builder: (BuildContext ctx) {
         return AlertDialog(
           title: const Text('Confirmar Eliminación'),
-          content: Text('¿Seguro que quieres eliminar "${item.nombreProducto}"?'),
+          content:
+              Text('¿Seguro que quieres eliminar "${item.nombreProducto}"?'),
           actions: [
             TextButton(
               child: const Text('Cancelar'),
               onPressed: () => Navigator.of(ctx).pop(),
             ),
             TextButton(
-              child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+              child:
+                  const Text('Eliminar', style: TextStyle(color: Colors.red)),
               onPressed: () async {
                 Navigator.of(ctx).pop();
-                 await VentaProvider.ventaProvider.removeItemVenta(item.id);
+                await VentaProvider.ventaProvider.removeItemVenta(item.id);
                 _recargarDetalleDeVentas();
               },
             ),
@@ -339,9 +344,8 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
     );
   }
 
-
   Future<List<VentaDetalleModel>> obtenerDetalleDeVenta() async {
-    return VentaProvider.ventaProvider.obtenerListaVentasDetalle(this._venta!.id);
+    return VentaProvider.ventaProvider.obtenerListaVentasDetalle(_venta.id);
   }
 
   void _recargarDetalleDeVentas() {

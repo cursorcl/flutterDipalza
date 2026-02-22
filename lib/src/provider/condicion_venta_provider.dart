@@ -4,7 +4,8 @@ import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import '../services/api_client.dart';
 
 class CondicionVentaProvider {
-  static final CondicionVentaProvider condicionVentaProvider = CondicionVentaProvider._();
+  static final CondicionVentaProvider condicionVentaProvider =
+      CondicionVentaProvider._();
   final _dio = ApiClient().dio;
 
   CondicionVentaProvider._() {
@@ -32,7 +33,8 @@ class CondicionVentaProvider {
       final List<dynamic> data = response.data;
       return data.map((json) => CondicionVentaModel.fromJson(json)).toList();
     } catch (error) {
-      DBLogProvider.db.nuevoLog(creaLogError('CondicionVentaProvider', 'obtenerListaProductos', error.toString()));
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'CondicionVentaProvider', 'obtenerListaProductos', error.toString()));
       return [];
     }
   }

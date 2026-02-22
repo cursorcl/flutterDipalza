@@ -18,13 +18,13 @@ class _Configuracion2PageState extends State<Configuracion2Page> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-        children: <Widget>[FondoWidget(), logo(context)],
+        children: <Widget>[const FondoWidget(), logo(context)],
       ),
     );
   }
 
   Widget logo(BuildContext context) {
-    return Center(
+    return const Center(
       child: Image(
         image: AssetImage('assets/image/logo_dipalza_transparente.png'),
         width: 200.0,

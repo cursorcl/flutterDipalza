@@ -2,13 +2,9 @@ import 'package:dipalza_movil/src/bloc/productos_venta_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
-import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
-import 'package:dipalza_movil/src/provider/venta_provider.dart';
-import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../model/venta_model.dart';
 import '../share/app.navigator.dart';
 
 // ignore: must_be_immutable
@@ -87,12 +83,12 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
           children: <Widget>[
             Text(
               producto.descripcion,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
             ),
-            SizedBox(height: 5.0),
+            const SizedBox(height: 5.0),
             Text(
                 'Valor Neto: ${getValorModena(producto.ventaneto.toDouble(), 0)}'),
-            SizedBox(height: 5.0),
+            const SizedBox(height: 5.0),
             // Sección de stock/piezas
             producto.numbered
                 ? Row(
@@ -112,19 +108,19 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                     style: TextStyle(
                         color: producto.stock > 0 ? Colors.black : Colors.red),
                   ),
-            SizedBox(height: 10.0), // Espacio extra para los TextFields
+            const SizedBox(height: 10.0), // Espacio extra para los TextFields
             // TextField para el descuento
             TextField(
               controller: _descuentoCtrl,
               onChanged: (value) => _updateButtonState(),
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: '% Descuento',
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
             ),
-            SizedBox(height: 10.0),
+            const SizedBox(height: 10.0),
             // TextField para la cantidad
             TextField(
               controller: _cantidadCtrl,
@@ -132,7 +128,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: producto.numbered ? 'Piezas' : 'Cantidad',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
@@ -142,7 +138,7 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
       actions: <Widget>[
         Row(children: [
           ElevatedButton(
-            child: FittedBox(
+            child: const FittedBox(
               fit: BoxFit
                   .scaleDown, // Para que solo se escale hacia abajo si no cabe
               child: Text('Cancelar'),
@@ -161,9 +157,9 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
               AppNavigator.pop();
             },
           ),
-          SizedBox(width: 10.0), // Espacio entre botones
+          const SizedBox(width: 10.0), // Espacio entre botones
           ElevatedButton(
-            child: FittedBox(
+            child: const FittedBox(
               fit: BoxFit
                   .scaleDown, // Para que solo se escale hacia abajo si no cabe
               child: Text('Agregar'),
@@ -178,41 +174,10 @@ class _ProductoSelectPopUpWidgetState extends State<ProductoSelectPopUpWidget> {
                 ? null
                 : () {
                     // Lógica para agregar
-/*                    _registrarItem(
-                      producto,
-                      widget.cliente,
-                      int.parse(_cantidadCtrl.text),
-                      double.parse(_descuentoCtrl.text),
-                      widget.condicionVenta,
-                      context,
-                    );*/
                   },
           ),
         ])
       ],
     );
-  }
-
-  void _registrarItem(
-      ProductosModel producto,
-      ClientesModel cliente,
-      int cantidad,
-      double descuento,
-      CondicionVentaModel condicionVenta,
-      BuildContext context) async {
-      final prefs = new PreferenciasUsuario();
-      var registro;
-    print('envio');
-    print(ventaDetalleModelToJson(registro));
-
-    VentaModel registrado =
-        await VentaProvider.ventaProvider.saveItemVenta(registro);
-
-
-    // producto.registroItemResp = registrado;
-    // _cantidadCtrl.text = '';
-    // widget.productosVentaBloc.agregarProducto(producto);
-    setState(() {});
-    AppNavigator.pop();
   }
 }

@@ -22,7 +22,6 @@ import '../../widget/fondo.widget.dart';
 import '../../widget/version_widget.dart';
 import '../rutas/rutas.page.dart';
 
-
 class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
 
@@ -72,20 +71,20 @@ class _LoginPageState extends State<LoginPage> {
 
   void _onRutChanged(String text, LoginBloc bloc) {
     _textUsuarioController.text = RUTValidator.formatear(text);
-    _textUsuarioController.selection = TextSelection.fromPosition(TextPosition(offset: _textUsuarioController.text.length));
+    _textUsuarioController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _textUsuarioController.text.length));
     bloc.changeUsuario(_textUsuarioController.text);
   }
 
   @override
   Widget build(BuildContext context) {
     final connectivityService = context.watch<ConnectivityService>();
-    this.status = connectivityService.status;
+    status = connectivityService.status;
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          FondoWidget(),
+          const FondoWidget(),
           _loginForm(context),
-
         ],
       ),
     );
@@ -94,8 +93,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget _loginForm(BuildContext context) {
     final bloc = context.read<LoginBloc>();
     final size = MediaQuery.of(context).size;
-
-
 
     return Center(
       child: SingleChildScrollView(
@@ -111,8 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                   blurRadius: 10.0,
                   offset: Offset(0.0, 5.0),
                 ),
-              ]
-          ),
+              ]),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -125,11 +121,10 @@ class _LoginPageState extends State<LoginPage> {
                 absorbing: status != ServerStatus.online,
                 child: _crearUsuario(bloc),
               ),
-
               const SizedBox(height: 20.0),
               AbsorbPointer(
-                  absorbing: status != ServerStatus.online,
-                  child: _crearPassword(bloc),
+                absorbing: status != ServerStatus.online,
+                child: _crearPassword(bloc),
               ),
               const SizedBox(height: 20.0),
               AbsorbPointer(
@@ -137,7 +132,6 @@ class _LoginPageState extends State<LoginPage> {
                 child: _crearSelectorRutas(context, bloc),
               ),
               const SizedBox(height: 20.0),
-
               AbsorbPointer(
                 absorbing: status != ServerStatus.online,
                 child: _crearSelectorFechaFacturacion(context),
@@ -148,16 +142,12 @@ class _LoginPageState extends State<LoginPage> {
                 child: _crearBotonIngresar(bloc),
               ),
               const SizedBox(height: 15.0),
-
               _crearBotonesSecundarios(context),
               const SizedBox(height: 20.0),
-
               const Divider(),
               const SizedBox(height: 10.0),
-
               _buildServerStatusIndicator(),
               const SizedBox(height: 15.0),
-
               VersionWidget(),
             ],
           ),
@@ -201,7 +191,8 @@ class _LoginPageState extends State<LoginPage> {
             errorText: snapshot.hasError ? snapshot.error.toString() : null,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             suffixIcon: IconButton(
-              icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+              icon:
+                  Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
               onPressed: () => setState(() => _obscureText = !_obscureText),
             ),
           ),
@@ -213,13 +204,16 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _crearSelectorRutas(BuildContext context, LoginBloc bloc) {
     return InkWell(
-      onTap: _isLoading ? null : () async {
-        final dynamic resultado = await AppNavigator.pushNamed(AppRoutes.rutas);
-        if (resultado != null && resultado is RutasModel) {
-          setState(() => _rutaSeleccionada = resultado);
-          bloc.changeRuta(_rutaSeleccionada!.codigo);
-        }
-      },
+      onTap: _isLoading
+          ? null
+          : () async {
+              final dynamic resultado =
+                  await AppNavigator.pushNamed(AppRoutes.rutas);
+              if (resultado != null && resultado is RutasModel) {
+                setState(() => _rutaSeleccionada = resultado);
+                bloc.changeRuta(_rutaSeleccionada!.codigo);
+              }
+            },
       borderRadius: BorderRadius.circular(10.0),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 12.0),
@@ -236,7 +230,9 @@ class _LoginPageState extends State<LoginPage> {
                 _rutaSeleccionada?.descripcion ?? 'Seleccione una ruta',
                 style: TextStyle(
                   fontSize: 16,
-                  color: _rutaSeleccionada == null ? Colors.grey[700] : Colors.black,
+                  color: _rutaSeleccionada == null
+                      ? Colors.grey[700]
+                      : Colors.black,
                 ),
               ),
             ),
@@ -292,7 +288,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   Widget _crearBotonIngresar(LoginBloc bloc) {
     return StreamBuilder(
       stream: bloc.formValidStream,
@@ -300,18 +295,28 @@ class _LoginPageState extends State<LoginPage> {
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            icon: _isLoading ? Container() : const Icon(Icons.login, color: Colors.white),
+            icon: _isLoading
+                ? Container()
+                : const Icon(Icons.login, color: Colors.white),
             label: _isLoading
-                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 3))
                 : const Text('Ingresar'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 15.0),
               backgroundColor: colorRojoBase(),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              textStyle:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            onPressed: (snapshot.hasData && !_isLoading) ? () => _login(bloc, context) : null,
+            onPressed: (snapshot.hasData && !_isLoading)
+                ? () => _login(bloc, context)
+                : null,
           ),
         );
       },
@@ -335,7 +340,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildServerStatusIndicator() {
-
     String message;
     Color color;
     IconData icon;
@@ -369,17 +373,18 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         Icon(icon, color: color, size: 20.0),
         const SizedBox(width: 8.0),
-        Text(message, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+        Text(message,
+            style: TextStyle(color: color, fontWeight: FontWeight.w500)),
       ],
     );
   }
 
   void _login(LoginBloc bloc, BuildContext context) async {
-
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
 
-    RespuestaModel resp = await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
+    RespuestaModel resp =
+        await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
 
     if (resp.status == 200 && mounted) {
       LoginResponseModel response = loginResponseModelFromJson(resp.detalle);

@@ -28,7 +28,7 @@ class _RutasPageState extends State<RutasPage> {
     _searchController.addListener(_filtrarRutas);
 
     // Reintenta si no hay datos
-    if (rutasBloc.listaRutas == null || rutasBloc.listaRutas.isEmpty) {
+    if (rutasBloc.listaRutas.isEmpty) {
       rutasBloc.obtenerListaRutas();
     }
   }
@@ -50,18 +50,26 @@ class _RutasPageState extends State<RutasPage> {
       child: ListTile(
         leading: CircleAvatar(
           radius: 25,
-          child: Icon(Icons.add_box_outlined),
+          child: const Icon(Icons.add_box_outlined),
           backgroundColor: colorRojoBase(),
           foregroundColor: Colors.white,
         ),
-        title: Text(ruta.descripcion, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.0, color: Colors.black)),
+        title: Text(ruta.descripcion,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13.0,
+                color: Colors.black)),
         subtitle: Row(
           children: <Widget>[
-            Text(ruta.codigo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10.0, color: Colors.grey)),
+            Text(ruta.codigo,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10.0,
+                    color: Colors.grey)),
           ],
         ),
         trailing: IconButton(
-            icon: Icon(Icons.arrow_forward_ios),
+            icon: const Icon(Icons.arrow_forward_ios),
             onPressed: () {
               AppNavigator.pop(ruta);
             }),
@@ -98,7 +106,8 @@ class _RutasPageState extends State<RutasPage> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: 'Buscar...',
-                        prefixIcon: const Icon(Icons.search, color: Colors.white),
+                        prefixIcon:
+                            const Icon(Icons.search, color: Colors.white),
                         filled: true,
                         fillColor: Colors.white24,
                         border: OutlineInputBorder(
@@ -108,10 +117,11 @@ class _RutasPageState extends State<RutasPage> {
                         contentPadding: const EdgeInsets.symmetric(vertical: 0),
                         suffixIcon: new IconButton(
                           color: Colors.white,
-                          icon: new Icon(Icons.cancel),
+                          icon: const Icon(Icons.cancel),
                           onPressed: () {
                             _searchController.clear();
-                            rutasBloc.limpiarFiltro(); // ← Usar BLoC para limpiar
+                            rutasBloc
+                                .limpiarFiltro(); // ← Usar BLoC para limpiar
                             setState(() {
                               _verBuscar = false;
                             });
@@ -142,7 +152,8 @@ class _RutasPageState extends State<RutasPage> {
                           const SizedBox(height: 16),
                           Text('Error: ${snapshot.error}'),
                           ElevatedButton(
-                            onPressed: () => rutasBloc.limpiarFiltro(), //  rutasBloc.cargarRutas(widget.listaRutas),
+                            onPressed: () => rutasBloc
+                                .limpiarFiltro(), //  rutasBloc.cargarRutas(widget.listaRutas),
                             child: const Text('Reintentar'),
                           ),
                         ],

@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 
 import '../share/app.navigator.dart';
 
-Future<void> showAlertDialog(BuildContext context, String mensaje, IconData? icono) {
+Future<void> showAlertDialog(
+    BuildContext context, String mensaje, IconData? icono) {
   return showDialog(
     context: context,
     barrierDismissible: false, // Permite cerrar tocando fuera del diálogo
     builder: (context) {
       return AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
         title: Icon(
           icono ?? Icons.error_outline, // Manejo de nulos moderno
           color: colorRojoBase(), // Asumo que esta función existe en tu scope

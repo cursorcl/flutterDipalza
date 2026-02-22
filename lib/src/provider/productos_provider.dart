@@ -8,7 +8,6 @@ class ProductosProvider {
   static final ProductosProvider productosProvider = ProductosProvider._();
   final _dio = ApiClient().dio;
 
-
   ProductosProvider._() {
     //
   }
@@ -26,7 +25,6 @@ class ProductosProvider {
       final response = await _dio.get('/api/productos');
       final List<dynamic> data = response.data;
       return data.map((json) => ProductosModel.fromJson(json)).toList();
-
     } catch (error) {
       return [];
     }
@@ -51,9 +49,9 @@ class ProductosProvider {
       log('Response data: ${response.data}', name: 'ProductosProvider');
       final Map<String, dynamic> data = response.data;
       return ProductosModel.fromJson(data);
-
     } catch (error) {
-      log('Error al ejecutar obtenerProducto', name: 'ProductosProvider', error: error);
+      log('Error al ejecutar obtenerProducto',
+          name: 'ProductosProvider', error: error);
       return null;
     }
   }

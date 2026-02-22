@@ -12,8 +12,7 @@ class ConduccionProvider {
   static final ConduccionProvider conduccionProvider = ConduccionProvider._();
   final _dio = ApiClient().dio;
 
-  ConduccionProvider._() {
-  }
+  ConduccionProvider._() {}
 
   Future<List<ConduccionModel>> obtenerListaConduccion() async {
     try {
@@ -35,9 +34,9 @@ class ConduccionProvider {
       final response = await _dio.get('/api/conduccion');
       final List<dynamic> data = response.data;
       return data.map((json) => ConduccionModel.fromJson(json)).toList();
-
     } catch (error) {
-      DBLogProvider.db.nuevoLog(creaLogError('ConduccionProvider', 'obtenerListaConduccion', error.toString()));
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'ConduccionProvider', 'obtenerListaConduccion', error.toString()));
       return [];
     }
   }
@@ -52,15 +51,15 @@ class ConduccionProvider {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         'Accept-Charset': 'utf-8'
       });
-      if(resp.statusCode == 200){
+      if (resp.statusCode == 200) {
         String responseBody = utf8.decode(resp.bodyBytes);
         return conduccionModelFromJson(responseBody);
       }
       return null;
     } catch (error) {
-      DBLogProvider.db.nuevoLog(creaLogError('ConduccionProvider', 'obtenerListaConduccion', error.toString()));
+      DBLogProvider.db.nuevoLog(creaLogError(
+          'ConduccionProvider', 'obtenerListaConduccion', error.toString()));
       return null;
     }
   }
-
 }

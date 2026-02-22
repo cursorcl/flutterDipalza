@@ -61,8 +61,8 @@ class AppColorScheme {
       onSecondary: baseColorScheme.onSecondary,
       surface: baseColorScheme.surface,
       onSurface: baseColorScheme.onSurface,
-      background: baseColorScheme.background,
-      onBackground: baseColorScheme.onBackground,
+      background: baseColorScheme.surface,
+      onBackground: baseColorScheme.onSurface,
       error: baseColorScheme.error,
       onError: baseColorScheme.onError,
 
@@ -89,8 +89,8 @@ class AppColorScheme {
       onSecondary: baseColorScheme.onSecondary,
       surface: baseColorScheme.surface,
       onSurface: baseColorScheme.onSurface,
-      background: baseColorScheme.background,
-      onBackground: baseColorScheme.onBackground,
+      background: baseColorScheme.surface,
+      onBackground: baseColorScheme.onSurface,
       error: baseColorScheme.error,
       onError: baseColorScheme.onError,
 
@@ -111,8 +111,6 @@ class AppColorScheme {
       onSecondary: onSecondary,
       surface: surface,
       onSurface: onSurface,
-      background: background,
-      onBackground: onBackground,
       error: error,
       onError: onError,
     );

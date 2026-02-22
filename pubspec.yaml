@@ -50,6 +50,7 @@ dependencies:
   flutter_background_service: ^5.0.0
   
 
+  path: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

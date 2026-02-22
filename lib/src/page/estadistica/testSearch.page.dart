@@ -33,7 +33,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-
 class EstadisticaPage extends StatefulWidget {
   @override
   _EstadisticaPageState createState() => new _EstadisticaPageState();
@@ -65,7 +64,7 @@ class _EstadisticaPageState extends State<EstadisticaPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Home'),
+        title: const Text('Home'),
         elevation: 0.0,
       ),
       body: new Column(
@@ -76,17 +75,20 @@ class _EstadisticaPageState extends State<EstadisticaPage> {
               padding: const EdgeInsets.all(8.0),
               child: new Card(
                 child: new ListTile(
-                  leading: new Icon(Icons.search),
+                  leading: const Icon(Icons.search),
                   title: new TextField(
                     controller: controller,
-                    decoration: new InputDecoration(
+                    decoration: const InputDecoration(
                         hintText: 'Search', border: InputBorder.none),
                     onChanged: onSearchTextChanged,
                   ),
-                  trailing: new IconButton(icon: new Icon(Icons.cancel), onPressed: () {
-                    controller.clear();
-                    onSearchTextChanged('');
-                  },),
+                  trailing: new IconButton(
+                    icon: const Icon(Icons.cancel),
+                    onPressed: () {
+                      controller.clear();
+                      onSearchTextChanged('');
+                    },
+                  ),
                 ),
               ),
             ),
@@ -94,29 +96,41 @@ class _EstadisticaPageState extends State<EstadisticaPage> {
           new Expanded(
             child: _searchResult.length != 0 || controller.text.isNotEmpty
                 ? new ListView.builder(
-              itemCount: _searchResult.length,
-              itemBuilder: (context, i) {
-                return new Card(
-                  child: new ListTile(
-                    leading: new CircleAvatar(backgroundImage: new NetworkImage(_searchResult[i].profileUrl,),),
-                    title: new Text(_searchResult[i].firstName + ' ' + _searchResult[i].lastName),
-                  ),
-                  margin: const EdgeInsets.all(0.0),
-                );
-              },
-            )
+                    itemCount: _searchResult.length,
+                    itemBuilder: (context, i) {
+                      return new Card(
+                        child: new ListTile(
+                          leading: new CircleAvatar(
+                            backgroundImage: new NetworkImage(
+                              _searchResult[i].profileUrl,
+                            ),
+                          ),
+                          title: new Text(_searchResult[i].firstName +
+                              ' ' +
+                              _searchResult[i].lastName),
+                        ),
+                        margin: const EdgeInsets.all(0.0),
+                      );
+                    },
+                  )
                 : new ListView.builder(
-              itemCount: _userDetails.length,
-              itemBuilder: (context, index) {
-                return new Card(
-                  child: new ListTile(
-                    leading: new CircleAvatar(backgroundImage: new NetworkImage(_userDetails[index].profileUrl,),),
-                    title: new Text(_userDetails[index].firstName + ' ' + _userDetails[index].lastName),
+                    itemCount: _userDetails.length,
+                    itemBuilder: (context, index) {
+                      return new Card(
+                        child: new ListTile(
+                          leading: new CircleAvatar(
+                            backgroundImage: new NetworkImage(
+                              _userDetails[index].profileUrl,
+                            ),
+                          ),
+                          title: new Text(_userDetails[index].firstName +
+                              ' ' +
+                              _userDetails[index].lastName),
+                        ),
+                        margin: const EdgeInsets.all(0.0),
+                      );
+                    },
                   ),
-                  margin: const EdgeInsets.all(0.0),
-                );
-              },
-            ),
           ),
         ],
       ),
@@ -131,8 +145,8 @@ class _EstadisticaPageState extends State<EstadisticaPage> {
     }
 
     _userDetails.forEach((userDetail) {
-      if (userDetail.firstName.contains(text) || userDetail.lastName.contains(text))
-        _searchResult.add(userDetail);
+      if (userDetail.firstName.contains(text) ||
+          userDetail.lastName.contains(text)) _searchResult.add(userDetail);
     });
 
     setState(() {});
@@ -144,11 +158,17 @@ List<UserDetails> _searchResult = [];
 List<UserDetails> _userDetails = [];
 
 final String url = 'https://jsonplaceholder.typicode.com/users';
+
 class UserDetails {
   final int id;
   final String firstName, lastName, profileUrl;
 
-  UserDetails({required this.id, required this.firstName, required this.lastName, this.profileUrl = 'https://i.amz.mshcdn.com/3NbrfEiECotKyhcUhgPJHbrL7zM=/950x534/filters:quality(90)/2014%2F06%2F02%2Fc0%2Fzuckheadsho.a33d0.jpg'});
+  UserDetails(
+      {required this.id,
+      required this.firstName,
+      required this.lastName,
+      this.profileUrl =
+          'https://i.amz.mshcdn.com/3NbrfEiECotKyhcUhgPJHbrL7zM=/950x534/filters:quality(90)/2014%2F06%2F02%2Fc0%2Fzuckheadsho.a33d0.jpg'});
 
   factory UserDetails.fromJson(Map<String, dynamic> json) {
     return new UserDetails(
