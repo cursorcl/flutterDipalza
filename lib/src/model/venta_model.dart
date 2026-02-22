@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:dipalza_movil/src/model/venta_detalle_model.dart';
+import 'package:dipalza_movil/src/share/estado.venta.dart';
+
 
 class VentaModel {
     VentaModel({
@@ -21,7 +23,8 @@ class VentaModel {
         this.totalIva = 0,
         this.totalNeto = 0,
         this.total = 0,
-        this.detalles = const []
+        this.detalles = const [],
+        this.estadoVenta = EstadoVenta.OPENED
 
     });
     int id;
@@ -44,6 +47,7 @@ class VentaModel {
     double totalNeto;
     double total;
     List<VentaDetalleModel> detalles;
+    EstadoVenta estadoVenta;
 
 
 
@@ -69,6 +73,7 @@ class VentaModel {
             ?.map((e) => VentaDetalleModel.fromJson(e as Map<String, dynamic>))
             .toList()
             ?? const [],
+        estadoVenta:  estadoVentaFromApi(json["estadoVenta"])
     );
 
     Map<String, dynamic> toMap() => {
@@ -90,6 +95,7 @@ class VentaModel {
         "totalIla": totalIla,
         "totalIva": totalIva,
         'detalles': detalles.map((d) => d.toJson()).toList(),
+        "estadoVenta": estadoVenta.name
     };
 
     static String toJson(VentaModel ventaModel) {

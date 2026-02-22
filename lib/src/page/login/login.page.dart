@@ -1,25 +1,25 @@
+// ignore_for_file: unused_import
+
 import 'dart:io';
 
 import 'package:dipalza_movil/src/bloc/login_bloc.dart';
+import 'package:dipalza_movil/src/model/login_response_model.dart';
+import 'package:dipalza_movil/src/model/respuesta_model.dart';
 import 'package:dipalza_movil/src/model/rutas_model.dart';
-import 'package:dipalza_movil/src/provider/login_provider.dart';
 import 'package:dipalza_movil/src/provider/vendedor_provider.dart';
 import 'package:dipalza_movil/src/services/connectivity_service.dart';
 import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
+import 'package:dipalza_movil/src/utils/alert_util.dart' as alertUtil;
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:dipalza_movil/src/utils/alert_util.dart' as alertUtil;
-import 'package:intl/intl.dart'; // <-- NUEVO: Importar paquete de formato
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../share/app_routes.dart';
 import '../../validacion/rut_validator.dart';
-import 'package:dipalza_movil/src/model/login_response_model.dart';
-import 'package:dipalza_movil/src/model/respuesta_model.dart';
-
 import '../../widget/fondo.widget.dart';
 import '../../widget/version_widget.dart';
-import '../home/home2.page.dart';
 import '../rutas/rutas.page.dart';
 
 
@@ -50,9 +50,17 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _textUsuarioController = TextEditingController(text: prefs.rut);
     _textPasswordController = TextEditingController(text: prefs.password);
-
-    // --- NUEVO: Establecer la fecha de facturación por defecto a mañana ---
     _fechaFacturacion = DateTime.now().add(const Duration(days: 1));
+
+    // CARGA INICIAL DE DATOS AL BLOC UNA SOLA VEZ
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Necesitamos el context para buscar el bloc, por eso usamos PostFrameCallback
+      if (mounted) {
+        final bloc = context.read<LoginBloc>();
+        bloc.changeUsuario(_textUsuarioController.text);
+        bloc.changePassword(_textPasswordController.text);
+      }
+    });
   }
 
   @override
@@ -84,11 +92,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _loginForm(BuildContext context) {
-    final bloc = LoginProvider.of(context);
+    final bloc = context.read<LoginBloc>();
     final size = MediaQuery.of(context).size;
 
-    bloc.changeUsuario(_textUsuarioController.text);
-    bloc.changePassword(_textPasswordController.text);
+
 
     return Center(
       child: SingleChildScrollView(
@@ -207,13 +214,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget _crearSelectorRutas(BuildContext context, LoginBloc bloc) {
     return InkWell(
       onTap: _isLoading ? null : () async {
-        final rutaSeleccionada = await Navigator.of(context)
-            .push(
-          MaterialPageRoute(
-            builder: (context) => const RutasPage()),
-        );
-        if (rutaSeleccionada != null) {
-          setState(() => _rutaSeleccionada = rutaSeleccionada);
+        final dynamic resultado = await AppNavigator.pushNamed(AppRoutes.rutas);
+        if (resultado != null && resultado is RutasModel) {
+          setState(() => _rutaSeleccionada = resultado);
           bloc.changeRuta(_rutaSeleccionada!.codigo);
         }
       },
@@ -244,9 +247,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // --- NUEVO: Widget completo para el selector de fecha ---
   Widget _crearSelectorFechaFacturacion(BuildContext context) {
-    // Formateamos la fecha para mostrarla. Ej: "15/09/2025"
     final String fechaFormateada = _fechaFacturacion != null
         ? DateFormat('dd/MM/yyyy').format(_fechaFacturacion!)
         : 'Seleccione fecha';
@@ -277,25 +278,17 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // --- NUEVO: Lógica para mostrar el DatePicker ---
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      // La fecha inicial del picker será la que ya está seleccionada
       initialDate: _fechaFacturacion ?? DateTime.now(),
-      // Permitimos seleccionar desde hoy...
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      // ...hasta un año en el futuro.
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    // Si el usuario seleccionó una fecha (no canceló)
     if (picked != null && picked != _fechaFacturacion) {
       setState(() {
         _fechaFacturacion = picked;
       });
-      // Opcional: Si quieres, puedes notificar al BLoC sobre el cambio
-      // final bloc = LoginProvider.of(context);
-      // bloc.changeFechaFacturacion(picked);
     }
   }
 
@@ -382,6 +375,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _login(LoginBloc bloc, BuildContext context) async {
+
+    FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
 
     RespuestaModel resp = await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
@@ -392,7 +387,9 @@ class _LoginPageState extends State<LoginPage> {
       prefs.name = response.nombre;
       prefs.rut = bloc.usuario;
       prefs.password = bloc.password;
-      prefs.token = response.accessToken;
+      prefs.access_token = response.accessToken;
+      prefs.refreshToken = response.refreshToken;
+
       if (_rutaSeleccionada != null) prefs.ruta = _rutaSeleccionada!.codigo;
 
       // Se guarda como String en formato ISO 8601 (estándar y robusto)
@@ -400,9 +397,9 @@ class _LoginPageState extends State<LoginPage> {
         prefs.fechaFacturacion = _fechaFacturacion!;
       }
 
-      Navigator.pushReplacementNamed(context, '/');
+      AppNavigator.pushReplacementNamed(AppRoutes.home);
     } else if (mounted) {
-      alertUtil.showAlert(
+      alertUtil.showAlertDialog(
           context,
           'Problemas con el servicio de autenticación (${resp.detalle})',
           Icons.error);

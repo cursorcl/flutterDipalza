@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import '../page/home/home2.page.dart';
+
 import 'app_routes.dart';
 
 class AppNavigator {
@@ -13,12 +13,41 @@ class AppNavigator {
     return navigatorKey.currentState!.pop(result);
   }
 
+  static void popUntil(String routeName) {
+    navigatorKey.currentState!.popUntil((route) {
+      print('ruta actual: ${route.settings.name}'); // para debug
+      return route.settings.name == routeName;
+    });
+  }
+
+  static void popUntilFirst() {
+    navigatorKey.currentState!.popUntil((route) => route.isFirst);
+  }
+
+  static Future<T?> pushNamedAndRemoveUntil<T>(
+      String routeName, {
+        Object? arguments,
+        bool Function(Route<dynamic>)? predicate, // <--- 1. Agrega este parámetro opcional
+      }) {
+    return navigatorKey.currentState!.pushNamedAndRemoveUntil<T>(
+      routeName,
+      // 2. Si no pasas nada, usa (route) => false para borrar TODO el historial
+      predicate ?? (route) => false,
+      arguments: arguments,
+    );
+  }
+
   static Future<T?> pushReplacementNamed<T>(String routeName, {Object? arguments}) {
     return navigatorKey.currentState!.pushReplacementNamed<T, T>(routeName, arguments: arguments);
   }
 
-  // Método especial para navegación global (login)
-  static void logout(BuildContext context) {
-    Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
+  static void goToLogin() {
+    final nav = navigatorKey.currentState;
+    if (nav == null) return;
+
+    nav.pushNamedAndRemoveUntil(
+      AppRoutes.login,
+          (route) => false,
+    );
   }
 }

@@ -1,9 +1,6 @@
 import 'dart:developer' as developer;
 
-import 'package:dipalza_movil/src/model/numerado_model.dart';
-import 'package:dipalza_movil/src/model/venta_detalle_pieza_model.dart';
 import 'package:dipalza_movil/src/model/venta_model.dart';
-import 'package:dipalza_movil/src/page/home/home2.page.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/app_routes.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -15,7 +12,6 @@ import '../../model/producto_model.dart';
 import '../../model/venta_detalle_model.dart';
 import '../../provider/productos_provider.dart';
 import '../../share/app.navigator.dart';
-import '../producto/productos.page.dart';
 
 class VentaEdicionItemDetalle extends StatefulWidget {
   final VentaModel? actualVenta;
@@ -41,7 +37,6 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   late FocusNode _guardarFocusNode;
 
   ProductosModel? productoEnVenta = null;
-  List<VentaDetallePiezaModel> numeradosEnVenta = [];
 
   bool _isBlocReady = false;
 
@@ -51,6 +46,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   double _pesoTotal = 0;
   bool _esNumerado = false;
   double _stockDisponible = 0;
+  double _pesoPromedio = 0;
   double _valorDescuento = 0;
   String _unidadProducto = 'un';
   double _porcentajeILA = 0;
@@ -90,15 +86,9 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
         _esNumerado = productoEnVenta!.numbered;
         _unidadProducto = productoEnVenta!.unidad;
         _porcentajeILA = productoEnVenta!.porcila;
-
-        // tengo que generar la lista de piezas que ya tiene la venta.
-        // ojo con esto, esta lista sirve mientras que no cambie el código de producto.
         if (_esNumerado) {
-          for (var item in d.piezasDetalle) {
-            numeradosEnVenta.add(item);
-          }
+          _cantidadController.text = d!.piezas.toString();
         }
-
         _cargarStockProducto(productoEnVenta!.articulo);
       } else {
         _productoController = TextEditingController(text: d.nombreProducto);
@@ -173,202 +163,200 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
     // UI PRINCIPAL
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.actualVentaDetalle == null ? 'Agregar producto' : 'Editar detalle'),
-        backgroundColor: Colors.redAccent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            if (widget.actualVentaDetalle == null)
-              Autocomplete<ProductosModel>(
-                initialValue: TextEditingValue(text: _productoController.text),
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  if (textEditingValue.text == '') {
-                    return const Iterable<ProductosModel>.empty();
-                  }
-                  return _productosBloc.searchProducts(textEditingValue.text);
-                },
-                displayStringForOption: (ProductosModel option) => option.descripcion,
-                onSelected: (ProductosModel seleccion) {
-                  _actualizarProductoSeleccionado(seleccion);
-                  _cargarStockProducto(seleccion.articulo);
-                },
-                fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted) {
-                  // Sincroniza el controller de Autocomplete con el nuestro
-                  _productoController = fieldTextEditingController;
-                  _productoFocusNode = fieldFocusNode;
-                  _addSelectAllListener(_productoFocusNode, _productoController);
-                  return TextField(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: Text(widget.actualVentaDetalle == null ? 'Agregar producto' : 'Editar detalle'),
+          backgroundColor: Colors.redAccent,
+        ),
+        body: SingleChildScrollView(
+          // ← envuelve el Padding
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 16.0,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16.0, // ← espacio para el teclado
+            ),
+            child: Column(
+              children: [
+                if (widget.actualVentaDetalle == null)
+                  Autocomplete<ProductosModel>(
+                    initialValue: TextEditingValue(text: _productoController.text),
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return const Iterable<ProductosModel>.empty();
+                      }
+                      return _productosBloc.searchProducts(textEditingValue.text);
+                    },
+                    displayStringForOption: (ProductosModel option) => option.descripcion,
+                    onSelected: (ProductosModel seleccion) {
+                      _actualizarProductoSeleccionado(seleccion);
+                      _cargarStockProducto(seleccion.articulo);
+                    },
+                    fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode,
+                        VoidCallback onFieldSubmitted) {
+                      // Sincroniza el controller de Autocomplete con el nuestro
+                      _productoController = fieldTextEditingController;
+                      _productoFocusNode = fieldFocusNode;
+                      _addSelectAllListener(_productoFocusNode, _productoController);
+                      return TextField(
+                        controller: _productoController,
+                        focusNode: _productoFocusNode,
+                        decoration: InputDecoration(
+                          labelText: 'Buscar por Código o Nombre',
+                          hintText: 'Escriba para buscar...',
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.search),
+                            tooltip: 'Buscar en lista completa',
+                            onPressed: _buscarProducto,
+                          ),
+                        ),
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: (term) => _buscarProductoPorTermino(term),
+                      );
+                    },
+                    optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<ProductosModel> onSelected, Iterable<ProductosModel> options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxHeight: 200),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final ProductosModel option = options.elementAt(index);
+                                return InkWell(
+                                  onTap: () {
+                                    onSelected(option);
+                                  },
+                                  child: ListTile(
+                                    title: Text(option.descripcion),
+                                    subtitle: Text("Código: ${option.articulo}"),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                else
+                  TextField(
                     controller: _productoController,
                     focusNode: _productoFocusNode,
+                    enabled: false,
                     decoration: InputDecoration(
-                      labelText: 'Buscar por Código o Nombre',
-                      hintText: 'Escriba para buscar...',
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.search),
-                        tooltip: 'Buscar en lista completa',
-                        onPressed: _buscarProducto,
-                      ),
+                      labelText: 'Producto',
                     ),
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: (term) => _buscarProductoPorTermino(term),
-                  );
-                },
-                optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<ProductosModel> onSelected, Iterable<ProductosModel> options) {
-                  return Align(
-                    alignment: Alignment.topLeft,
-                    child: Material(
-                      elevation: 4.0,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 200),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final ProductosModel option = options.elementAt(index);
-                            return InkWell(
-                              onTap: () {
-                                onSelected(option);
-                              },
-                              child: ListTile(
-                                title: Text(option.descripcion),
-                                subtitle: Text("Código: ${option.articulo}"),
-                              ),
-                            );
-                          },
+                  ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.remove_circle, size: 30),
+                      color: Colors.redAccent,
+                      disabledColor: Colors.grey[400],
+                      onPressed: isDecrementDisabled ? null : _decrementarCantidad,
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _cantidadController,
+                        focusNode: _cantidadFocusNode,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _excedeStock ? Colors.red : Colors.black),
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Cantidad',
+                          labelStyle: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                            color: _excedeStock ? Colors.red : Colors.black,
+                          ),
                         ),
+                        onChanged: (_) => _recalcularTotal(),
+                        onSubmitted: (_) => FocusScope.of(context).requestFocus(_descuentoFocusNode),
+                        textInputAction: TextInputAction.next,
                       ),
                     ),
-                  );
-                },
-              )
-            else
-              TextField(
-                controller: _productoController,
-                focusNode: _productoFocusNode,
-                enabled: false,
-                decoration: InputDecoration(
-                  labelText: 'Producto',
-                ),
-              ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.remove_circle, size: 30),
-                  color: Colors.redAccent,
-                  disabledColor: Colors.grey[400],
-                  onPressed: isDecrementDisabled ? null : _decrementarCantidad,
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _cantidadController,
-                    focusNode: _cantidadFocusNode,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _excedeStock ? Colors.red : Colors.black),
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Cantidad',
-                      labelStyle: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.normal,
-                        color: _excedeStock ? Colors.red : Colors.black,
-                      ),
+                    IconButton(
+                      icon: Icon(Icons.add_circle, color: Colors.green, size: 30),
+                      onPressed: _incrementarCantidad,
                     ),
-                    onChanged: (_) => _recalcularTotal(),
-                    onSubmitted: (_) => FocusScope.of(context).requestFocus(_descuentoFocusNode),
-                    textInputAction: TextInputAction.next,
+                  ],
+                ),
+                if (_esNumerado)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Peso total: ${_pesoTotal.toStringAsFixed(2)} kg',
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
                   ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.remove_circle, size: 30),
+                      color: Colors.redAccent,
+                      disabledColor: Colors.grey[400],
+                      onPressed: isDescuentoDecrementDisabled ? null : _decrementarDescuento,
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _descuentoController,
+                        focusNode: _descuentoFocusNode,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        decoration: InputDecoration(labelText: 'Descuento (%)'),
+                        onChanged: (_) => _recalcularTotal(),
+                        onSubmitted: (_) => FocusScope.of(context).requestFocus(_guardarFocusNode),
+                        textInputAction: TextInputAction.next,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.add_circle, size: 30),
+                      color: Colors.green,
+                      disabledColor: Colors.grey[400],
+                      onPressed: isDescuentoIncrementDisabled ? null : _incrementarDescuento,
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.add_circle, color: Colors.green, size: 30),
-                  onPressed: _incrementarCantidad,
+                _buildResumenInferior(),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  icon: Icon(Icons.save),
+                  label: Text('Guardar'),
+                  focusNode: _guardarFocusNode,
+                  onPressed: enabled ? _guardar : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey[400],
+                    disabledForegroundColor: Colors.grey[800],
+                    minimumSize: Size(double.infinity, 45),
+                  ),
                 ),
               ],
             ),
-            if (_esNumerado)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Peso total: ${_pesoTotal.toStringAsFixed(2)} kg',
-                  style: TextStyle(color: Colors.grey[700]),
-                ),
-              ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.remove_circle, size: 30),
-                  color: Colors.redAccent,
-                  disabledColor: Colors.grey[400],
-                  onPressed: isDescuentoDecrementDisabled ? null : _decrementarDescuento,
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _descuentoController,
-                    focusNode: _descuentoFocusNode,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(labelText: 'Descuento (%)'),
-                    onChanged: (_) => _recalcularTotal(),
-                    onSubmitted: (_) => FocusScope.of(context).requestFocus(_guardarFocusNode),
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add_circle, size: 30),
-                  color: Colors.green,
-                  disabledColor: Colors.grey[400],
-                  onPressed: isDescuentoIncrementDisabled ? null : _incrementarDescuento,
-                ),
-              ],
-            ),
-            const Spacer(),
-            _buildResumenInferior(),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              icon: Icon(Icons.save),
-              label: Text('Guardar'),
-              focusNode: _guardarFocusNode,
-              onPressed: enabled ? _guardar : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: Colors.grey[400],
-                disabledForegroundColor: Colors.grey[800],
-                minimumSize: Size(double.infinity, 45),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   void _incrementarCantidad() async {
     double cantidad = double.tryParse(_cantidadController.text) ?? 0;
     cantidad++;
     if (_esNumerado) {
-      if (cantidad < productoEnVenta!.numerados.length) {
-        // tengo que marcar el siguiente numerado en la BD como reservado
-        int idx = (cantidad - 1).toInt();
-        productoEnVenta!.numerados[idx].estado = "R";
-        NumeradoModel item = await VentaProvider.ventaProvider.actualizarNumerado(productoEnVenta!.numerados[idx]);
-        // actaulizo el estado en mi lista de numerados asociado al producto
-        productoEnVenta!.numerados[idx] = item;
-        // se crea el registro asociado para la pieza
-        VentaDetallePiezaModel piezaModel = new VentaDetallePiezaModel(
-            detalleVentaId: widget.actualVentaDetalle != null ? widget.actualVentaDetalle!.id : -1, inventarioId: item.id, peso: item.peso);
-        // se agrega a la lista de numerados en la venta.
-        numeradosEnVenta.add(piezaModel);
-        setState(() {
-          _pesoTotal += productoEnVenta!.numerados[idx].peso;
-        });
-      }
+      setState(() {
+        _pesoTotal = 0;
+        var lista = productoEnVenta!.numerados;
+        if (lista.length > 0) {
+          _pesoTotal = this._pesoPromedio * cantidad;
+        }
+      });
     }
     _cantidadController.text = cantidad.toString();
     setState(() {
@@ -384,16 +372,13 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       cantidad--;
       _cantidadController.text = cantidad.toString();
       if (_esNumerado) {
-        if (cantidad < productoEnVenta!.numerados.length) {
-          int idx = (cantidad).toInt();
-          productoEnVenta!.numerados[idx].estado = "D";
-          NumeradoModel item = await VentaProvider.ventaProvider.actualizarNumerado(productoEnVenta!.numerados[idx]);
-          productoEnVenta!.numerados[idx] = item;
-          numeradosEnVenta.removeAt(idx);
-          setState(() {
-            _pesoTotal -= productoEnVenta!.numerados[idx].peso;
-          });
-        }
+        setState(() {
+          _pesoTotal = 0;
+          var lista = productoEnVenta!.numerados;
+          if (lista.length > 0) {
+            _pesoTotal = this._pesoPromedio * cantidad;
+          }
+        });
       }
       setState(() {
         _excedeStock = cantidad > _stockDisponible;
@@ -484,7 +469,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   }
 
   void _buscarProducto() async {
-    productoEnVenta = await AppNavigator.pushNamed(AppRoutes.productosSeleccion);
+    productoEnVenta = await AppNavigator.pushNamed<ProductosModel?>(AppRoutes.productosSeleccion);
     /*
     productoEnVenta = await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const ProductosPage(isForSelection: true)),
@@ -504,11 +489,15 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
       if (productoEnVenta != null) {
         _productosBloc.updatePorduct(productoEnVenta!);
+        if (_esNumerado) {
+          var lista = productoEnVenta!.numerados;
+          this._pesoPromedio = lista.length == 0 ? 0 : lista.map((nn) => nn.peso).reduce((a, b) => a + b) / lista.length;
+        }
         setState(() {
           if (_esNumerado) {
-            _stockDisponible = productoEnVenta!.pieces;
+            _stockDisponible = productoEnVenta!.pieces - productoEnVenta!.piezasVentas;
           } else {
-            _stockDisponible = productoEnVenta!.stock;
+            _stockDisponible = productoEnVenta!.stock - productoEnVenta!.stockVentas;
           }
           _unidadProducto = productoEnVenta!.unidad;
           _porcentajeILA = productoEnVenta!.porcila; // Usando 'porcila'
@@ -548,15 +537,14 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       _stockDisponible = 0; // Se resetea
       _estaCargandoStock = true; // Se pone a cargar
       // al cambiar el código de producto se debe limpiar la lista de piezas asociadas que tiene el registro.
-      numeradosEnVenta.clear();
       _recalcularTotal();
       FocusScope.of(context).requestFocus(_cantidadFocusNode);
-
     });
   }
 
   /// Recalcula el valor del descuento y el total final
   void _recalcularTotal() {
+    // TODO debo verificar este cálculo
     final cantidad = double.tryParse(_cantidadController.text) ?? 0;
     final descuento = double.tryParse(_descuentoController.text) ?? 0;
     final subtotal = cantidad * _precioUnitario;
@@ -570,7 +558,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   }
 
   void _guardar() async {
-    final cantidad = double.tryParse(_cantidadController.text) ?? 0;
+    var cantidad = double.tryParse(_cantidadController.text) ?? 0;
     final porcentajeDescuento = double.tryParse(_descuentoController.text) ?? 0;
 
     if (_productoId == null) {
@@ -602,7 +590,10 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
       _productosBloc.updatePorduct(producto);
 
-      final stockReal = producto.stock;
+      var stockReal = productoEnVenta!.stock - productoEnVenta!.stockVentas;
+      if (_esNumerado) {
+        stockReal = productoEnVenta!.pieces - productoEnVenta!.piezasVentas;
+      }
       setState(() => _stockDisponible = stockReal);
       final ventaId = widget.actualVenta == null ? -1 : widget.actualVenta!.id;
 
@@ -610,6 +601,12 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       final totalIva = total * porcIva / 100;
       final porcIla = producto.porcila;
       final totalIla = total * porcIla / 100;
+
+      var piezas = 0;
+      if (_esNumerado) {
+        piezas = cantidad.toInt();
+        cantidad = cantidad * _pesoPromedio;
+      }
 
       final detalle = VentaDetalleModel(
           id: widget.actualVentaDetalle == null ? -1 : widget.actualVentaDetalle!.id,
@@ -626,13 +623,13 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           totalIla: totalIla,
           totalLinea: total,
           unidad: unidad,
-          piezas: 0,
+          piezas: piezas,
           // TODO me falta validar las piezas
-          piezasDetalle: numeradosEnVenta.isEmpty ? [] : numeradosEnVenta);
+          piezasDetalle: []);
       String json = ventaDetalleModelToJson(detalle);
       developer.log("Enviando a grabar detalle venta $json");
       final VentaModel ventaModel = await VentaProvider.ventaProvider.saveItemVenta(detalle);
-      AppNavigator.pop( ventaModel);
+      AppNavigator.pop(ventaModel);
     } catch (e, s) {
       showAlertDialog(context, s.toString(), Icons.error);
     }

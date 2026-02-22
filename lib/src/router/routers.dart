@@ -8,7 +8,6 @@ import 'package:dipalza_movil/src/page/ventas/venta.encabezado.edicion.page.dart
 import 'package:flutter/material.dart';
 
 import '../page/home/home.page.dart';
-import '../page/ventas/listado.detalle.de.una.venta.dart';
 
 Map<String, WidgetBuilder> getApplicationRoutes() {
   return <String, WidgetBuilder>{
@@ -17,9 +16,7 @@ Map<String, WidgetBuilder> getApplicationRoutes() {
     '/': (BuildContext context) => HomePage(),
     'login': (BuildContext context) => LoginPage(),
     'config': (BuildContext context) => ConfiguracionPage(),
-
     'clientes': (BuildContext context) => ClientesPage(),
-
     'home': (BuildContext context) => HomePage(),
     'productos': (BuildContext context) => ProductosPage(),
     'listadoDeVentas': (BuildContext context) => ListadeDeVentasPage(),

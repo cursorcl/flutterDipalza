@@ -1,0 +1,106 @@
+import 'package:flutter/material.dart';
+
+import '../model/producto_model.dart';
+import '../model/venta_model.dart';
+import '../page/cliente/clientes.page.dart';
+import '../page/config/preferences.page.dart';
+import '../page/home/home.page.dart';
+// --- IMPORTS DE TUS PÁGINAS ---
+import '../page/login/login.page.dart'; // O AuthGate si usas ese
+import '../page/producto/productos.page.dart';
+import '../page/rutas/rutas.page.dart';
+import '../page/ventas/listado.de.ventas.page.dart';
+import '../page/ventas/listado.detalle.de.una.venta.dart';
+import '../page/ventas/listado.ultima.venta.page.dart';
+import '../page/ventas/venta.encabezado.edicion.page.dart';
+import '../page/ventas/venta.item.detalle.edicion.dart';
+import 'app_routes.dart';
+
+class AppRouter {
+
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    final args = settings.arguments;
+
+    switch (settings.name) {
+
+    // --- RUTAS DE ENTRADA ---
+      case 'home': // Asegúrate de tener esta constante o usar string
+        return MaterialPageRoute(builder: (_) =>  HomePage());
+
+      case AppRoutes.login:
+        return MaterialPageRoute(builder: (_) =>  LoginPage());
+
+    // --- RUTAS PRINCIPALES (Si se navegaran directamente) ---
+      case AppRoutes.listadoVentas:
+        return MaterialPageRoute(builder: (_) => ListadeDeVentasPage());
+
+    // --- PANTALLAS SECUNDARIAS ---
+      case AppRoutes.rutas:
+        return MaterialPageRoute(builder: (_) => RutasPage());
+
+      case AppRoutes.productosSeleccion:
+        return MaterialPageRoute<ProductosModel?>(builder: (_) => const ProductosPage(isForSelection: true));
+
+      case AppRoutes.clientesSeleccion:
+        return MaterialPageRoute(builder: (_) => const ClientesPage(isForSelection: true));
+
+    // --- RUTAS CON ARGUMENTOS (Lógica movida desde tu Home) ---
+
+      case AppRoutes.nuevaVenta:
+        return MaterialPageRoute(builder: (_) => VentaEncabezadoEdicionPage());
+
+      case AppRoutes.modificarVenta:
+        if (args is Map<String, dynamic>) {
+          final venta = args['ventaEnEdicion'] as VentaModel?;
+          return MaterialPageRoute(
+              builder: (_) => VentaEncabezadoEdicionPage(ventaEnEdicion: venta)
+          );
+        }
+        return _errorRoute("Faltan argumentos en Modificar Venta");
+
+      case AppRoutes.ventaDetalle:
+        if (args is Map<String, dynamic>) {
+          return MaterialPageRoute(
+            builder: (_) => ListadoDetalleDeUnaVentaPage(
+              ventaModel: args['ventaModel'],
+              esEdicion: args['esEdicion'],
+            ),
+          );
+        }
+        return _errorRoute("Faltan argumentos en Venta Detalle");
+
+      case AppRoutes.ventaItemEdicion:
+        if (args is Map<String, dynamic>) {
+          return MaterialPageRoute(
+            builder: (_) => VentaEdicionItemDetalle(
+              actualVenta: args['actualVenta'],
+              actualVentaDetalle: args['actualVentaDetalle'],
+            ),
+          );
+        }
+        return _errorRoute("Faltan argumentos en Item Edición");
+
+      case AppRoutes.listadoUltimaVenta:
+        if (args is Map<String, dynamic>) {
+          return MaterialPageRoute(
+              builder: (_) => ListadoDetalleDeUltimaVentaPage(ventaModel: args['ventaModel'])
+          );
+        }
+        return _errorRoute("Faltan argumentos en Última Venta");
+        
+      case AppRoutes.config:
+        return MaterialPageRoute(builder: (_) => ConfiguracionPage());
+        
+    // DEFAULT
+      default:
+        return _errorRoute("Ruta no definida: ${settings.name}");
+    }
+  }
+
+  static Route<dynamic> _errorRoute(String message) {
+    return MaterialPageRoute(builder: (_) => Scaffold(
+      appBar: AppBar(title: const Text("Error de Navegación")),
+      body: Center(child: Text(message)),
+    ));
+  }
+}

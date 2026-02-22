@@ -12,5 +12,6 @@ class AppRoutes {
   static const String ventaDetalle = 'ventaDetalle'; // ListadoDetalleDeUnaVentaPage(ventaModel, esEdicion)
   static const String ventaItemEdicion = 'ventaItemEdicion'; // VentaEdicionItemDetalle(actualVenta, actualVentaDetalle)
   static const String login = 'login'; // LoginPage
-  static const String home_menu = 'home_menu'; // ListadeDeVentasPage
+  static const String home = 'home'; // ListadeDeVentasPage
+  static const String listadoUltimaVenta = 'listadoUltimaVenta'; // ListadoDetalleDeUltimaVentaPage'
 }

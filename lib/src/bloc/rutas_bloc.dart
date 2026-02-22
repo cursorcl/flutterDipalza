@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'package:rxdart/rxdart.dart';
 
 import 'package:dipalza_movil/src/model/rutas_model.dart';
 import 'package:dipalza_movil/src/provider/rutas_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 class RutasBloc {
+
+
   // El singleton
   static final RutasBloc _singleton = new RutasBloc._internal();
   // El Behavior que mantiene el ultimo valor
@@ -21,7 +23,7 @@ class RutasBloc {
   // Define el stream, para mantener la información actualizada
   Stream<List<RutasModel>> get rutasStream => _rutasController.stream;
   // El valor actual del bloc
-  List<RutasModel> get listaRutas => _rutasController.value;
+  List<RutasModel> get listaRutas => _rutasController.valueOrNull ?? [];
 
   // Método que actualiza el valor del behavior
   obtenerListaRutas() async {

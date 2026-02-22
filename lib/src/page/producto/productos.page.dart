@@ -2,10 +2,9 @@
 import 'package:dipalza_movil/src/bloc/productos_bloc.dart';
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
+import 'package:flutter/material.dart';
 
-import '../../provider/productos_provider.dart';
 import '../../share/app.navigator.dart';
 import '../../widget/connectivity_banner.widget.dart';
 

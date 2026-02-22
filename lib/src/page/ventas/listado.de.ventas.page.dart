@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../share/app_routes.dart';
+import '../../share/app_scaffold_key.dart';
 import '../../widget/connectivity_banner.widget.dart';
 import '../../widget/fondo.widget.dart';
-import '../home/home2.page.dart';
 
 class ListadeDeVentasPage extends StatefulWidget {
   const ListadeDeVentasPage({Key? key}) : super(key: key);
@@ -36,15 +36,21 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            AppScaffoldKey.homeKey.currentState?.openDrawer();
+            //Scaffold.of(context).openDrawer();
+
+          },
+        ),
         centerTitle: true,
         backgroundColor: colorRojoBase(),
         title: Text(
-              'Ventas',
-              style: TextStyle(color: Colors.white),
-            ),
+          'Ventas',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -69,7 +75,33 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
     return FutureBuilder(
       future: _listaVentasFuture,
       builder: (BuildContext context, AsyncSnapshot<List<VentaModel>> snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                const SizedBox(height: 10),
+                const Text('Ocurrió un error al cargar:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    '${snapshot.error}', // Esto nos dirá la verdad
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _cargarVentas,
+                  child: const Text("Reintentar"),
+                )
+              ],
+            ),
+          );
+        } else
+          if (snapshot.hasData) {
           final nuevaCant = snapshot.data!.length;
           // Solo si cambió, actualiza el estado del padre post-frame
           if (nuevaCant != cantidadVentas) {
@@ -85,17 +117,15 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
             Positioned.fill(
                 child: Column(
               children: <Widget>[
-                // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
                 ConnectivityBanner(),
                 Expanded(child: ListView(children: _widgetListOfItemVenta(context, snapshot.data!))),
               ],
             ))
           ]);
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
         }
+          else {
+            return const Center(child: Text("Sin información disponible"));
+          }
       },
     );
   }
@@ -184,7 +214,7 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(itemVenta.nombreCliente ?? '--',
+                Text(itemVenta.nombreCliente,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -195,8 +225,7 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
                 ),
                 Text(getFormatRut(itemVenta.rutCliente),
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.0,
+                        fontWeight: FontWeight.normal, color: Colors.grey[700], fontSize: 13
                     )),
                 SizedBox(
                   height: 5.0,
@@ -206,49 +235,33 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
             subtitle: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(itemVenta.nombreCondicionVenta),
+                Text(itemVenta.nombreCondicionVenta,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal, color: Colors.grey[700], fontSize: 10
+                    )),
                 Expanded(child: Container()),
-                Text(getValorModena(itemVenta.total + itemVenta.totalIla + itemVenta.totalIva - itemVenta.totalDescuento, 0),
+                Text(getValorModena(itemVenta.total, 0),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: 16
                     ))
               ],
             ),
             trailing: IconButton(
                 icon: Icon(Icons.arrow_forward_ios),
                 onPressed: () {
-                  AppNavigator.pushNamed(AppRoutes.ventaDetalle, arguments: {
-                    'ventaModel': itemVenta,
-                    'esEdicion': false
-                  });
-/*
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => ListadoDetalleDeUnaVentaPage(ventaModel: itemVenta, esEdicion: false),
-                    ),
-                  );
-*/
+                  AppNavigator.pushNamed(AppRoutes.ventaDetalle, arguments: {'ventaModel': itemVenta, 'esEdicion': false});
                 }),
           ),
         ));
   }
 
   void _goToVentaPage(BuildContext context, VentaModel? venta) {
-      AppNavigator.pushNamed(
-        AppRoutes.nuevaVenta,
-        arguments: {'ventaEnEdicion': venta},
-      ).then((valor) {
-        if (valor == true) {
-          setState(() {
-            // Esto forzará al FutureBuilder a recargarse
-          });
-        }
-      });
-    /*
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => VentaEncabezadoEdicionPage(ventaEnEdicion: venta),
-      ),
+    AppNavigator.pushNamed(
+      AppRoutes.nuevaVenta,
+      arguments: {'ventaEnEdicion': venta},
     ).then((valor) {
       if (valor == true) {
         setState(() {
@@ -256,7 +269,6 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
         });
       }
     });
-     */
   }
 
   Future<void> _showDialogRemoveItemVenta(BuildContext context, VentaModel venta) async {

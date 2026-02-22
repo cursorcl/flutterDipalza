@@ -1,10 +1,10 @@
+import 'dart:convert';
+
 import 'package:dipalza_movil/src/model/login.model.dart';
 import 'package:dipalza_movil/src/model/respuesta_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
-
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class VenderdorProvider {
   Future<RespuestaModel> loginUsuario(String usuario, String password) async {
@@ -31,15 +31,15 @@ class VenderdorProvider {
           detalle: 'Error en la conexión del servicio de Autenticación.');
     }
 
-    if (resp != null && resp.statusCode == 401) {
+    if (resp.statusCode == 401) {
       return RespuestaModel(
           status: resp.statusCode,
           detalle: 'Las credenciales son incorrectas.');
-    } else if (resp != null && resp.statusCode == 409) {
+    } else if (resp.statusCode == 409) {
       return RespuestaModel(
           status: resp.statusCode,
           detalle: 'Usuario con actividad en otro dispositivo');
-    } else if (resp != null && resp.statusCode == 402) {
+    } else if (resp.statusCode == 402) {
       return RespuestaModel(
           status: resp.statusCode,
           detalle: 'La versión de prueba ha finalizado.');

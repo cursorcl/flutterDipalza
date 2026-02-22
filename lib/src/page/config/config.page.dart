@@ -1,8 +1,8 @@
+import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
-import 'package:dipalza_movil/src/share/app.navigator.dart';
 
 class ConfiguracionPage extends StatefulWidget {
   const ConfiguracionPage({Key? key}) : super(key: key);

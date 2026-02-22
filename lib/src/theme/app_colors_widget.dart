@@ -1,6 +1,7 @@
 // lib/theme/app_colors_widget.dart
 
 import 'package:flutter/material.dart';
+
 import 'app_color_scheme.dart';
 
 /// Widget para proporcionar acceso a los colores corporativos

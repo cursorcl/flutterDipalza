@@ -1,7 +1,7 @@
 import 'package:dipalza_movil/src/model/venta_model.dart';
-import 'package:dipalza_movil/src/page/home/home2.page.dart';
 import 'package:dipalza_movil/src/page/ventas/venta.item.detelle.view.dart';
-import 'package:dipalza_movil/src/page/ventas/venta.item.detalle.edicion.dart';
+import 'package:dipalza_movil/src/provider/conduccion_provider.dart';
+import 'package:dipalza_movil/src/provider/rutas_provider.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/app_routes.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
@@ -10,15 +10,16 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../model/venta_detalle_model.dart';
 import '../../share/app.navigator.dart';
+import '../../share/estado.venta.dart';
 import '../../widget/connectivity_banner.widget.dart';
 import '../../widget/fondo.widget.dart';
 
 class ListadoDetalleDeUnaVentaPage extends StatefulWidget {
-  final VentaModel? ventaModel;
+  final VentaModel ventaModel;
   final bool esEdicion;
 
 
-  const ListadoDetalleDeUnaVentaPage({Key? key, this.ventaModel, this.esEdicion = false}) : super(key: key);
+  const ListadoDetalleDeUnaVentaPage({Key? key, required this.ventaModel, this.esEdicion = false}) : super(key: key);
 
   @override
   _ListaVentasPageState createState() => _ListaVentasPageState();
@@ -26,14 +27,34 @@ class ListadoDetalleDeUnaVentaPage extends StatefulWidget {
 
 class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
 
-  late VentaModel? _venta;
+  late Future<List<VentaDetalleModel>> _futureBuildeDetallesDeVenta;
+  late VentaModel _venta;
   int cantidadVentas = 0;
-  List<VentaDetalleModel> ventas = [];
 
   @override
   void initState() {
     super.initState();
-    _venta = widget.ventaModel; // copia inicial
+    _venta = widget.ventaModel;
+    _cargarConfiguracionRuta();
+    _futureBuildeDetallesDeVenta = obtenerDetalleDeVenta();
+  }
+
+  Future<void> _cargarConfiguracionRuta() async {
+    try {
+      var rutas = await RutasProvider.rutasProvider.obtenerListaRutas();
+
+      if (!mounted) return;
+
+      if (rutas.isNotEmpty) {
+        var ruta = rutas.firstWhere(
+                (r) => r.codigo == _venta.codigoRuta,
+            orElse: () => rutas.first
+        );
+        createConduccion(ruta.codigoConduccion);
+      }
+    } catch (e) {
+      print("Error cargando rutas: $e");
+    }
   }
 
   @override
@@ -44,46 +65,62 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
         leading: widget.esEdicion ? null : BackButton(
           onPressed: () {
             // Aquí pones tu ruta específica
-            Navigator.pushNamed(context, '/listadoDeVentas');
+            AppNavigator.pushNamed(AppRoutes.listadoVentas);
           },
         ),
         backgroundColor: colorRojoBase(),
-        title:  Text(
-              this._venta != null    ? 'Venta #${this._venta?.id == -1 ? 'Nueva' : this._venta?.id}' : 'Nueva Venta',
-              style: TextStyle(color: Colors.white),
-            ),
+        title: Text(
+          this._venta != null ? 'Venta #${this._venta?.id == -1 ? 'Nueva' : this._venta?.id}' : 'Nueva Venta',
+          style: TextStyle(color: Colors.white),
+        ),
         actions: !widget.esEdicion ? [] : [
-          IconButton(
-            icon: const Icon(Icons.check_circle_outline),
-            tooltip: "Finalizar Venta",
-            onPressed: _finalizarVenta,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0), // Margen para que no toque los bordes
+            child: TextButton.icon(
+              onPressed: _finalizarVenta,
+              icon: const Icon(Icons.check_circle_outline, size: 20),
+              label: const Text("Finalizar"),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.white.withOpacity(0.15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+            ),
           ),
         ],
       ),
-      floatingActionButton:  widget.esEdicion ?
+      floatingActionButton: widget.esEdicion ?
       FloatingActionButton(
           elevation: 10,
           tooltip: 'Agregar Item',
           child: const Icon(Icons.add),
           backgroundColor: colorRojoBase(),
-          // Usa tu color
           onPressed: () {
             _inicializarNuevaVenta(context);
           })
           : null
-    ,
+      ,
       body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 1. ENVUELVE EL CONTENIDO EN EXPANDED
-            Expanded(
-              child:  this._venta != null && this._venta?.id != -1
-                  ? _creaListaVentasDetalle(context) // si hay ID → carga desde backend
-                  : _buildNuevaVenta(context),
-            ),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: this._venta?.id != -1
+                ? RefreshIndicator(
+              onRefresh: () async {
+                _recargarDetalleDeVentas();
+                await _futureBuildeDetallesDeVenta;
+              },
+              // El hijo del RefreshIndicator es tu lista
+              child: _creaListaVentasDetalle(context),
+            )
+                : _buildNuevaVenta(context),
+          ),
 
 
-          ],
+        ],
       ), // si no hay ID → muestra inicial vacío
     );
   }
@@ -112,24 +149,23 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
 
   Widget _creaListaVentasDetalle(BuildContext context) {
     return FutureBuilder(
-      future: VentaProvider.ventaProvider.obtenerListaVentasDetalle(this._venta!.id),
+      future: _futureBuildeDetallesDeVenta,
       builder: (BuildContext context, AsyncSnapshot<List<VentaDetalleModel>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasData) {
-
           return Stack(children: <Widget>[
             Positioned.fill(
               child: FondoWidget(),
             ),
             Positioned.fill(
                 child: Column(
-              children: <Widget>[
-                ConnectivityBanner(),
-                Expanded(child: ListView(children: _ventasDetalleItems(context, snapshot.data!))),
-              ],
-            ))
+                  children: <Widget>[
+                    ConnectivityBanner(),
+                    Expanded(child: ListView(children: _createWidgetVentasDetalleItems(context, snapshot.data!))),
+                  ],
+                ))
           ]);
         } else {
           return Center(
@@ -140,7 +176,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
     );
   }
 
-  List<Widget> _ventasDetalleItems(BuildContext context, List<VentaDetalleModel> listaVenta) {
+  List<Widget> _createWidgetVentasDetalleItems(BuildContext context, List<VentaDetalleModel> listaVenta) {
     final List<Widget> _listItem = [];
     if (listaVenta.length == 0) {
       _listItem.add(_createEmptyCard());
@@ -148,7 +184,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
       listaVenta.forEach((itemVenta) {
         final slidableItem = Slidable(
           key: ValueKey(itemVenta.id),
-          endActionPane: widget.esEdicion ?  ActionPane(
+          endActionPane: widget.esEdicion ? ActionPane(
             motion: const StretchMotion(), // Un efecto visual
             children: [
               // --- BOTÓN ELIMINAR ---
@@ -174,7 +210,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
                 label: 'Modificar',
               ),
             ],
-          ) :  null,
+          ) : null,
 
           // El hijo es tu widget original
           child: VentaDetalleTile(item: itemVenta),
@@ -213,80 +249,71 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
   void _inicializarNuevaVenta(BuildContext context) {
     // Lógica para navegar a una pantalla de edición
 
-    AppNavigator.pushNamed(AppRoutes.ventaItemEdicion, arguments : {
-      'actualVenta' : this._venta
+    AppNavigator.pushNamed(AppRoutes.ventaItemEdicion, arguments: {
+      'actualVenta': this._venta
     }).then((ventaActualizada) {
       if (ventaActualizada != null) {
         setState(() {
-          // haga lo que corresponda con el modelo devuelto
-          this._venta = ventaActualizada as VentaModel?;
+          this._venta = ventaActualizada as VentaModel;
+          _futureBuildeDetallesDeVenta = Future.value( this._venta.detalles);
         });
-      }});
-/*    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => VentaEdicionItemDetalle(actualVenta: this._venta,),
-      ),
-    ).then((ventaActualizada) {
-      if (ventaActualizada != null) {
-        setState(() {
-          // haga lo que corresponda con el modelo devuelto
-          this._venta = ventaActualizada;
-        });
-      }});*/
+      }
+    });
   }
 
   // --- Coloca esto dentro de la clase State de tu Widget ---
 
   void _modificarItem(BuildContext context, VentaDetalleModel item) {
-
     AppNavigator.pushNamed(AppRoutes.ventaItemEdicion,
-      arguments: {
-      'actualVentaDetalle' : item,
-        'actualVenta' : this._venta
-      }
+        arguments: {
+          'actualVentaDetalle': item,
+          'actualVenta': this._venta
+        }
     ).then((ventaActualizada) {
       if (ventaActualizada != null) {
         setState(() {
           // haga lo que corresponda con el modelo devuelto
-          this._venta = ventaActualizada as VentaModel?;
+          this._venta = ventaActualizada as VentaModel;
         });
       }
     });
-
-/*    Navigator.of(context).push<VentaModel>(
-      MaterialPageRoute(
-        builder: (context) => VentaEdicionItemDetalle(actualVentaDetalle: item, actualVenta: this._venta,),
-      ),
-    ).then((ventaActualizada) {
-      if (ventaActualizada != null) {
-        setState(() {
-          // haga lo que corresponda con el modelo devuelto
-          this._venta = ventaActualizada;
-        });
-      }
-    });*/
-
-
   }
-  void _finalizarVenta() {
-    // Validar que exista la venta actual
-    if (_venta == null) {
-      return;
-    }
 
-    // Aquí podrías agregar validaciones adicionales:
-    // - que la venta tenga al menos un producto
-    // - que el total sea mayor que 0, etc.
+  Future<VentaDetalleModel> createConduccion(String codigoConduccion) async {
+    var conducciones = await ConduccionProvider.conduccionProvider.obtenerListaConduccion();
+    var conduccion = conducciones.firstWhere((conduccion) => conduccion.codigo == codigoConduccion, orElse: () => conducciones.first);
 
-    Navigator.of(context).pushNamed(
-        'listadoDeVentas'
+    return VentaDetalleModel(
+        ventaId: this._venta.id,
+        idProducto: conduccion.codigo,
+        nombreProducto: conduccion.descripcion,
+        cantidad: 1,
+        precioUnitario: conduccion.valor,
+        porcentajeDescuento: 0,
+        porcentajeIva: 0,
+        porcentajeIla: 0,
+        totalLinea: conduccion.valor,
+        totalDescuento: 0,
+        totalIva: 0,
+        totalIla: 0,
+        piezas: 0,
+        unidad: 'UND'
     );
   }
 
-  void _eliminarItem(BuildContext context, VentaDetalleModel item) {
-    // ¡MUY IMPORTANTE! Siempre pide confirmación antes de borrar.
-    print('Eliminar: ${item.nombreProducto}');
+  Future<void> _finalizarVenta() async {
+    _venta = await VentaProvider.ventaProvider.cambiarEstadoVenta(this._venta, EstadoVenta.FINISHED);
 
+    if (_venta == null) {
+      return;
+    }
+    AppNavigator.popUntilFirst();
+    //AppNavigator.popUntil(AppRoutes.listadoVentas);
+    //AppNavigator.pop(true);
+    //AppNavigator.pushNamedAndRemoveUntil(AppRoutes.listadoVentas);
+  }
+
+  void _eliminarItem(BuildContext context, VentaDetalleModel item) {
     showDialog(
       context: context,
       builder: (BuildContext ctx) {
@@ -300,25 +327,26 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
             ),
             TextButton(
               child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                // --- AQUÍ VA TU LÓGICA DE BORRADO REAL ---
-                // 1. Llama a tu BLoC, Provider o API para borrar el dato.
-                // 2. Si tiene éxito, actualiza el estado (ej. llamando a setState
-                //    o refrescando el FutureBuilder) para que la lista se repinte.
-
-                print('Eliminando: ${item.nombreProducto}');
-
-                Navigator.of(ctx).pop(); // Cierra el diálogo
-
-                // Ejemplo simple si 'listaVenta' fuera una variable de estado:
-                // setState(() => listaVenta.remove(item));
-                // (En tu caso, con FutureBuilder, probablemente necesites
-                // llamar al método que recarga el Future)
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+                 await VentaProvider.ventaProvider.removeItemVenta(item.id);
+                _recargarDetalleDeVentas();
               },
             ),
           ],
         );
       },
     );
+  }
+
+
+  Future<List<VentaDetalleModel>> obtenerDetalleDeVenta() async {
+    return VentaProvider.ventaProvider.obtenerListaVentasDetalle(this._venta!.id);
+  }
+
+  void _recargarDetalleDeVentas() {
+    setState(() {
+      _futureBuildeDetallesDeVenta = obtenerDetalleDeVenta();
+    });
   }
 }

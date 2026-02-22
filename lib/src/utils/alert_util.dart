@@ -3,17 +3,16 @@ import 'package:flutter/material.dart';
 
 import '../share/app.navigator.dart';
 
-void showAlert(BuildContext context, String mensaje, IconData icono) {
-  showDialog<String>(
+Future<void> showAlertDialog(BuildContext context, String mensaje, IconData? icono) {
+  return showDialog(
     context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
+    barrierDismissible: false, // Permite cerrar tocando fuera del diálogo
+    builder: (context) {
       return AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
         title: Icon(
-          icono != null ? icono : Icons.error_outline,
-          color: colorRojoBase(),
+          icono ?? Icons.error_outline, // Manejo de nulos moderno
+          color: colorRojoBase(), // Asumo que esta función existe en tu scope
           size: 60.0,
         ),
         content: Text(mensaje),
@@ -23,55 +22,11 @@ void showAlert(BuildContext context, String mensaje, IconData icono) {
               'Cerrar',
               style: TextStyle(color: colorRojoBase()),
             ),
+            // Asegúrate que AppNavigator maneje el contexto global o pásalo si es necesario
             onPressed: () => AppNavigator.pop(),
           )
         ],
       );
     },
-  );
-}
-
-void showBlock(BuildContext context, String mensaje) {
-  showDialog<String>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            width: 100.0,
-            height: 100.0,
-            child: Image.asset(
-              'assets/gift/spinner_loading.gif',
-              colorBlendMode: BlendMode.srcATop,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-Widget showAlertDialog(BuildContext context, String mensaje, IconData icono) {
-  return AlertDialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-    title: Icon(
-      icono != null ? icono : Icons.error_outline,
-      color: colorRojoBase(),
-      size: 60.0,
-    ),
-    content: Text(mensaje),
-    actions: <Widget>[
-      TextButton(
-        child: Text(
-          'Cerrar',
-          style: TextStyle(color: colorRojoBase()),
-        ),
-        onPressed: () => AppNavigator.pop(),
-      )
-    ],
   );
 }

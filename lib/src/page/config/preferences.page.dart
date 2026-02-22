@@ -1,5 +1,8 @@
+// ignore_for_file: unused_field, unused_element
+
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -44,16 +47,11 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   }
 
   bool get _canShowLogout {
-    if (_prefs.token == null || _prefs.token!.isEmpty) return false;
+    if (_prefs.access_token.isEmpty) return false;
     // Elige UNA de las dos líneas según tu tipo de token:
-    return !isJwtExpired(_prefs.token!);                          // JWT
+    return !isJwtExpired(_prefs.access_token);                          // JWT
   }
 
-  Future<void> _logout() async {
-     _prefs.token = '';
-    if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil('login', (route) => false);
-  }
 
   @override
   void dispose() {
@@ -80,9 +78,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   }
 
   Future<void> _pickRuta() async {
-    // TODO: reemplace por su carga real de rutas
-    final List<RutasModel> listaRutas = [];
-    final seleccion =await AppNavigator.pushNamed<RutasModel>(AppRoutes.rutas); // RutasPage(listaRutas: listaRutas)),
+    final seleccion = await AppNavigator.pushNamed(AppRoutes.rutas); // RutasPage(listaRutas: listaRutas)),
     if (seleccion != null) {
       setState(() => _rutaSeleccionada = seleccion);
       _prefs.ruta = seleccion.codigo; // mismo setter que usa LoginPage
@@ -552,11 +548,11 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                   content: const Text('¿Desea cerrar la sesión?'),
                   actions: [
                     TextButton(
-                      onPressed: () => AppNavigator.pop(false),
+                      onPressed: () =>Navigator.of(ctx).pop(false),
                       child: const Text('Cancelar'),
                     ),
                     FilledButton(
-                      onPressed: () => AppNavigator.pop( true),
+                      onPressed: () =>  Navigator.of(ctx).pop(true),
                       child: const Text('Cerrar sesión'),
                     ),
                   ],
@@ -564,7 +560,8 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
               );
               if (salir == true && mounted) {
                 // Limpia tokens/estado y navega a login
-                _logout();
+                _prefs.access_token = '';
+                AppNavigator.goToLogin();
               }
             },
           ),

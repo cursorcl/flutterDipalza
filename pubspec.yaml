@@ -28,26 +28,36 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.3
-  package_info: ^2.0.2
+  #package_info: ^2.0.2
+  package_info_plus: ^4.2.0
   http: ^0.13.4
   rxdart: ^0.27.2
   shared_preferences: ^2.0.8
   path_provider: ^2.0.6
   sqflite: ^2.0.0+4
-  geolocator: ^7.7.1
+  geolocator: ^13.0.0
   connectivity_plus: ^6.0.3
   provider: ^6.1.2
   get_it: ^7.7.0 # Esta es la librería para el Service Locator
   intl: ^0.19.0 # Paquete para formato de fechas y números
   flutter_slidable: ^4.0.3
   fluttertoast: ^8.2.4
+  dio: ^5.9.0
+  flutter_secure_storage: ^8.1.0
+  jwt_decoder: ^2.0.1
+
+  permission_handler: ^11.3.0
+  flutter_background_service: ^5.0.0
   
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.9.2
-  flutter_native_splash: ^1.3.1
+  #flutter_launcher_icons: ^0.9.2
+  #flutter_native_splash: ^1.3.1
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.1
+  dart_code_metrics: ^5.6.0
 
 flutter_icons:
   android: "launcher_icon" 

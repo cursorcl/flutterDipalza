@@ -1,5 +1,7 @@
 import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/provider/cliente_provider.dart';
+import 'package:dipalza_movil/src/provider/venta_provider.dart';
+import 'package:dipalza_movil/src/share/app_routes.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
@@ -46,6 +48,8 @@ class _ClientesPageState extends State<ClientesPage> {
     bool searchResult = _searchResult.length != 0 || controller.text.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
         backgroundColor: colorRojoBase(),
         title: Container(
           child: Center(
@@ -74,7 +78,6 @@ class _ClientesPageState extends State<ClientesPage> {
         Positioned.fill(
           child: Column(
             children: <Widget>[
-              // ¡Aquí está! Se mostrará en la parte superior de la pantalla.
               ConnectivityBanner(),
               _verBuscar ? _creaInputBuscar(context) : Container(),
               Expanded(child: searchResult ? _creaListaClientes(context, _searchResult) : _creaListaClientes(context, _listaClientes))
@@ -196,16 +199,22 @@ class _ClientesPageState extends State<ClientesPage> {
         ),
         trailing: IconButton(
             icon: Icon(Icons.remove_red_eye_outlined),
-            onPressed: () {
-              // Cambia la acción según el modo
-              if (widget.isForSelection) {
-              // --- NUEVA ACCIÓN: Devuelve el cliente ---
-              AppNavigator.pop( cliente);
-              } else {
-              // --- TU ACCIÓN ORIGINAL ---
-              // TODO Debo presentar sus ventas anteriores
-              //Navigator.pushNamed(context, 'venta', arguments: new InicioVentaModel(cliente: cliente));
-              print('Modo Vista: ${cliente.razon}');
+            onPressed: () async {
+              var ventaModel = await VentaProvider.ventaProvider.obtenerUltimaVenta(cliente);
+              if(ventaModel == null)
+                {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Este cliente no tiene ventas asociadas.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return; // No navega
+                }
+              else {
+                AppNavigator.pushNamed(AppRoutes.listadoUltimaVenta, arguments: {
+                  'ventaModel': ventaModel
+                });
               }
             }),
         onTap: () {

@@ -1,6 +1,7 @@
 // src/bloc/condicion_venta_bloc.dart
 
 import 'dart:async';
+
 import 'package:dipalza_movil/src/model/condicion_venta_model.dart';
 import 'package:dipalza_movil/src/provider/condicion_venta_provider.dart';
 import 'package:rxdart/rxdart.dart';

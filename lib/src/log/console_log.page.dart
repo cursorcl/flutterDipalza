@@ -1,6 +1,7 @@
-import 'log_model.dart';
-import 'db_log_provider.dart';
 import 'package:flutter/material.dart';
+
+import 'db_log_provider.dart';
+import 'log_model.dart';
 
 class ConsoleLogPage extends StatefulWidget {
   @override

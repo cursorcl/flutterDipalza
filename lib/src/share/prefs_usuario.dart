@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenciasUsuario {
@@ -10,10 +11,70 @@ class PreferenciasUsuario {
   PreferenciasUsuario._internal();
 
   late SharedPreferences _prefs;
+  final _storage = const FlutterSecureStorage();
 
-  initPrefs() async {
+  // --- VARIABLES EN MEMORIA (Para acceso rápido y síncrono) ---
+  // Esto evita tener que poner 'await' en cada llamada a token en tu UI
+  String _tokenInMemory = '';
+  String _refreshTokenInMemory = '';
+  String _passwordInMemory = '';
+  String _rutInMemory = '';
+
+  // --- INICIALIZACIÓN ---
+  Future<void> initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
+
+    // Leemos del almacenamiento seguro y cargamos en RAM al inicio
+    _tokenInMemory = await _storage.read(key: 'token') ?? '';
+    _refreshTokenInMemory = await _storage.read(key: 'refreshToken') ?? '';
+    _passwordInMemory = await _storage.read(key: 'password') ?? '';
+    _rutInMemory = await _storage.read(key: 'rut') ?? '';
   }
+
+  // =======================================================
+  //  SECCIÓN SEGURA (FlutterSecureStorage + Memoria)
+  // =======================================================
+
+  String get access_token => _tokenInMemory;
+
+  set access_token(String value) {
+    _tokenInMemory = value; // Actualizamos memoria
+    _storage.write(key: 'token', value: value); // Guardamos seguro asíncronamente
+  }
+
+  String get refreshToken => _refreshTokenInMemory;
+
+  set refreshToken(String value) {
+    _refreshTokenInMemory = value;
+    _storage.write(key: 'refreshToken', value: value);
+  }
+
+  String get password => _passwordInMemory;
+
+  set password(String value) {
+    _passwordInMemory = value;
+    _storage.write(key: 'password', value: value);
+  }
+
+  String get rut => _rutInMemory;
+
+  set rut(String value) {
+    _rutInMemory = value;
+    _storage.write(key: 'rut', value: value);
+  }
+
+  // Método para borrar datos sensibles al hacer Logout
+  Future<void> borrarCredenciales() async {
+    _tokenInMemory = '';
+    _refreshTokenInMemory = '';
+    _passwordInMemory = '';
+    _rutInMemory = '';
+    await _storage.deleteAll();
+  }
+
+  // =======================================================
+  //  SECCIÓN PREFERENCIAS (SharedPreferences - Se mantienen igual)
+  // =======================================================
 
   String get vendedor {
     return _prefs.getString('vendedor') ?? '';
@@ -29,30 +90,6 @@ class PreferenciasUsuario {
 
   set name(String value) {
     _prefs.setString('name', value);
-  }
-
-  String get rut {
-    return _prefs.getString('rut') ?? '';
-  }
-
-  set rut(String value) {
-    _prefs.setString('rut', value);
-  }
-
-  String get password {
-    return _prefs.getString('password') ?? '';
-  }
-
-  set password(String value) {
-    _prefs.setString('password', value);
-  }
-
-  String get token {
-    return _prefs.getString('token') ?? '';
-  }
-
-  set token(String value) {
-    _prefs.setString('token', value);
   }
 
   String get urlServicio {
@@ -87,28 +124,17 @@ class PreferenciasUsuario {
     _prefs.setStringList('serviceHistory', value);
   }
 
-  // --- NUEVO: Getter para fechaFacturacion ---
   DateTime get fechaFacturacion {
-    // Leemos el string guardado en SharedPreferences.
     final fechaGuardada = _prefs.getString('fechaFacturacion');
-
-    // Si no hay nada guardado, devolvemos la fecha de mañana como valor por defecto.
     if (fechaGuardada == null) {
       return DateTime.now().add(const Duration(days: 1));
     }
-
-    // Si hay un string, lo convertimos de nuevo a un objeto DateTime.
-    // Usamos tryParse para evitar errores si el string estuviera mal formado.
     return DateTime.tryParse(fechaGuardada) ?? DateTime.now().add(const Duration(days: 1));
   }
 
-  // --- NUEVO: Setter para fechaFacturacion ---
   set fechaFacturacion(DateTime value) {
-    // Guardamos la fecha convirtiéndola a un string en formato ISO 8601.
-    // Este formato ('2025-09-15T10:30:00.000') es estándar y seguro.
     _prefs.setString('fechaFacturacion', value.toIso8601String());
   }
-
 
   double get iva {
     return  _prefs.getDouble('iva') ?? 19.0;
@@ -118,4 +144,8 @@ class PreferenciasUsuario {
     _prefs.setDouble('iva', value);
   }
 
+  deleteAll() {
+    _prefs.clear();
+    _storage.deleteAll();
+  }
 }

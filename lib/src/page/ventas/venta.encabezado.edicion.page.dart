@@ -1,5 +1,4 @@
 import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/page/home/home2.page.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/app_routes.dart';
 import 'package:dipalza_movil/src/utils/utils.dart'; // Para colorRojoBase() y getFormatRut()
@@ -11,10 +10,9 @@ import '../../model/venta_model.dart';
 import '../../provider/cliente_provider.dart';
 import '../../provider/condicion_venta_provider.dart';
 import '../../share/app.navigator.dart';
+import '../../share/estado.venta.dart';
 import '../../share/prefs_usuario.dart';
 import '../../widget/fondo.widget.dart';
-import '../cliente/clientes.page.dart';
-import 'listado.detalle.de.una.venta.dart';
 
 class VentaEncabezadoEdicionPage extends StatefulWidget {
   final VentaModel? ventaEnEdicion;
@@ -49,15 +47,6 @@ class _VentaEncabezadoEdicionPageState extends State<VentaEncabezadoEdicionPage>
   void _navegarASeleccionCliente(BuildContext context) async {
 
     final cliente = await AppNavigator.pushNamed(AppRoutes.clientesSeleccion);
-    /*
-    final cliente = await Navigator.of(context).push(
-      MaterialPageRoute(
-        // Le decimos a tu página que la queremos para "Seleccionar"
-        builder: (context) => const ClientesPage(isForSelection: true),
-      ),
-    );
-     */
-
     // Cuando vuelve (con Navigator.of(context).pop), actualizamos el estado
     if (cliente != null && cliente is ClientesModel) {
       setState(() {
@@ -165,7 +154,6 @@ class _VentaEncabezadoEdicionPageState extends State<VentaEncabezadoEdicionPage>
     );
   }
 
-  /// Un Dropdown estándar para los métodos de pago
   Widget _buildCondicionVentaModelSelector() {
     return Card(
       elevation: 2.0,
@@ -196,7 +184,6 @@ class _VentaEncabezadoEdicionPageState extends State<VentaEncabezadoEdicionPage>
     );
   }
 
-  /// Carga todos los datos necesarios para la página
   Future<void> _cargarDatosIniciales() async {
     setState(() => _estaCargando = true);
 
@@ -252,16 +239,14 @@ class _VentaEncabezadoEdicionPageState extends State<VentaEncabezadoEdicionPage>
       codigoVendedor: pref.vendedor,
       codigoRuta: pref.ruta,
       codigoCondicionVenta: _condicionSeleccionada!.codigo,
-      detalles: this.ventaParaEditar?.detalles ?? []
+      detalles: this.ventaParaEditar?.detalles ?? [],
+      estadoVenta: this.ventaParaEditar != null && this.ventaParaEditar?.id != -1 ? EstadoVenta.REOPENED : EstadoVenta.OPENED
     );
 
     final VentaModel ventaGuardada = await VentaProvider.ventaProvider.saveVenta(ventaModel);
-    // Actualizamos el estado local
     setState(() {
       this.ventaParaEditar = ventaGuardada;
     });
-
-    // Devolvemos la venta actualizada para que quien llamó a esta función pueda usarla
     return ventaGuardada;
     }
 }

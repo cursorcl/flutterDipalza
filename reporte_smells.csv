@@ -1,0 +1,139 @@
+Archivo,Línea,Tipo,Severidad,Descripción,Causa probable,Refactor sugerido,Riesgo
+lib/src/page/ventas/listado.de.ventas.page.dart,261,Unused Element,Alta,Método '_goToVentaPage' no utilizado,El método fue definido pero nunca se invoca,Eliminar el método o verificar si debe usarse,Bajo
+lib/src/page/ventas/listado.de.ventas.page.dart,283,Dead Code,Alta,Operador null-aware innecesario,El receptor no puede ser null por diseño,Eliminar el operador ?.,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,73,Invalid Null Aware,Alta,Operador ?.' innecesario múltiples veces,El receptor no puede ser null,Eliminar operador ?.,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,307,Unnecessary Null Comparison,Alta,Comparación innecesaria con null,El operando nunca será null,Eliminar la comparación,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,344,Unnecessary Non Null Assertion,Alta,Operador ! innecesario,El receptor no puede ser null,Eliminar el operador !,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,31,Unused Field,Alta,Campo '_estaCargando' no utilizado,El campo se define pero nunca se lee,Eliminar o usar el campo,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,110,Unused Variable,Alta,Variable 'ventaActualizada' no utilizada,La variable se asigna pero no se usa,Eliminar variable o usar su valor,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,212,Unused Variable,Alta,Variable 'prefs' no utilizada,La variable se declara pero no se usa,Eliminar la declaración,Bajo
+lib/src/page/ventas/venta.item.detalle.edicion.dart,90,Unnecessary Non Null Assertion,Alta,Operador ! innecesario,El receptor no puede ser null,Eliminar el operador !,Bajo
+lib/src/bloc/rutas_bloc.dart,6,Unused Import,Alta,Import no utilizado 'connectivity_service.dart',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/productos_provider.dart,1,Unused Import,Alta,Import no utilizado 'db_log_provider.dart',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/rutas_provider.dart,1,Unused Import,Alta,Import no utilizado 'dart:convert',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/rutas_provider.dart,4,Unused Import,Alta,Import no utilizado 'prefs_usuario.dart',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/rutas_provider.dart,5,Unused Import,Alta,Import no utilizado 'http',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/vendedor_provider.dart,12,Unused Variable,Alta,Variable 'stringToBase64' no utilizada,La variable se declara pero nunca se usa,Eliminar variable,Bajo
+lib/src/provider/venta_provider.dart,3,Unused Import,Alta,Import no utilizado 'dart:io',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/venta_provider.dart,6,Unused Import,Alta,Import no utilizado 'productos_venta_bloc.dart',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/venta_provider.dart,10,Unused Import,Alta,Import no utilizado 'app.navigator.dart',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/venta_provider.dart,13,Unused Import,Alta,Import no utilizado 'alert_util.dart',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/venta_provider.dart,14,Unused Import,Alta,Import no utilizado 'material.dart',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/venta_provider.dart,15,Unused Import,Alta,Import no utilizado 'http',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/provider/venta_provider.dart,119,Unused Variable,Alta,Variable 'response' no utilizada,La variable se declara pero nunca se usa,Eliminar variable,Bajo
+lib/src/provider/venta_provider.dart,147,Unused Variable,Alta,Variable 'response' no utilizada,La variable se declara pero nunca se usa,Eliminar variable,Bajo
+lib/src/page/ventas/venta.item.detelle.view.dart,3,Unused Import,Alta,Import no utilizado 'intl',Import agregado pero no usado en el archivo,Eliminar import no usado,Bajo
+lib/src/widget/producto.select.popup.widget.dart,196,Unused Element,Alta,Método '_registrarItem' no utilizado,El método fue definido pero nunca se invoca,Eliminar método o verificar uso,Bajo
+lib/src/widget/producto.select.popup.widget.dart,203,Unused Variable,Alta,Variable 'prefs' no utilizada,La variable se declara pero no se usa,Eliminar variable,Bajo
+lib/src/widget/producto.select.popup.widget.dart,208,Unused Variable,Alta,Variable 'registrado' no utilizada,La variable se declara pero no se usa,Eliminar variable,Bajo
+lib/src/page/home/home.page.dart,55,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/home/home.page.dart,63,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/home/home.page.dart,69,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/home/home.page.dart,74,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/home/home.page.dart,78,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/home/home.page.dart,80,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/login/auth_gate.dart,40,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/login/auth_gate.dart,59,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/login/auth_gate.dart,63,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,56,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,201,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,228,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/services/api_client.dart,82,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/share/app.navigator.dart,18,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/widget/producto.select.popup.widget.dart,205,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/widget/producto.select.popup.widget.dart,206,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/main.dart,65,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/provider/parametros_provider.dart,49,Avoid Print,Media,Llamada a print() en código de producción,Depuración dejada en código de producción,Usar logger o eliminar print,Medio
+lib/src/log/console_log.page.dart,29,Deprecated Member,Alta,Widget WillPopScope obsoleto,API deprecated en Flutter 3.12+,Reemplazar con PopScope,Medio
+lib/src/page/home/home.page.barra.inferior.dart,39,Deprecated Member,Alta,Parámetro onPopInvoked obsoleto,API deprecated en Flutter 3.22+,Usar onPopInvokedWithResult,Medio
+lib/src/page/home/home.page.dart,89,Deprecated Member,Alta,Parámetro onPopInvoked obsoleto,API deprecated en Flutter 3.22+,Usar onPopInvokedWithResult,Medio
+lib/src/page/config/preferences.page.dart,464,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/page/home/ActionTile.dart,17,Deprecated Member,Media,Método surfaceVariant obsoleto,API deprecated en Flutter 3.18+,Usar surfaceContainerHighest,Medio
+lib/src/page/home/ActionTile.dart,17,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/page/home/ActionTile.dart,20,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/page/home/ActionTile.dart,29,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,85,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_color_scheme.dart,64,Deprecated Member,Media,Método background obsoleto,API deprecated en Flutter 3.18+,Usar surface en lugar de background,Medio
+lib/src/theme/app_color_scheme.dart,65,Deprecated Member,Media,Método onBackground obsoleto,API deprecated en Flutter 3.18+,Usar onSurface en lugar de onBackground,Medio
+lib/src/theme/app_color_scheme.dart,92,Deprecated Member,Media,Método background obsoleto,API deprecated en Flutter 3.18+,Usar surface en lugar de background,Medio
+lib/src/theme/app_color_scheme.dart,93,Deprecated Member,Media,Método onBackground obsoleto,API deprecated en Flutter 3.18+,Usar onSurface en lugar de onBackground,Medio
+lib/src/theme/app_color_scheme.dart,114,Deprecated Member,Media,Método background obsoleto,API deprecated en Flutter 3.18+,Usar surface en lugar de background,Medio
+lib/src/theme/app_color_scheme.dart,115,Deprecated Member,Media,Método onBackground obsoleto,API deprecated en Flutter 3.18+,Usar onSurface en lugar de onBackground,Medio
+lib/src/theme/app_color_scheme.dart,122,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_color_scheme.dart,123,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_color_scheme.dart,125,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_color_scheme.dart,126,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_color_scheme.dart,128,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_color_scheme.dart,129,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_theme.dart,127,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/theme/app_theme.dart,128,Deprecated Member,Media,Método withOpacity() obsoleto,API deprecated,Usar .withValues() en lugar de .withOpacity(),Medio
+lib/src/page/rutas/rutas.page.dart,31,Unnecessary Null Comparison,Media,Comparación innecesaria con null,El operando nunca será null,Eliminar la comparación,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,73,Unnecessary Null Comparison,Media,Comparación innecesaria con null,El operando nunca será null,Eliminar la comparación,Bajo
+lib/src/services/api_client.dart,26,Unnecessary Null Comparison,Media,Comparación innecesaria con null,El operando nunca será null,Eliminar la comparación,Bajo
+lib/src/page/home/ActionTile.dart,1,Unnecessary Import,Media,Import innecesario de cupertino.dart,Elementos ya provistos por material.dart,Eliminar import innecesario,Bajo
+lib/src/page/home/home.page.barra.inferior.dart,6,Unnecessary Import,Media,Import innecesario de cupertino.dart,Elementos ya provistos por material.dart,Eliminar import innecesario,Bajo
+lib/src/page/home/home.page.dart,8,Unnecessary Import,Media,Import innecesario de cupertino.dart,Elementos ya provistos por material.dart,Eliminar import innecesario,Bajo
+lib/src/log/console_log.page.dart,13,Prefer Final Fields,Media,Campo _scrollController podría ser final,El campo nunca se reasigna,Agregar final al campo,Bajo
+lib/src/page/cliente/clientes.page.dart,25,Prefer Final Fields,Media,Campo _searchResult podría ser final,El campo nunca se reasigna,Agregar final al campo,Bajo
+lib/src/page/producto/productos.page.dart,25,Prefer Final Fields,Media,Campo _searchResult podría ser final,El campo nunca se reasigna,Agregar final al campo,Bajo
+lib/src/page/home/ActionTile.dart,32,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/login/login.page.dart,82,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,73,Unnecessary This,Media,Uso innecesario de this. (múltiples),Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,110,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,253,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,257,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,258,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,270,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,276,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,287,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,305,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,344,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,46,Unnecessary This,Media,Uso innecesario de this. (múltiples),Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,58,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,69,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,124,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,144,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,164,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,184,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,112,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,192,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,211,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,235,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,242,Unnecessary This,Media,Uso innecesario de this. (múltiples),Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,248,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.item.detalle.edicion.dart,357,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.item.detalle.edicion.dart,379,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/page/ventas/venta.item.detalle.edicion.dart,494,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/services/api_client.dart,15,Unnecessary This,Media,Uso innecesario de this.,Calificador innecesario,Eliminar this. innecesario,Bajo
+lib/src/log/console_log.page.dart,35,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/log/console_log.page.dart,38,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/log/console_log.page.dart,46,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/log/console_log.page.dart,52,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/log/console_log.page.dart,87,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/log/console_log.page.dart,91,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/log/console_log.page.dart,101,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/log/console_log.page.dart,105,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/cliente/clientes.page.dart,55-201,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/config/config.page.dart,29-126,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/config/config2.page.dart,21-29,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/config/preferences.page.dart,457,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/estadistica/testSearch.page.dart,68-86,Prefer Const Constructors,Baja,Falta const en constructores,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/home/home.page.dart,34-37,Prefer Const Constructors,Baja,Falta const en constructores,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/home/home.page.barra.inferior.dart,29-32,Prefer Const Constructors,Baja,Falta const en constructores,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/login/login.page.dart,86,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/login/auth_gate.dart,94-97,Prefer Const Constructors,Baja,Falta const en constructores,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/producto/productos.page.dart,42-186,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/rutas/rutas.page.dart,53-111,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/ventas/listado.de.ventas.page.dart,50-310,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/ventas/listado.detalle.de.una.venta.dart,74-239,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/ventas/listado.ultima.venta.page.dart,47-208,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/page/ventas/venta.encabezado.edicion.page.dart,74-75,Prefer Const Constructors,Baja,Falta const en constructores,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/page/ventas/venta.item.detalle.edicion.dart,151-340,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/provider/vendedor_provider.dart,27,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/router/routers.dart,16-24,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/share/app_router.dart,28-92,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/widget/fondo.widget.dart,17-36,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/widget/producto.select.popup.widget.dart,90-169,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/widget/version_widget.dart,33,Prefer Const Constructors,Baja,Falta const en constructor,Constructor podría ser const,Agregar const al constructor,Bajo
+lib/src/theme/app_theme.dart,20-38,Prefer Const Constructors,Baja,Falta const en múltiples constructores,Múltiples constructores podrían ser const,Agregar const a los constructores,Bajo
+lib/src/provider/venta_provider.dart,30-372,Dead Code / Comentario,Baja,Código commented out (múltiples métodos),Código legacy no eliminado,Métodos con código HTTP antiguo comentado que debe eliminarse,Bajo

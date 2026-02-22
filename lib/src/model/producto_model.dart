@@ -22,6 +22,8 @@ class ProductosModel {
       required this.numbered,
       required this.codigoila,
       required this.pieces,
+        required this.stockVentas,
+        required this.piezasVentas,
       required this.numerados});
 
   String articulo;
@@ -34,6 +36,8 @@ class ProductosModel {
   bool numbered;
   String codigoila;
   double pieces;
+  double stockVentas;
+  double piezasVentas;
   List<NumeradoModel> numerados;
 
   factory ProductosModel.fromJson(Map<String, dynamic> json) => ProductosModel(
@@ -47,7 +51,11 @@ class ProductosModel {
       numbered: json["numbered"] == null ? false : json["numbered"],
       numerados: NumeradoModel.listFromJson(json["numerados"]),
       codigoila: json["codigoila"] ?? "",
-      pieces: json["pieces"] == null ? 0 : json["pieces"]);
+      pieces: json["pieces"] == null ? 0 : json["pieces"],
+      stockVentas: json["stockVentas"] == null ? 0 : json["stockVentas"],
+      piezasVentas: json["piezasVentas"] == null ? 0 : json["piezasVentas"]
+  );
+
 
   Map<String, dynamic> toJson() => {
         "articulo": articulo,
@@ -60,7 +68,9 @@ class ProductosModel {
         "numbered": numbered,
         "numerados": numeradosModelToJson(numerados),
         "codigoila": codigoila,
-        "pieces": pieces
+        "pieces": pieces,
+        "stockVentas": stockVentas,
+        "piezasVentas": piezasVentas
       };
 
   ProductosModel clone() {

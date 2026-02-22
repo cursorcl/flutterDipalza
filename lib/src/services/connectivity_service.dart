@@ -1,9 +1,10 @@
 // src/services/connectivity_service.dart
 
 import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:flutter/material.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 
 // Usamos el mismo Enum que definimos para la pantalla de Login
