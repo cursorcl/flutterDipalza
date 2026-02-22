@@ -152,290 +152,209 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     if (!_isBlocReady) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(widget.actualVentaDetalle == null
-              ? 'Agregar producto'
-              : 'Editar detalle'),
+          title: Text(widget.actualVentaDetalle == null ? 'Agregar producto' : 'Editar detalle'),
           backgroundColor: Colors.redAccent,
         ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
-    final double cantidadActual =
-        double.tryParse(_cantidadController.text) ?? 0;
-    final bool isDecrementDisabled = cantidadActual <= 0;
-    final double descuentoActual =
-        double.tryParse(_descuentoController.text) ?? 0;
-    final bool isDescuentoDecrementDisabled = descuentoActual <= 0;
-    final bool isDescuentoIncrementDisabled = descuentoActual >= 50;
 
-    final bool enabled = _productoController.text.isNotEmpty;
+    final bool enabled = _productoController.text.trim().isNotEmpty;
 
-    // UI PRINCIPAL
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(widget.actualVentaDetalle == null
-              ? 'Agregar producto'
-              : 'Editar detalle'),
-          backgroundColor: Colors.redAccent,
-        ),
-        body: SingleChildScrollView(
-          // ← envuelve el Padding
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              top: 16.0,
-              bottom: MediaQuery.of(context).viewInsets.bottom +
-                  16.0, // ← espacio para el teclado
-            ),
-            child: Column(
-              children: [
-                if (widget.actualVentaDetalle == null)
-                  Autocomplete<ProductosModel>(
-                    initialValue:
-                        TextEditingValue(text: _productoController.text),
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text == '') {
-                        return const Iterable<ProductosModel>.empty();
-                      }
-                      return _productosBloc
-                          .searchProducts(textEditingValue.text);
-                    },
-                    displayStringForOption: (ProductosModel option) =>
-                        option.descripcion,
-                    onSelected: (ProductosModel seleccion) {
-                      _actualizarProductoSeleccionado(seleccion);
-                      _cargarStockProducto(seleccion.articulo);
-                    },
-                    fieldViewBuilder: (BuildContext context,
-                        TextEditingController fieldTextEditingController,
-                        FocusNode fieldFocusNode,
-                        VoidCallback onFieldSubmitted) {
-                      // Sincroniza el controller de Autocomplete con el nuestro
-                      _productoController = fieldTextEditingController;
-                      _productoFocusNode = fieldFocusNode;
-                      _addSelectAllListener(
-                          _productoFocusNode, _productoController);
-                      return TextField(
-                        controller: _productoController,
-                        focusNode: _productoFocusNode,
-                        decoration: InputDecoration(
-                          labelText: 'Buscar por Código o Nombre',
-                          hintText: 'Escriba para buscar...',
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.search),
-                            tooltip: 'Buscar en lista completa',
-                            onPressed: _buscarProducto,
-                          ),
-                        ),
-                        textInputAction: TextInputAction.search,
-                        onSubmitted: (term) => _buscarProductoPorTermino(term),
-                      );
-                    },
-                    optionsViewBuilder: (BuildContext context,
-                        AutocompleteOnSelected<ProductosModel> onSelected,
-                        Iterable<ProductosModel> options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4.0,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: options.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final ProductosModel option =
-                                    options.elementAt(index);
-                                return InkWell(
-                                  onTap: () {
-                                    onSelected(option);
-                                  },
-                                  child: ListTile(
-                                    title: Text(option.descripcion),
-                                    subtitle:
-                                        Text("Código: ${option.articulo}"),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                else
-                  TextField(
-                    controller: _productoController,
-                    focusNode: _productoFocusNode,
-                    enabled: false,
-                    decoration: const InputDecoration(
-                      labelText: 'Producto',
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle, size: 30),
-                      color: Colors.redAccent,
-                      disabledColor: Colors.grey[400],
-                      onPressed:
-                          isDecrementDisabled ? null : _decrementarCantidad,
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: _cantidadController,
-                        focusNode: _cantidadFocusNode,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: _excedeStock ? Colors.red : Colors.black),
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Cantidad',
-                          labelStyle: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.normal,
-                            color: _excedeStock ? Colors.red : Colors.black,
-                          ),
-                        ),
-                        onChanged: (_) => _recalcularTotal(),
-                        onSubmitted: (_) => FocusScope.of(context)
-                            .requestFocus(_descuentoFocusNode),
-                        textInputAction: TextInputAction.next,
-                      ),
-                    ),
-                    IconButton(
-                      icon:
-                          const Icon(Icons.add_circle, color: Colors.green, size: 30),
-                      onPressed: _incrementarCantidad,
-                    ),
-                  ],
-                ),
-                if (_esNumerado)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      'Peso total: ${_pesoTotal.toStringAsFixed(2)} kg',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle, size: 30),
-                      color: Colors.redAccent,
-                      disabledColor: Colors.grey[400],
-                      onPressed: isDescuentoDecrementDisabled
-                          ? null
-                          : _decrementarDescuento,
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: _descuentoController,
-                        focusNode: _descuentoFocusNode,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                        decoration: const InputDecoration(labelText: 'Descuento (%)'),
-                        onChanged: (_) => _recalcularTotal(),
-                        onSubmitted: (_) => FocusScope.of(context)
-                            .requestFocus(_guardarFocusNode),
-                        textInputAction: TextInputAction.next,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle, size: 30),
-                      color: Colors.green,
-                      disabledColor: Colors.grey[400],
-                      onPressed: isDescuentoIncrementDisabled
-                          ? null
-                          : _incrementarDescuento,
-                    ),
-                  ],
-                ),
-                _buildResumenInferior(),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
-                  label: const Text('Guardar'),
-                  focusNode: _guardarFocusNode,
-                  onPressed: enabled ? _guardar : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey[400],
-                    disabledForegroundColor: Colors.grey[800],
-                    minimumSize: const Size(double.infinity, 45),
-                  ),
-                ),
-              ],
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        title: Text(widget.actualVentaDetalle == null ? 'Agregar producto' : 'Editar detalle'),
+        backgroundColor: Colors.redAccent,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: TextButton.icon(
+              onPressed: enabled ? _guardar : null,
+              icon: const Icon(Icons.check, color: Colors.white),
+              label: const Text(
+                'Guardar',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
-        ));
-  }
+        ],
+      ),
 
-  void _incrementarCantidad() async {
-    double cantidad = double.tryParse(_cantidadController.text) ?? 0;
-    cantidad++;
-    if (_esNumerado) {
-      setState(() {
-        _pesoTotal = 0;
-        var lista = productoEnVenta!.numerados;
-        if (lista.length > 0) {
-          _pesoTotal = _pesoPromedio * cantidad;
-        }
-      });
-    }
-    _cantidadController.text = cantidad.toString();
-    setState(() {
-      _excedeStock = cantidad > _stockDisponible;
-    });
+      // ✅ ListView evita RenderFlex overflow con teclado abierto
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 7),
+          children: [
+            // =========================
+            // PRODUCTO (Autocomplete ORIGINAL)
+            // =========================
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: (widget.actualVentaDetalle == null)
+                  ? Autocomplete<ProductosModel>(
+                initialValue: TextEditingValue(text: _productoController.text),
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) {
+                    return const Iterable<ProductosModel>.empty();
+                  }
+                  return _productosBloc.searchProducts(textEditingValue.text);
+                },
+                displayStringForOption: (ProductosModel option) => option.descripcion,
+                onSelected: (ProductosModel seleccion) {
+                  _actualizarProductoSeleccionado(seleccion);
+                  _cargarStockProducto(seleccion.articulo);
+                },
+                fieldViewBuilder: (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                    ) {
+                  // Mantener sincronizado con tus campos
+                  _productoController = fieldTextEditingController;
+                  _productoFocusNode = fieldFocusNode;
+                  _addSelectAllListener(_productoFocusNode, _productoController);
 
-    _recalcularTotal();
-  }
+                  return TextField(
+                    controller: _productoController,
+                    focusNode: _productoFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por Código o Nombre',
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.manage_search),
+                        tooltip: 'Buscar en lista completa',
+                        onPressed: _buscarProducto,
+                      ),
+                    ),
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (term) => _buscarProductoPorTermino(term),
+                  );
+                },
+                optionsViewBuilder: (
+                    BuildContext context,
+                    AutocompleteOnSelected<ProductosModel> onSelected,
+                    Iterable<ProductosModel> options,
+                    ) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4.0,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 220),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: options.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final ProductosModel option = options.elementAt(index);
+                            return InkWell(
+                              onTap: () => onSelected(option),
+                              child: ListTile(
+                                dense: true,
+                                title: Text(option.descripcion),
+                                subtitle: Text('Código: ${option.articulo}'),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              )
+                  : TextField(
+                controller: _productoController,
+                enabled: false,
+                decoration: const InputDecoration(
+                  labelText: 'Producto',
+                  isDense: true,
+                ),
+              ),
+            ),
 
-  void _decrementarCantidad() async {
-    double cantidad = double.tryParse(_cantidadController.text) ?? 0;
-    if (cantidad >= 1) {
-      cantidad--;
-      _cantidadController.text = cantidad.toString();
-      if (_esNumerado) {
-        setState(() {
-          _pesoTotal = 0;
-          var lista = productoEnVenta!.numerados;
-          if (lista.length > 0) {
-            _pesoTotal = _pesoPromedio * cantidad;
-          }
-        });
-      }
-      setState(() {
-        _excedeStock = cantidad > _stockDisponible;
-      });
-      _recalcularTotal();
-    }
-  }
+            // =========================
+            // CANTIDAD (sin +/-)
+            // =========================
+            TextField(
+              controller: _cantidadController,
+              focusNode: _cantidadFocusNode,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: _excedeStock ? Colors.red : Colors.black,
+              ),
+              decoration: InputDecoration(
+                labelText: 'Cantidad',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: _excedeStock ? Colors.red : Colors.black12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: _excedeStock ? Colors.red : Colors.redAccent),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onChanged: (_) {
+                // Mantener tu lógica existente
+                final cantidad = double.tryParse(_cantidadController.text.replaceAll(',', '.')) ?? 0;
+                setState(() => _excedeStock = cantidad > _stockDisponible);
+                _recalcularTotal();
+              },
+            ),
 
-  void _incrementarDescuento() {
-    double descuento = double.tryParse(_descuentoController.text) ?? 0;
-    descuento++;
-    _descuentoController.text = descuento.toString();
-    _recalcularTotal();
-  }
+            if (_esNumerado) ...[
+              const SizedBox(height: 6),
+              Text(
+                'Peso total: ${_pesoTotal.toStringAsFixed(2)} kg',
+                style: TextStyle(color: Colors.grey[700]),
+                textAlign: TextAlign.center,
+              ),
+            ],
 
-  void _decrementarDescuento() {
-    double descuento = double.tryParse(_descuentoController.text) ?? 0;
-    descuento--;
-    if (descuento < 0) descuento = 0;
-    _descuentoController.text = descuento.toString();
-    _recalcularTotal();
+            const SizedBox(height: 14),
+
+            // =========================
+            // DESCUENTO (sin +/-)
+            // =========================
+            TextField(
+              controller: _descuentoController,
+              focusNode: _descuentoFocusNode,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              decoration: InputDecoration(
+                labelText: 'Descuento (%)',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.redAccent),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onChanged: (_) => _recalcularTotal(),
+            ),
+
+            const SizedBox(height: 14),
+
+            // =========================
+            // RESUMEN
+            // =========================
+            _buildResumenInferior(),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildResumenInferior() {
@@ -443,10 +362,10 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     String formatNumber(double value) => value.toStringAsFixed(2);
 
     return Card(
-      elevation: 4.0,
+      elevation: 2.0,
       margin: const EdgeInsets.all(0),
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           children: [
             _buildResumenRow(
@@ -455,28 +374,32 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                   ? 'Cargando...'
                   : '${formatNumber(_stockDisponible)} ($_unidadProducto)',
               valueColor: _stockDisponible > 0 ? Colors.blueAccent : Colors.red,
+              fontSize: 13,
             ),
             _buildResumenRow(
               'Precio Unitario:',
               formatCurrency(_precioUnitario),
+              fontSize: 13,
             ),
             _buildResumenRow(
               'Descuento:',
               formatCurrency(_valorDescuento),
+              fontSize: 13,
               valueColor:
                   _valorDescuento > 0 ? Colors.orange[700]! : Colors.grey[700]!,
             ),
             _buildResumenRow(
               '% ILA asociado:',
               '${formatNumber(_porcentajeILA)}%',
+              fontSize: 13,
             ),
-            const Divider(height: 24, thickness: 1),
+            const Divider(height: 12, thickness: 0.8),
             _buildResumenRow(
               'Total Item:',
               formatCurrency(_valorFinal),
               valueColor: Colors.green[700]!,
               isBold: true,
-              fontSize: 18,
+              fontSize: 16,
             ),
           ],
         ),

@@ -52,16 +52,11 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          AppNavigator.pushNamed(
+        onPressed: () async {
+          await AppNavigator.pushNamed(
             AppRoutes.nuevaVenta,
-          ).then((valor) {
-            if (valor == true) {
-              setState(() {
-                // Esto forzará al FutureBuilder a recargarse
-              });
-            }
-          });
+          );
+          _cargarVentas();
         },
         child: const Icon(Icons.add),
         backgroundColor: colorRojoBase(), // Usa tu color
@@ -116,14 +111,14 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
             ),
             Positioned.fill(
                 child: Column(
-              children: <Widget>[
-                const ConnectivityBanner(),
-                Expanded(
-                    child: ListView(
-                        children:
+                  children: <Widget>[
+                    const ConnectivityBanner(),
+                    Expanded(
+                        child: ListView(
+                            children:
                             _widgetListOfItemVenta(context, snapshot.data!))),
-              ],
-            ))
+                  ],
+                ))
           ]);
         } else {
           return const Center(child: Text("Sin información disponible"));
@@ -132,8 +127,7 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
     );
   }
 
-  List<Widget> _widgetListOfItemVenta(
-      BuildContext context, List<VentaModel> listaVenta) {
+  List<Widget> _widgetListOfItemVenta(BuildContext context, List<VentaModel> listaVenta) {
     final List<Widget> _listItem = [];
     if (listaVenta.length == 0) {
       _listItem.add(_widgetEmptyItem());
@@ -262,8 +256,7 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
         ));
   }
 
-  Future<void> _showDialogRemoveItemVenta(
-      BuildContext context, VentaModel venta) async {
+  Future<void> _showDialogRemoveItemVenta(BuildContext context, VentaModel venta) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -287,10 +280,10 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
             ),
             TextButton(
               child:
-                  const Text('Eliminar', style: TextStyle(color: Colors.red)),
+              const Text('Eliminar', style: TextStyle(color: Colors.red)),
               onPressed: () async {
                 final result =
-                    await VentaProvider.ventaProvider.removeVenta(venta.id);
+                await VentaProvider.ventaProvider.removeVenta(venta.id);
                 if (result == false) {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
