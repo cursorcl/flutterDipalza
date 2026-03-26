@@ -8,6 +8,7 @@ import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../share/app.navigator.dart';
+import '../../share/app_scaffold_key.dart';
 import '../../widget/connectivity_banner.widget.dart';
 
 class ClientesPage extends StatefulWidget {
@@ -48,6 +49,12 @@ class _ClientesPageState extends State<ClientesPage> {
     bool searchResult = _searchResult.length != 0 || controller.text.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            AppScaffoldKey.homeKey.currentState?.openDrawer();
+          },
+        ),
         centerTitle: true,
         automaticallyImplyLeading: false,
         backgroundColor: colorRojoBase(),
@@ -208,19 +215,28 @@ class _ClientesPageState extends State<ClientesPage> {
         trailing: IconButton(
             icon: const Icon(Icons.remove_red_eye_outlined),
             onPressed: () async {
-              var ventaModel =
-                  await VentaProvider.ventaProvider.obtenerUltimaVenta(cliente);
-              if (ventaModel == null) {
+              try {
+                var ventaModel =
+                await VentaProvider.ventaProvider.obtenerUltimaVenta(cliente);
+                if (ventaModel == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Este cliente no tiene ventas asociadas.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return; // No navega
+                } else {
+                  AppNavigator.pushNamed(AppRoutes.listadoUltimaVenta,
+                      arguments: {'ventaModel': ventaModel});
+                }
+              } catch(e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Este cliente no tiene ventas asociadas.'),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: Text('No se pudo completar la operación: ${e.toString()}'),
+                    backgroundColor: Colors.red,
                   ),
                 );
-                return; // No navega
-              } else {
-                AppNavigator.pushNamed(AppRoutes.listadoUltimaVenta,
-                    arguments: {'ventaModel': ventaModel});
               }
             }),
         onTap: () {

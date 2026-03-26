@@ -6,6 +6,7 @@ import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../share/app.navigator.dart';
+import '../../share/app_scaffold_key.dart';
 import '../../widget/connectivity_banner.widget.dart';
 
 class ProductosPage extends StatefulWidget {
@@ -30,10 +31,19 @@ class _ProductosPageState extends State<ProductosPage> {
     _productsBloc.obtainProducts();
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            AppScaffoldKey.homeKey.currentState?.openDrawer();
+          },
+        ),
         backgroundColor: colorRojoBase(),
         title: Container(
           child: const Center(

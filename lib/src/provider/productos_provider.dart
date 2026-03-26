@@ -35,16 +35,6 @@ class ProductosProvider {
 
   Future<ProductosModel?> obtenerProducto(String code) async {
     try {
-      /*
-      final prefs = new PreferenciasUsuario();
-      final token = prefs.access_token;
-      Uri url = Uri.http(prefs.urlServicio, '/api/productos/' + code);
-      final resp = await http.get(url, headers: {'Accept-Charset': 'utf-8', 'Authorization': 'Bearer $token',});
-      print(resp.body);
-      print(productoModelFromJson(resp.body));
-      return productoModelFromJson(resp.body);
-       */
-
       final response = await _dio.get('/api/productos/' + code);
       log('Response data: ${response.data}', name: 'ProductosProvider');
       final Map<String, dynamic> data = response.data;

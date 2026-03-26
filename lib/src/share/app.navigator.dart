@@ -25,6 +25,7 @@ class AppNavigator {
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 
+
   static Future<T?> pushNamedAndRemoveUntil<T>(
     String routeName, {
     Object? arguments,

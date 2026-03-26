@@ -235,6 +235,7 @@ class _VentaEncabezadoEdicionPageState
         rutCliente: _clienteSeleccionado!.rut,
         codigoCliente: _clienteSeleccionado!.codigo,
         codigoVendedor: pref.vendedor,
+        tipoVendedor: pref.tipo,
         codigoRuta: pref.ruta,
         codigoCondicionVenta: _condicionSeleccionada!.codigo,
         detalles: ventaParaEditar?.detalles ?? [],
@@ -243,7 +244,7 @@ class _VentaEncabezadoEdicionPageState
             : EstadoVenta.OPENED);
 
     final VentaModel ventaGuardada =
-        await VentaProvider.ventaProvider.saveVenta(ventaModel);
+        await VentaProvider.ventaProvider.saveVentaEncabezado(ventaModel);
     setState(() {
       ventaParaEditar = ventaGuardada;
     });

@@ -304,7 +304,8 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
               onChanged: (_) {
                 // Mantener tu lógica existente
                 final cantidad = double.tryParse(_cantidadController.text.replaceAll(',', '.')) ?? 0;
-                setState(() => _excedeStock = cantidad > _stockDisponible);
+                setState(() =>
+                _excedeStock = cantidad > _stockDisponible);
                 _recalcularTotal();
               },
             ),
@@ -523,6 +524,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     final total = subtotal - descuentoMonto;
 
     setState(() {
+      _pesoTotal = _pesoPromedio * cantidad;
       _valorFinal = total;
       _valorDescuento = descuentoMonto;
     });

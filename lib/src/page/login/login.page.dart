@@ -394,6 +394,7 @@ class _LoginPageState extends State<LoginPage> {
       prefs.password = bloc.password;
       prefs.access_token = response.accessToken;
       prefs.refreshToken = response.refreshToken;
+      prefs.tipo = response.tipo;
 
       if (_rutaSeleccionada != null) prefs.ruta = _rutaSeleccionada!.codigo;
 

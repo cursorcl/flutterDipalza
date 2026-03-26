@@ -256,7 +256,6 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
 
   void _inicializarNuevaVenta(BuildContext context) {
     // Lógica para navegar a una pantalla de edición
-
     AppNavigator.pushNamed(AppRoutes.ventaItemEdicion,
         arguments: {'actualVenta': _venta}).then((ventaActualizada) {
       if (ventaActualizada != null) {
@@ -311,9 +310,6 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
     _venta = await VentaProvider.ventaProvider
         .cambiarEstadoVenta(_venta, EstadoVenta.FINISHED);
     AppNavigator.popUntilFirst();
-    //AppNavigator.popUntil(AppRoutes.listadoVentas);
-    //AppNavigator.pop(true);
-    //AppNavigator.pushNamedAndRemoveUntil(AppRoutes.listadoVentas);
   }
 
   void _eliminarItem(BuildContext context, VentaDetalleModel item) {

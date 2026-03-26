@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../model/rutas_model.dart';
 import '../../share/app.navigator.dart';
 import '../../share/app_routes.dart';
+import '../../share/app_scaffold_key.dart';
 import '../../share/prefs_usuario.dart';
 import '../../utils/jwt_util.dart';
 import '../../utils/utils.dart';
@@ -441,6 +442,12 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     return Scaffold(
       // Sin botón de volver; título centrado para consistencia
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            AppScaffoldKey.homeKey.currentState?.openDrawer();
+          },
+        ),
         backgroundColor: colorRojoBase(),
         title: const Text('Configuración'),
         centerTitle: true,

@@ -85,6 +85,14 @@ class PreferenciasUsuario {
     _prefs.setString('vendedor', value);
   }
 
+  String get tipo {
+    return _prefs.getString('tipo') ?? '';
+  }
+
+  set tipo(String value) {
+    _prefs.setString('tipo', value);
+  }
+
   String get name {
     return _prefs.getString('name') ?? "";
   }

@@ -18,51 +18,69 @@ import 'package:provider/provider.dart';
 
 import 'src/bloc/condicion_venta_bloc.dart';
 
+Timer? _timerPosicion;
+late Position _ultimaPosicionConocida;
+
+
 // 1. Función global para el servicio
 @pragma('vm:entry-point')
 Future<bool> onStart(ServiceInstance service) async {
-  // Inicializamos componentes dentro del proceso aislado
   final prefs = PreferenciasUsuario();
   await prefs.initPrefs();
   final apiClient = ApiClient();
 
-  late LocationSettings locationSettings;
   if (defaultTargetPlatform == TargetPlatform.iOS) {
-    locationSettings = AppleSettings(
+    // iOS: stream de ubicación
+    final locationSettings = AppleSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
-      pauseLocationUpdatesAutomatically:
-          false, // CRÍTICO: Evita que iOS detenga el GPS
-      showBackgroundLocationIndicator:
-          true, // Muestra la barra azul de "App usando GPS"
+      distanceFilter: 500,
+      pauseLocationUpdatesAutomatically: false,
+      showBackgroundLocationIndicator: true,
+      allowBackgroundLocationUpdates: true,
     );
+    Geolocator.getPositionStream(
+      locationSettings: locationSettings
+    ).listen((Position position) {
+      _ultimaPosicionConocida = position;
+      if (_ultimaPosicionConocida != null) {
+         _enviarAlServidor(apiClient, _ultimaPosicionConocida!);
+      }
+    });
+
   } else {
-    locationSettings = AndroidSettings(
+    // Android: timer cada 5 minutos
+    final locationSettings = AndroidSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
-      intervalDuration: const Duration(minutes: 5),
+      distanceFilter: 500,
+      intervalDuration: const Duration(minutes: 1),
     );
+
+    Timer.periodic(const Duration(minutes: 1), (timer) async {
+        _ultimaPosicionConocida = await Geolocator.getCurrentPosition(
+            locationSettings: locationSettings);
+        if (_ultimaPosicionConocida != null) {
+          await _enviarAlServidor(apiClient, _ultimaPosicionConocida!);
+        }
+    });
   }
 
-  // Timer cada 5 minutos
-  Timer.periodic(const Duration(minutes: 5), (timer) async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          locationSettings: locationSettings);
-
-      // Enviamos a tu API usando el ApiClient que ya tiene el renovarToken
-      await apiClient.dio.post('/api/ubicacion', data: {
-        'latitud': position.latitude,
-        'longitud': position.longitude,
-        'fecha': DateTime.now().toIso8601String(),
-      });
-    } catch (e) {
-      print("Error en rastreo iOS: $e");
-    }
-  });
   return true;
 }
 
+Future<void> _enviarAlServidor(ApiClient _apiClient, Position position) async {
+  try {
+    final prefs = PreferenciasUsuario();
+    await prefs.initPrefs();
+    await _apiClient.dio.post('/api/posicion', data: {
+      'vendedorId': prefs.vendedor,
+      'latitud': position.latitude,
+      'longitud': position.longitude,
+      'fechaHora': DateTime.now().toIso8601String(),
+    });
+  } catch (e) {
+    print("Error en envío periódico: $e");
+  }
+}
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
 
@@ -93,8 +111,8 @@ void main() async {
   if (prefs.urlServicio == '') {
     prefs.urlServicio = 'localhost:8099'; // 'cursorcl.dynalias.com:8099';
   }
-  prefs.access_token = '';
   setupLocator();
+  await initializeService();
   runApp(
     MultiProvider(
       providers: [

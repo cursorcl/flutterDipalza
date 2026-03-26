@@ -41,7 +41,6 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
           icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {
             AppScaffoldKey.homeKey.currentState?.openDrawer();
-            //Scaffold.of(context).openDrawer();
           },
         ),
         centerTitle: true,
@@ -185,11 +184,9 @@ class _ListadoDeVentasPageState extends State<ListadeDeVentasPage> {
                   AppRoutes.modificarVenta,
                   arguments: {'ventaEnEdicion': itemVenta},
                 ).then((valor) {
-                  if (valor == true) {
                     setState(() {
-                      // Esto forzará al FutureBuilder a recargarse
+                      _listaVentasFuture = VentaProvider.ventaProvider.obtenerListaVentas();
                     });
-                  }
                 });
               },
               backgroundColor: Colors.blue,
