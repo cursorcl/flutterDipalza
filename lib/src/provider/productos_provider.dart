@@ -14,14 +14,6 @@ class ProductosProvider {
 
   Future<List<ProductosModel>> obtenerListaProductos() async {
     try {
-      /*
-      final prefs = new PreferenciasUsuario();
-      final token = prefs.access_token;
-      Uri url = Uri.http(prefs.urlServicio, '/api/productos');
-      final resp = await http.get(url, headers: {'Accept-Charset': 'utf-8', 'Authorization': 'Bearer $token',});
-      return productosModelFromJson(resp.body);
-       */
-
       final response = await _dio.get('/api/productos');
       final List<dynamic> data = response.data;
       return data.map((json) => ProductosModel.fromJson(json)).toList();
@@ -43,6 +35,24 @@ class ProductosProvider {
       log('Error al ejecutar obtenerProducto',
           name: 'ProductosProvider', error: error);
       return null;
+    }
+  }
+
+  Future<double> obtenerPesoPromedioProducto(String code) async {
+    try {
+      final response = await _dio.get('/api/numerados/pesopromedio/$code');
+      log('Response data: ${response.data}', name: 'ProductosProvider');
+
+      if(response.data == null) return 0;
+
+      if(response.data is num)
+        return (response.data as num).toDouble();
+
+      return 0;
+    } catch (error) {
+      log('Error al ejecutar obtenerProducto',
+          name: 'ProductosProvider', error: error);
+      return 0;
     }
   }
 }

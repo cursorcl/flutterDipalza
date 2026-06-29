@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
     const ListadeDeVentasPage(),
     const ProductosPage(),
     const ClientesPage(),
-    const ConfiguracionPage(),
+    const ConfiguracionPage(showMenuIcon: true),
   ];
 
   @override

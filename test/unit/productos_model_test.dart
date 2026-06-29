@@ -37,6 +37,7 @@ void main() {
           articulo: 'P001',
           descripcion: 'Producto Test',
           ventaneto: 1000.0,
+          precioLista2: 1000.0,
           porcila: 10.5,
           porccarne: 89.5,
           unidad: 'UNI',

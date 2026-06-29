@@ -1,12 +1,22 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import '../share/prefs_usuario.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
   late Dio dio;
+  late Dio dioRefresh;
   final pref = PreferenciasUsuario();
 
+  bool _isRefreshing = false;
+  bool _sessionNotified = false;
+  final List<Completer<bool>> _refreshQueue = [];
+
+  final _sessionExpiredController = StreamController<void>.broadcast();
+  Stream<void> get onSessionExpired => _sessionExpiredController.stream;
 
   // Singleton
   factory ApiClient() => _instance;
@@ -18,29 +28,35 @@ class ApiClient {
       receiveTimeout: const Duration(seconds: 10),
     ));
 
-    // Usamos QueuedInterceptorsWrapper en lugar de InterceptorsWrapper simple.
-    // Esto asegura que las peticiones se procesen secuencialmente durante el refresco.
+    dioRefresh = Dio(BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ));
+
     dio.interceptors.add(QueuedInterceptorsWrapper(
       onRequest: (options, handler) async {
-        // 1. Inyectar el token actual antes de cada petición
-        final token =  pref.access_token;
+        final token = pref.access_token;
         options.headers['Authorization'] = 'Bearer $token';
-              return handler.next(options);
+        return handler.next(options);
       },
       onError: (DioException e, handler) async {
-        // Si el error es 403 (Prohibido/Expirado)
-        if (e.response?.statusCode == 403) {
-
-          final bool renovado = await renovarToken();
-
-          if (renovado) {
-            final options = e.requestOptions;
-            options.headers['Authorization'] = 'Bearer ${pref.access_token}';
-            try {
+        if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+          try {
+            final bool renovado = await _refreshTokenIfNeeded();
+            if (renovado) {
+              final options = e.requestOptions;
+              options.headers['Authorization'] = 'Bearer ${pref.access_token}';
               final response = await dio.fetch(options);
               return handler.resolve(response);
-            } catch (err) {
-              return handler.next(e);
+            } else if (!_sessionNotified) {
+              _sessionNotified = true;
+              _sessionExpiredController.add(null);
+            }
+          } catch (err) {
+            debugPrint("Error durante refresh token: $err");
+            if (!_sessionNotified) {
+              _sessionNotified = true;
+              _sessionExpiredController.add(null);
             }
           }
         }
@@ -48,27 +64,63 @@ class ApiClient {
       },
     ));
   }
-  /// Método para renovar el token directamente en el ApiClient
+
+  Future<bool> _refreshTokenIfNeeded() async {
+    if (_isRefreshing) {
+      final completer = Completer<bool>();
+      _refreshQueue.add(completer);
+      return completer.future.timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          _refreshQueue.remove(completer);
+          return false;
+        },
+      );
+    }
+
+    _isRefreshing = true;
+    try {
+      final result = await renovarToken();
+      if (result) {
+        _sessionNotified = false;
+      }
+      for (final completer in _refreshQueue) {
+        if (!completer.isCompleted) {
+          completer.complete(result);
+        }
+      }
+      _refreshQueue.clear();
+      return result;
+    } catch (e) {
+      for (final completer in _refreshQueue) {
+        if (!completer.isCompleted) {
+          completer.complete(false);
+        }
+      }
+      _refreshQueue.clear();
+      rethrow;
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
   Future<bool> renovarToken() async {
     try {
       final refreshToken = pref.refreshToken;
       if (refreshToken.isEmpty) return false;
 
-      // Usamos una instancia local de Dio para evitar el interceptor
-      // de esta misma clase y prevenir bucles infinitos.
-      final dioRefresh = Dio();
-
-      final resp = await dioRefresh.post(
-        'http://${pref.urlServicio}/auth/refresh',
-        data: {'refreshToken': refreshToken},
-        options: Options(contentType: Headers.jsonContentType),
-      );
+      final resp = await dioRefresh
+          .post(
+            'http://${pref.urlServicio}/auth/refresh',
+            data: {'refreshToken': refreshToken},
+            options: Options(contentType: Headers.jsonContentType),
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (resp.statusCode == 200) {
         final nuevoAccessToken = resp.data['accessToken'];
         final nuevoRefreshToken = resp.data['refreshToken'];
 
-        // Guardamos en las preferencias
         pref.access_token = nuevoAccessToken;
         if (nuevoRefreshToken != null) {
           pref.refreshToken = nuevoRefreshToken;
@@ -78,8 +130,17 @@ class ApiClient {
       }
       return false;
     } catch (e) {
-      print("Error en renovación automática: $e");
+      debugPrint("Error en renovación automática: $e");
       return false;
     }
+  }
+
+  Future<void> logout() async {
+    pref.borrarCredenciales();
+    _sessionExpiredController.add(null);
+  }
+
+  void dispose() {
+    _sessionExpiredController.close();
   }
 }

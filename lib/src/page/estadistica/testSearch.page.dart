@@ -30,8 +30,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class EstadisticaPage extends StatefulWidget {
   @override
@@ -43,8 +43,9 @@ class _EstadisticaPageState extends State<EstadisticaPage> {
 
   // Get json result and convert it to model. Then add
   Future<Null> getUserDetails() async {
-    final http.Response response = await http.get(Uri.parse(url));
-    final responseJson = json.decode(response.body);
+    final dio = Dio();
+    final Response response = await dio.get(url);
+    final responseJson = json.decode(response.data.toString());
 
     setState(() {
       for (var user in responseJson) {

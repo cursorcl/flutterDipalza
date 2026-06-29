@@ -19,6 +19,7 @@ class ProductosModel {
       {required this.articulo,
       required this.descripcion,
       required this.ventaneto,
+      required this.precioLista2,
       required this.porcila,
       required this.porccarne,
       required this.unidad,
@@ -33,6 +34,7 @@ class ProductosModel {
   String articulo;
   String descripcion;
   double ventaneto;
+  double precioLista2;
   double porcila;
   double porccarne;
   String unidad;
@@ -48,6 +50,7 @@ class ProductosModel {
       articulo: json["articulo"],
       descripcion: json["descripcion"],
       ventaneto: json["ventaNeto"] == null ? 0 : json["ventaNeto"].toDouble(),
+      precioLista2: json["precioLista2"] == null ? 0 : json["precioLista2"].toDouble(),
       porcila: json["porcIla"] == null ? 0 : json["porcIla"].toDouble(),
       porccarne: json["porcCarne"] == null ? 0 : json["porcCarne"].toDouble(),
       unidad: json["unidad"].toUpperCase(),
@@ -63,6 +66,7 @@ class ProductosModel {
         "articulo": articulo,
         "descripcion": descripcion,
         "ventaNeto": ventaneto,
+        "precioLista2": precioLista2,
         "porcIla": porcila,
         "porcCarne": porccarne,
         "unidad": unidad,

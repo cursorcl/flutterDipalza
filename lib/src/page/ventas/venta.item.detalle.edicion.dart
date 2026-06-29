@@ -56,6 +56,9 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   double _porcentajeILA = 0;
   double _porcentajeIVA = 0;
   bool _estaCargandoStock = false;
+  int _listaPrecio = 1;
+  double _precioLista1 = 0;
+  double _precioLista2 = 0;
 
   // Se utiliza para colocar rojo el borde del campo cantidad si excede el stock
   bool _excedeStock = false;
@@ -80,7 +83,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     _cantidadController =
         TextEditingController(text: d?.cantidad.toString() ?? '0');
     _descuentoController = TextEditingController(
-        text: d?.totalDescuento.toString() ?? '0'); // '0' por defecto
+        text: d?.porcentajeDescuento.toString() ?? '0'); // '0' por defecto
 
     if (d != null) {
       final String claveBusqueda = d.idProducto;
@@ -89,7 +92,14 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
         _productoId = productoEnVenta!.articulo;
         _productoController =
             TextEditingController(text: productoEnVenta!.descripcion);
-        _precioUnitario = productoEnVenta!.ventaneto;
+        _precioLista1 = productoEnVenta!.ventaneto;
+        _precioLista2 = productoEnVenta!.precioLista2;
+        if (_precioLista2 > 0) {
+          final diffL1 = (d.precioUnitario - _precioLista1).abs();
+          final diffL2 = (d.precioUnitario - _precioLista2).abs();
+          _listaPrecio = diffL2 < diffL1 ? 2 : 1;
+        }
+        _precioUnitario = _listaPrecio == 1 ? _precioLista1 : _precioLista2;
         _esNumerado = productoEnVenta!.numbered;
         _unidadProducto = productoEnVenta!.unidad;
         _porcentajeILA = productoEnVenta!.porcila;
@@ -276,6 +286,11 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
             ),
 
             // =========================
+            // SELECTOR LISTA DE PRECIO (AÑADIDO)
+            // =========================
+            _buildSelectorPrecio(),
+
+            // =========================
             // CANTIDAD (sin +/-)
             // =========================
             TextField(
@@ -359,7 +374,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
   }
 
   Widget _buildResumenInferior() {
-    String formatCurrency(double value) => '\$${value.toStringAsFixed(2)}';
+    String formatCurrency(double value) => '\$${value.toStringAsFixed(0)}';
     String formatNumber(double value) => value.toStringAsFixed(2);
 
     return Card(
@@ -387,7 +402,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
               formatCurrency(_valorDescuento),
               fontSize: 13,
               valueColor:
-                  _valorDescuento > 0 ? Colors.orange[700]! : Colors.grey[700]!,
+              _valorDescuento > 0 ? Colors.orange[700]! : Colors.grey[700]!,
             ),
             _buildResumenRow(
               '% ILA asociado:',
@@ -410,8 +425,8 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
   Widget _buildResumenRow(String label, String value,
       {Color valueColor = Colors.black,
-      bool isBold = false,
-      double fontSize = 16}) {
+        bool isBold = false,
+        double fontSize = 16}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -434,15 +449,80 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     );
   }
 
+// AÑADIDO: Widget para seleccionar la lista de precios.
+  Widget _buildSelectorPrecio() {
+    // Solo muestra el selector si hay un producto cargado.
+    if (productoEnVenta == null) {
+      return const SizedBox.shrink(); // No muestra nada si no hay producto
+    }
+
+    // Función para formatear el precio y que se vea bien
+    String formatPrice(double price) => '\$${price.toStringAsFixed(0)}';
+
+    // Si _precioLista2 es nulo o negativo, lo tratamos como 0.
+    final precio2 = _precioLista2 > 0 ? _precioLista2 : 0.0;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Escoja Precio',
+            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+          ),
+          const SizedBox(height: 6),
+
+          // MODIFICADO: Envolvemos el SegmentedButton en Row y Expanded
+          Row( // 1. Row crea un contexto de layout horizontal.
+            children: [
+              Expanded( // 2. Expanded le dice a su hijo que ocupe todo el espacio disponible en la Row.
+                child: SegmentedButton<int>(
+                  style: SegmentedButton.styleFrom(
+                    selectedBackgroundColor: Colors.redAccent,
+                    selectedForegroundColor: Colors.white,
+                    disabledForegroundColor: Colors.grey,
+                    disabledBackgroundColor: Colors.grey.withOpacity(0.1),
+                    // AÑADIDO: Un poco más de padding vertical para que se vea mejor al estirarse.
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  segments: <ButtonSegment<int>>[
+                    ButtonSegment<int>(
+                      value: 1,
+                      label: Text(
+                        'Precio 1\n${formatPrice(_precioLista1)}',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    ButtonSegment<int>(
+                      value: 2,
+                      label: Text(
+                        'Precio 2\n${formatPrice(precio2)}',
+                        textAlign: TextAlign.center,
+                      ),
+                      enabled: precio2 > 0,
+                    ),
+                  ],
+                  selected: {_listaPrecio},
+                  onSelectionChanged: (Set<int> newSelection) {
+                    setState(() {
+                      _listaPrecio = newSelection.first;
+                      _precioUnitario =
+                      _listaPrecio == 1 ? _precioLista1 : _precioLista2;
+                    });
+                    _recalcularTotal();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
   void _buscarProducto() async {
     productoEnVenta = await AppNavigator.pushNamed<ProductosModel?>(
         AppRoutes.productosSeleccion);
-    /*
-    productoEnVenta = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ProductosPage(isForSelection: true)),
-    );
-     */
-
     if (productoEnVenta != null && productoEnVenta is ProductosModel) {
       _actualizarProductoSeleccionado(productoEnVenta);
       _cargarStockProducto(productoEnVenta!.articulo);
@@ -456,12 +536,12 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
       if (productoEnVenta != null) {
         _productosBloc.updatePorduct(productoEnVenta!);
+        _esNumerado = productoEnVenta!.numbered;
+        _precioLista1 = productoEnVenta!.ventaneto;
+        _precioLista2 = productoEnVenta!.precioLista2;
+        _precioUnitario = _listaPrecio == 1 ? _precioLista1 : _precioLista2;
         if (_esNumerado) {
-          var lista = productoEnVenta!.numerados;
-          _pesoPromedio = lista.length == 0
-              ? 0
-              : lista.map((nn) => nn.peso).reduce((a, b) => a + b) /
-                  lista.length;
+          _pesoPromedio = await _productosProvider.obtenerPesoPromedioProducto(codigo);
         }
         setState(() {
           if (_esNumerado) {
@@ -472,7 +552,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
                 productoEnVenta!.stock - productoEnVenta!.stockVentas;
           }
           _unidadProducto = productoEnVenta!.unidad;
-          _porcentajeILA = productoEnVenta!.porcila; // Usando 'porcila'
+          _porcentajeILA = productoEnVenta!.porcila;
         });
       }
     } catch (e) {
@@ -500,7 +580,14 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
     setState(() {
       _productoId = producto.articulo;
       _productoController.text = producto.descripcion;
-      _precioUnitario = producto.ventaneto;
+      _precioLista1 = producto.ventaneto;
+      _precioLista2 = producto.precioLista2;
+
+      // MODIFICADO: Siempre reiniciamos a la Lista 1 por defecto.
+      _listaPrecio = 1;
+      // MODIFICADO: El precio unitario por defecto es el de la lista 1.
+      _precioUnitario = _precioLista1;
+
       _esNumerado = producto.numbered;
       _pesoTotal = 0;
 
@@ -516,11 +603,10 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
   /// Recalcula el valor del descuento y el total final
   void _recalcularTotal() {
-    // TODO debo verificar este cálculo
     final cantidad = double.tryParse(_cantidadController.text) ?? 0;
-    final descuento = double.tryParse(_descuentoController.text) ?? 0;
+    final porcentajeDescuento = double.tryParse(_descuentoController.text) ?? 0;
     final subtotal = cantidad * _precioUnitario;
-    final descuentoMonto = subtotal * (descuento / 100);
+    final descuentoMonto = subtotal * (porcentajeDescuento / 100);
     final total = subtotal - descuentoMonto;
 
     setState(() {
@@ -543,7 +629,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       return;
     }
 
-    if (porcentajeDescuento < 0 || porcentajeDescuento >= 50) {
+    if (porcentajeDescuento < 0 || porcentajeDescuento > 50) { // MODIFICADO: El descuento máximo debe ser menor a 100
       _mostrarError('El descuento debe estar entre 0 y 50%.');
       return;
     }
@@ -554,10 +640,13 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
         _mostrarError('Error: No se pudo validar el producto.');
         return;
       }
+
       _porcentajeILA = producto.porcila;
       final unidad = producto.unidad;
-      final precioUnitatio = producto.ventaneto;
-      final subtotal = (_esNumerado ? _pesoTotal : cantidad) * precioUnitatio;
+
+      // MODIFICADO: Se usa el _precioUnitario del estado, que respeta la selección del usuario.
+      // Se elimina el recálculo redundante.
+      final subtotal = (_esNumerado ? _pesoTotal : cantidad) * _precioUnitario;
       final totalDescuento = subtotal * (porcentajeDescuento / 100);
       final total = subtotal - totalDescuento;
 
@@ -570,7 +659,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
       setState(() => _stockDisponible = stockReal);
       final ventaId = widget.actualVenta == null ? -1 : widget.actualVenta!.id;
 
-      final porcIva = 19.0;
+      final porcIva = _porcentajeIVA; // Usamos el IVA del estado
       final totalIva = total * porcIva / 100;
       final porcIla = producto.porcila;
       final totalIla = total * porcIla / 100;
@@ -589,6 +678,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           idProducto: producto.articulo,
           nombreProducto: producto.descripcion,
           cantidad: cantidad,
+          // MODIFICADO: Se guarda el precio que el usuario realmente seleccionó.
           precioUnitario: _precioUnitario,
           porcentajeDescuento: porcentajeDescuento,
           porcentajeIva: _porcentajeIVA,
@@ -599,12 +689,11 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           totalLinea: total,
           unidad: unidad,
           piezas: piezas,
-          // TODO me falta validar las piezas
           piezasDetalle: []);
       String json = ventaDetalleModelToJson(detalle);
       developer.log("Enviando a grabar detalle venta $json");
       final VentaModel ventaModel =
-          await VentaProvider.ventaProvider.saveItemVenta(detalle);
+      await VentaProvider.ventaProvider.saveItemVenta(detalle);
       AppNavigator.pop(ventaModel);
     } catch (e, s) {
       showAlertDialog(context, s.toString(), Icons.error);

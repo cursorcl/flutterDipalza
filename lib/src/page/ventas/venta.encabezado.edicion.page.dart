@@ -104,12 +104,23 @@ class _VentaEncabezadoEdicionPageState
                     onPressed: (_clienteSeleccionado == null)
                         ? null // Deshabilita el botón si no hay cliente
                         : () async {
-                            await saveVenta();
-                            AppNavigator.pushNamed(AppRoutes.ventaDetalle,
-                                arguments: {
-                                  'ventaModel': ventaParaEditar,
-                                  'esEdicion': true
-                                });
+                            try {
+                              await saveVenta();
+                              if (!mounted) return;
+                              AppNavigator.pushNamed(AppRoutes.ventaDetalle,
+                                  arguments: {
+                                    'ventaModel': ventaParaEditar,
+                                    'esEdicion': true
+                                  });
+                            } catch (e) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error al guardar la venta: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           },
                   ),
                 ],
@@ -239,13 +250,11 @@ class _VentaEncabezadoEdicionPageState
         codigoRuta: pref.ruta,
         codigoCondicionVenta: _condicionSeleccionada!.codigo,
         detalles: ventaParaEditar?.detalles ?? [],
-        estadoVenta: ventaParaEditar != null && ventaParaEditar?.id != -1
-            ? EstadoVenta.REOPENED
-            : EstadoVenta.OPENED);
+        estadoVenta: EstadoVenta.OPENED);
 
     final VentaModel ventaGuardada =
         await VentaProvider.ventaProvider.saveVentaEncabezado(ventaModel);
-    setState(() {
+    if (mounted) setState(() {
       ventaParaEditar = ventaGuardada;
     });
     return ventaGuardada;

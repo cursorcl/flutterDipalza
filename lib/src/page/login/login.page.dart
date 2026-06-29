@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _textUsuarioController = TextEditingController(text: prefs.rut);
+    _textUsuarioController = TextEditingController(text: prefs.userName);
     _textPasswordController = TextEditingController(text: prefs.password);
     _fechaFacturacion = DateTime.now().add(const Duration(days: 1));
 
@@ -70,9 +70,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onRutChanged(String text, LoginBloc bloc) {
-    _textUsuarioController.text = RUTValidator.formatear(text);
-    _textUsuarioController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _textUsuarioController.text.length));
+    //_textUsuarioController.text = RUTValidator.formatear(text);
+    //_textUsuarioController.selection = TextSelection.fromPosition(
+    //    TextPosition(offset: _textUsuarioController.text.length));
     bloc.changeUsuario(_textUsuarioController.text);
   }
 
@@ -99,16 +99,13 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           width: size.width * 0.90,
           padding: const EdgeInsets.all(24.0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10.0,
-                  offset: Offset(0.0, 5.0),
-                ),
-              ]),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15.0), boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: Offset(0.0, 5.0),
+            ),
+          ]),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -191,8 +188,7 @@ class _LoginPageState extends State<LoginPage> {
             errorText: snapshot.hasError ? snapshot.error.toString() : null,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             suffixIcon: IconButton(
-              icon:
-                  Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+              icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
               onPressed: () => setState(() => _obscureText = !_obscureText),
             ),
           ),
@@ -207,8 +203,7 @@ class _LoginPageState extends State<LoginPage> {
       onTap: _isLoading
           ? null
           : () async {
-              final dynamic resultado =
-                  await AppNavigator.pushNamed(AppRoutes.rutas);
+              final dynamic resultado = await AppNavigator.pushNamed(AppRoutes.rutas);
               if (resultado != null && resultado is RutasModel) {
                 setState(() => _rutaSeleccionada = resultado);
                 bloc.changeRuta(_rutaSeleccionada!.codigo);
@@ -230,9 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                 _rutaSeleccionada?.descripcion ?? 'Seleccione una ruta',
                 style: TextStyle(
                   fontSize: 16,
-                  color: _rutaSeleccionada == null
-                      ? Colors.grey[700]
-                      : Colors.black,
+                  color: _rutaSeleccionada == null ? Colors.grey[700] : Colors.black,
                 ),
               ),
             ),
@@ -244,9 +237,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _crearSelectorFechaFacturacion(BuildContext context) {
-    final String fechaFormateada = _fechaFacturacion != null
-        ? DateFormat('dd/MM/yyyy').format(_fechaFacturacion!)
-        : 'Seleccione fecha';
+    final String fechaFormateada = _fechaFacturacion != null ? DateFormat('dd/MM/yyyy').format(_fechaFacturacion!) : 'Seleccione fecha';
 
     return InkWell(
       onTap: _isLoading ? null : () => _selectDate(context),
@@ -295,28 +286,18 @@ class _LoginPageState extends State<LoginPage> {
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            icon: _isLoading
-                ? Container()
-                : const Icon(Icons.login, color: Colors.white),
+            icon: _isLoading ? Container() : const Icon(Icons.login, color: Colors.white),
             label: _isLoading
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 3))
+                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
                 : const Text('Ingresar'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 15.0),
               backgroundColor: colorRojoBase(),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              textStyle:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            onPressed: (snapshot.hasData && !_isLoading)
-                ? () => _login(bloc, context)
-                : null,
+            onPressed: (snapshot.hasData && !_isLoading) ? () => _login(bloc, context) : null,
           ),
         );
       },
@@ -328,7 +309,18 @@ class _LoginPageState extends State<LoginPage> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         TextButton(
-          onPressed: () => AppNavigator.pushNamed(AppRoutes.config),
+          onPressed: () async {
+            final urlAntes = prefs.urlServicio;
+            await AppNavigator.pushNamed(AppRoutes.config);
+            if (!mounted) return;
+            if (prefs.urlServicio != urlAntes) {
+              final bloc = context.read<LoginBloc>();
+              setState(() {
+                _rutaSeleccionada = null;
+              });
+              bloc.changeRuta('');
+            }
+          },
           child: const Text('Configurar'),
         ),
         TextButton(
@@ -373,8 +365,7 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         Icon(icon, color: color, size: 20.0),
         const SizedBox(width: 8.0),
-        Text(message,
-            style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+        Text(message, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -383,14 +374,13 @@ class _LoginPageState extends State<LoginPage> {
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
 
-    RespuestaModel resp =
-        await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
+    RespuestaModel resp = await vendedorProvider.loginUsuario(bloc.usuario, bloc.password);
 
     if (resp.status == 200 && mounted) {
-      LoginResponseModel response = loginResponseModelFromJson(resp.detalle);
+      LoginResponseModel response = LoginResponseModel.fromJson(resp.detalle);
       prefs.vendedor = response.codigo;
       prefs.name = response.nombre;
-      prefs.rut = bloc.usuario;
+      prefs.userName = bloc.usuario;
       prefs.password = bloc.password;
       prefs.access_token = response.accessToken;
       prefs.refreshToken = response.refreshToken;
@@ -405,10 +395,7 @@ class _LoginPageState extends State<LoginPage> {
 
       AppNavigator.pushReplacementNamed(AppRoutes.home);
     } else if (mounted) {
-      alertUtil.showAlertDialog(
-          context,
-          'Problemas con el servicio de autenticación (${resp.detalle})',
-          Icons.error);
+      alertUtil.showAlertDialog(context, 'Problemas con el servicio de autenticación (${resp.detalle})', Icons.error);
     }
 
     if (mounted) {

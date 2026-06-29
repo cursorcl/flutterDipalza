@@ -18,7 +18,7 @@ class PreferenciasUsuario {
   String _tokenInMemory = '';
   String _refreshTokenInMemory = '';
   String _passwordInMemory = '';
-  String _rutInMemory = '';
+  String _userNameInMemory = '';
 
   // --- INICIALIZACIÓN ---
   Future<void> initPrefs() async {
@@ -28,7 +28,7 @@ class PreferenciasUsuario {
     _tokenInMemory = await _storage.read(key: 'token') ?? '';
     _refreshTokenInMemory = await _storage.read(key: 'refreshToken') ?? '';
     _passwordInMemory = await _storage.read(key: 'password') ?? '';
-    _rutInMemory = await _storage.read(key: 'rut') ?? '';
+    _userNameInMemory = await _storage.read(key: 'userName') ?? '';
   }
 
   // =======================================================
@@ -57,11 +57,11 @@ class PreferenciasUsuario {
     _storage.write(key: 'password', value: value);
   }
 
-  String get rut => _rutInMemory;
+  String get userName => _userNameInMemory;
 
-  set rut(String value) {
-    _rutInMemory = value;
-    _storage.write(key: 'rut', value: value);
+  set userName(String value) {
+    _userNameInMemory = value;
+    _storage.write(key: 'userName', value: value);
   }
 
   // Método para borrar datos sensibles al hacer Logout
@@ -69,7 +69,7 @@ class PreferenciasUsuario {
     _tokenInMemory = '';
     _refreshTokenInMemory = '';
     _passwordInMemory = '';
-    _rutInMemory = '';
+    _userNameInMemory = '';
     await _storage.deleteAll();
   }
 

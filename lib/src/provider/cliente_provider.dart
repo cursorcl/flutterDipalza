@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import '../services/api_client.dart';
 
@@ -13,63 +11,63 @@ class ClientesProvider {
   static final ClientesProvider clientesProvider = ClientesProvider._();
   final _dio = ApiClient().dio;
 
-  ClientesProvider._() {
-    //
-  }
+  ClientesProvider._() {}
 
   Future<List<ClientesModel>> obtenerListaClientes(
       String codVendedor, String codRuta, BuildContext context) async {
     try {
-      final response = await _dio.get('/api/clientes/ruta/$codRuta');
+      final response = await _dio.get('/api/clientes/vendedor', queryParameters: {'codigoVendedor': codVendedor});
       final List<dynamic> data = response.data;
       return data.map((json) => ClientesModel.fromJson(json)).toList();
     } catch (error) {
-      log(error.toString());
+      print(error.toString());
       return [];
     }
   }
 
   Future<List<ClientesModel>> obtenerListaClientesv2() async {
-    final prefs = new PreferenciasUsuario();
+    final prefs = PreferenciasUsuario();
 
-    Uri url = Uri.http(prefs.urlServicio,
-        '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}');
+    try {
+      final response = await _dio.get(
+        '/clients/seller/${prefs.vendedor}/route/${prefs.ruta}',
+        options: Options(
+          headers: {'Accept-Charset': 'utf-8'},
+        ),
+      );
 
-    final resp = await http.get(url, headers: {
-      HttpHeaders.authorizationHeader: prefs.access_token,
-      'Accept-Charset': 'utf-8'
-    });
-
-    if (resp.statusCode == 200 || resp.statusCode == 202) {
-      String responseBody = utf8.decode(resp.bodyBytes);
-      return clientesModelFromJson(responseBody);
+      if (response.statusCode == 200 || response.statusCode == 202) {
+        final data = response.data;
+        if (data is List) {
+          return data.map((json) => ClientesModel.fromJson(json)).toList();
+        }
+        return clientesModelFromJson(jsonEncode(data));
+      }
+      return clientesModelFromJson('[]');
+    } catch (error) {
+      print(error.toString());
+      return clientesModelFromJson('[]');
     }
-    return clientesModelFromJson('[]');
   }
 
   Future<ClientesModel> obtenerClienteByRutCodigo(
       String rut, String codigo) async {
-    final prefs = new PreferenciasUsuario();
+    try {
+      final response = await _dio.get(
+        '/api/clientes/$rut',
+        queryParameters: codigo.trim().isNotEmpty ? {'codigo': codigo} : null,
+        options: Options(
+          headers: {'Accept-Charset': 'utf-8'},
+        ),
+      );
 
-    var params = prefs.urlServicio.split(":");
-
-    final url = Uri(
-      scheme: 'http',
-      host: params[0],
-      port: int.parse(params[1]),
-      pathSegments: ['api', 'clientes', rut],
-    );
-    if (codigo.trim() != "") url.replace(queryParameters: {'codigo': codigo});
-
-    final resp = await http.get(url, headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ${prefs.access_token}',
-      'Accept-Charset': 'utf-8'
-    });
-
-    if (resp.statusCode == 200 || resp.statusCode == 202) {
-      String responseBody = utf8.decode(resp.bodyBytes);
-      return clienteModelFromJson(responseBody);
+      if (response.statusCode == 200 || response.statusCode == 202) {
+        return ClientesModel.fromJson(response.data);
+      }
+      return clienteModelFromJson('{}');
+    } catch (error) {
+      print(error.toString());
+      return clienteModelFromJson('{}');
     }
-    return clienteModelFromJson('{}');
   }
 }

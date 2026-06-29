@@ -1,8 +1,7 @@
 import 'dart:async';
 
 class Validators {
-  final validarUsuario = StreamTransformer<String, String>.fromHandlers(
-      handleData: (usuario, sink) {
+  final validarUsuario = StreamTransformer<String, String>.fromHandlers(handleData: (usuario, sink) {
     if (usuario.length >= 3) {
       sink.add(usuario);
     } else {
@@ -10,8 +9,7 @@ class Validators {
     }
   });
 
-  final validarPassword = StreamTransformer<String, String>.fromHandlers(
-      handleData: (password, sink) {
+  final validarPassword = StreamTransformer<String, String>.fromHandlers(handleData: (password, sink) {
     if (password.length >= 6) {
       sink.add(password);
     } else {
@@ -19,12 +17,11 @@ class Validators {
     }
   });
 
-  final validarRuta =
-      StreamTransformer<String, String>.fromHandlers(handleData: (ruta, sink) {
-    if (ruta.length >= 0) {
+  final validarRuta = StreamTransformer<String, String>.fromHandlers(handleData: (ruta, sink) {
+    if (ruta.isNotEmpty) {
       sink.add(ruta);
     } else {
-      sink.addError('Debe seleccionar Ruta.');
+      sink.addError('Seleccione una ruta');
     }
   });
 }

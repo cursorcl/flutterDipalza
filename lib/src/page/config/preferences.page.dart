@@ -19,7 +19,8 @@ import '../../widget/connectivity_banner.widget.dart';
 enum ConnectionStatus { unknown, ok, invalid }
 
 class ConfiguracionPage extends StatefulWidget {
-  const ConfiguracionPage({super.key});
+  final bool showMenuIcon;
+  const ConfiguracionPage({super.key, this.showMenuIcon = false});
 
   @override
   State<ConfiguracionPage> createState() => _ConfiguracionPageState();
@@ -442,12 +443,14 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     return Scaffold(
       // Sin botón de volver; título centrado para consistencia
       appBar: AppBar(
-        leading: IconButton(
+        leading: widget.showMenuIcon
+            ? IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {
-            AppScaffoldKey.homeKey.currentState?.openDrawer();
+            //AppScaffoldKey.homeKey.currentState?.openDrawer();
+            Scaffold.of(context).openDrawer();
           },
-        ),
+        ) : null,
         backgroundColor: colorRojoBase(),
         title: const Text('Configuración'),
         centerTitle: true,
