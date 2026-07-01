@@ -23,13 +23,14 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
+        continue-on-error: true
         with:
           release-type: dart
 
   build:
     runs-on: ubuntu-latest
     needs: release-please
-    if: ${{ needs.release-please.outputs.release_created || github.event_name == 'workflow_dispatch' }}
+    if: always() && (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch')
     steps:
       - uses: actions/checkout@v4
 
