@@ -13,7 +13,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     // Asegúrate de que este namespace sea el que definiste al crear el proyecto
     namespace "cl.eosorio.dipalza.movil"
-    compileSdk 35
+    compileSdk 36
 
     compileOptions {
         coreLibraryDesugaringEnabled true
@@ -42,7 +42,7 @@ android {
     defaultConfig {
         applicationId "cl.eosorio.dipalza.movil"
         minSdk 21
-        targetSdk 35
+        targetSdk 36
         versionCode 11
         versionName "2.0.0"
     }
