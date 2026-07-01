@@ -3,4 +3,12 @@ subprojects {
         project.buildDir = "${rootProject.buildDir}/${project.name}"
     }
     project.evaluationDependsOn(":app")
+
+    // Fuerza compileSdk 36 en todos los plugins de Android en el momento
+    // en que registran el plugin, no en afterEvaluate (compatible con AGP 8.x+).
+    plugins.withId('com.android.library') {
+        android {
+            compileSdk = 36
+        }
+    }
 }
