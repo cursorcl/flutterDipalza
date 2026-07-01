@@ -1,31 +1,6 @@
 subprojects {
-    // Definición de directorios de build
     if (project.name != 'app') {
         project.buildDir = "${rootProject.buildDir}/${project.name}"
     }
-
-    // Dependencia de evaluación necesaria para Flutter
     project.evaluationDependsOn(":app")
-
-    // Definimos una función para aplicar la configuración de los SDKs
-    def configureAndroidProject = { p ->
-        if (p.hasProperty('android')) {
-            p.android {
-                compileSdk 35
-                defaultConfig {
-                    minSdk 21
-                }
-            }
-        }
-    }
-
-    // Si el proyecto ya se evaluó, aplicamos la configuración de inmediato.
-    // De lo contrario, esperamos al afterEvaluate.
-    if (project.state.executed) {
-        configureAndroidProject(project)
-    } else {
-        project.afterEvaluate {
-            configureAndroidProject(project)
-        }
-    }
 }
