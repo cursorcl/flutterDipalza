@@ -1,7 +1,8 @@
+// Redirige los outputs al directorio build/ del proyecto Flutter (un nivel arriba de android/)
+rootProject.buildDir = "${rootProject.projectDir}/../build"
+
 subprojects {
-    if (project.name != 'app') {
-        project.buildDir = "${rootProject.buildDir}/${project.name}"
-    }
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
     project.evaluationDependsOn(":app")
 
     // Fuerza compileSdk 36 en todos los plugins de Android en el momento

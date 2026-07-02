@@ -35,7 +35,7 @@ dependencies:
   shared_preferences: ^2.0.8
   path_provider: ^2.0.6
   sqflite: ^2.0.0+4
-  geolocator: ^13.0.0
+  geolocator: ^14.0.0
   connectivity_plus: ^6.0.3
   provider: ^6.1.2
   get_it: ^7.7.0 # Esta es la librería para el Service Locator
@@ -43,7 +43,7 @@ dependencies:
   flutter_slidable: ^4.0.3
   fluttertoast: ^8.2.4
   dio: ^5.9.0
-  flutter_secure_storage: ^8.1.0
+  flutter_secure_storage: ^10.0.0
   jwt_decoder: ^2.0.1
 
   permission_handler: ^11.3.0

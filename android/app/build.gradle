@@ -41,7 +41,7 @@ android {
 
     defaultConfig {
         applicationId "cl.eosorio.dipalza.movil"
-        minSdk 21
+        minSdk 23
         targetSdk 36
         versionCode 11
         versionName "2.0.0"
