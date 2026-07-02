@@ -41,7 +41,7 @@ android {
 
     defaultConfig {
         applicationId "cl.eosorio.dipalza.movil"
-        minSdk 23
+        minSdkVersion flutter.minSdkVersion
         targetSdk 36
         versionCode 11
         versionName "2.0.0"
