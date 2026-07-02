@@ -41,7 +41,7 @@ dependencies:
   get_it: ^7.7.0 # Esta es la librería para el Service Locator
   intl: ^0.19.0 # Paquete para formato de fechas y números
   flutter_slidable: ^4.0.3
-  fluttertoast: ^8.2.4
+  fluttertoast: ^9.1.0
   dio: ^5.9.0
   flutter_secure_storage: ^10.0.0
   jwt_decoder: ^2.0.1
