@@ -91,7 +91,7 @@ class _VentaEncabezadoEdicionPageState
                   _buildClienteSelector(context),
                   const SizedBox(height: 16),
                   _buildCondicionVentaModelSelector(),
-                  const Spacer(), // Empuja el botón al fondo
+                  const SizedBox(height: 32),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.arrow_forward),
                     label: const Text('Detalle Venta'),

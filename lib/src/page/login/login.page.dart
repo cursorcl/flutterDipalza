@@ -395,7 +395,8 @@ class _LoginPageState extends State<LoginPage> {
 
       AppNavigator.pushReplacementNamed(AppRoutes.home);
     } else if (mounted) {
-      alertUtil.showAlertDialog(context, 'Problemas con el servicio de autenticación (${resp.detalle})', Icons.error);
+      final mensaje = resp.detalle['error']?.toString() ?? 'No se pudo iniciar sesión. Intente nuevamente.';
+      alertUtil.showAlertDialog(context, mensaje, Icons.error_outline);
     }
 
     if (mounted) {

@@ -26,8 +26,13 @@ class VenderdorProvider {
         ),
       );
 
+      final respData = resp.data;
       return RespuestaModel(
-          status: resp.statusCode ?? 200, detalle: resp.data);
+        status: resp.statusCode ?? 200,
+        detalle: respData is Map<String, dynamic>
+            ? respData
+            : {"error": respData?.toString() ?? "Respuesta inesperada"},
+      );
     } on DioException catch (e) {
       if (e.response == null) {
         return RespuestaModel(
@@ -53,9 +58,12 @@ class VenderdorProvider {
             detalle: {"error": "La versión de prueba ha finalizado."},
           );
         default:
+          final data = e.response?.data;
           return RespuestaModel(
             status: e.response!.statusCode ?? 500,
-            detalle: e.response?.data ?? {"error": "Error desconocido"},
+            detalle: data is Map<String, dynamic>
+                ? data
+                : {"error": data?.toString() ?? "Error desconocido"},
           );
       }
     } catch (error) {

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../model/rutas_model.dart';
+import '../../services/api_client.dart';
 import '../../share/app.navigator.dart';
 import '../../share/app_routes.dart';
 import '../../share/app_scaffold_key.dart';
@@ -379,6 +380,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                           return;
                         }
                         _prefs.urlServicio = toStoreFormat(_urlController.text);
+                        ApiClient().dio.options.baseUrl = 'http://${_prefs.urlServicio}';
                         _prefs.recentEndpoints.insert(0, _urlController.text);
                         if (!mounted) return;
                         setState(() {}); // refresca la ficha principal

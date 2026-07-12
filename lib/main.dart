@@ -42,10 +42,13 @@ Future<bool> onStart(ServiceInstance service) async {
     );
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return true; // sale de onStart limpiamente
-    Geolocator.getPositionStream(locationSettings: locationSettings).listen((Position position) {
-      _ultimaPosicionConocida = position;
-      _enviarAlServidor(apiClient, _ultimaPosicionConocida!);
-    });
+    Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+      (Position position) {
+        _ultimaPosicionConocida = position;
+        _enviarAlServidor(apiClient, position);
+      },
+      onError: (e) => debugPrint('[BG] Error en stream GPS: $e'),
+    );
   } else {
     // Android: timer cada 5 minutos
     final locationSettings = AndroidSettings(
@@ -87,6 +90,7 @@ Future<void> _enviarAlServidor(ApiClient _apiClient, Position position) async {
   try {
     final prefs = PreferenciasUsuario();
     await prefs.initPrefs();
+    if (prefs.access_token.isEmpty || prefs.vendedor.isEmpty) return;
     await _apiClient.dio.post('/api/posicion', data: {
       'vendedorId': prefs.vendedor,
       'latitud': position.latitude,
@@ -94,7 +98,7 @@ Future<void> _enviarAlServidor(ApiClient _apiClient, Position position) async {
       'fechaHora': DateTime.now().toIso8601String(),
     });
   } catch (e) {
-    print("Error en envío periódico: $e");
+    debugPrint("Error en envío periódico: $e");
   }
 }
 
