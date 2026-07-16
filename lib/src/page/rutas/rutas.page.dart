@@ -6,6 +6,7 @@ import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:flutter/material.dart';
 
 import '../../bloc/rutas_bloc.dart';
+import '../../share/prefs_usuario.dart';
 import '../../utils/utils.dart';
 
 class RutasPage extends StatefulWidget {
@@ -72,6 +73,31 @@ class _RutasPageState extends State<RutasPage> {
         _codigosSeleccionados.add(codigo);
       }
     });
+  }
+
+  Future<void> _cerrarSesion() async {
+    final salir = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar'),
+        content: const Text('¿Desea cerrar la sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+    if (salir == true && mounted) {
+      // Limpia tokens/estado y navega a login
+      PreferenciasUsuario().access_token = '';
+      AppNavigator.goToLogin();
+    }
   }
 
   _card(RutasModel ruta) {
@@ -142,6 +168,12 @@ class _RutasPageState extends State<RutasPage> {
                 });
               },
             ),
+            if (widget.obligatorio)
+              IconButton(
+                icon: const Icon(Icons.logout),
+                tooltip: 'Cerrar sesión',
+                onPressed: _cerrarSesion,
+              ),
           ],
           bottom: _verBuscar
               ? PreferredSize(
@@ -198,8 +230,7 @@ class _RutasPageState extends State<RutasPage> {
                           const SizedBox(height: 16),
                           Text('Error: ${snapshot.error}'),
                           ElevatedButton(
-                            onPressed: () => rutasBloc
-                                .limpiarFiltro(), //  rutasBloc.cargarRutas(widget.listaRutas),
+                            onPressed: () => rutasBloc.obtenerListaRutas(),
                             child: const Text('Reintentar'),
                           ),
                         ],
