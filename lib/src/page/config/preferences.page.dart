@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../model/rutas_model.dart';
+import '../../provider/vendedor_ruta_provider.dart';
 import '../../services/api_client.dart';
 import '../../share/app.navigator.dart';
 import '../../share/app_routes.dart';
@@ -30,7 +31,7 @@ class ConfiguracionPage extends StatefulWidget {
 class _ConfiguracionPageState extends State<ConfiguracionPage> {
   final _prefs = PreferenciasUsuario();
   late TextEditingController _urlController;
-  RutasModel? _rutaSeleccionada;
+  List<RutasModel> _rutasAsignadas = [];
   DateTime? _fechaTrabajo;
   double? _iva;
   double? _ila;
@@ -47,6 +48,14 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     _status = (_prefs.urlServicio.isEmpty)
         ? ConnectionStatus.unknown
         : ConnectionStatus.unknown;
+    _cargarRutasAsignadas();
+  }
+
+  Future<void> _cargarRutasAsignadas() async {
+    final rutas = await VendedorRutaProvider()
+        .obtenerRutasAsignadas(_prefs.vendedor, _prefs.tipo);
+    if (!mounted) return;
+    setState(() => _rutasAsignadas = rutas);
   }
 
   bool get _canShowLogout {
@@ -79,12 +88,17 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
     }
   }
 
-  Future<void> _pickRuta() async {
+  Future<void> _pickRutas() async {
     final seleccion = await AppNavigator.pushNamed(
-        AppRoutes.rutas); // RutasPage(listaRutas: listaRutas)),
+      AppRoutes.rutas,
+      arguments: {'multiSelect': true, 'seleccionInicial': _rutasAsignadas},
+    );
     if (seleccion != null) {
-      setState(() => _rutaSeleccionada = seleccion);
-      _prefs.ruta = seleccion.codigo; // mismo setter que usa LoginPage
+      final nuevas = List<RutasModel>.from(seleccion);
+      setState(() => _rutasAsignadas = nuevas);
+      _prefs.rutasAsignadas = nuevas.map((r) => r.codigo).toList();
+      await VendedorRutaProvider()
+          .guardarRutasAsignadas(_prefs.vendedor, _prefs.tipo, _prefs.rutasAsignadas);
     }
   }
 
@@ -508,20 +522,27 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Column(
               children: [
-                // Ruta
+                // Rutas
                 ListTile(
                   leading: const Icon(Icons.map_outlined),
-                  title: const Text('Ruta'),
-                  subtitle: Text(
-                    _rutaSeleccionada?.descripcion ??
-                        _rutaSeleccionada?.codigo ??
-                        'Seleccione una ruta',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  title: const Text('Rutas'),
+                  subtitle: _rutasAsignadas.isEmpty
+                      ? const Text('Sin rutas asignadas')
+                      : null,
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: _pickRuta,
+                  onTap: _pickRutas,
                 ),
+                if (_rutasAsignadas.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _rutasAsignadas
+                          .map((r) => Chip(label: Text(r.descripcion)))
+                          .toList(),
+                    ),
+                  ),
                 const Divider(height: 0),
 
                 // Fecha de trabajo
