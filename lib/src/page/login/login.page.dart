@@ -7,6 +7,7 @@ import 'package:dipalza_movil/src/model/login_response_model.dart';
 import 'package:dipalza_movil/src/model/respuesta_model.dart';
 import 'package:dipalza_movil/src/model/rutas_model.dart';
 import 'package:dipalza_movil/src/provider/vendedor_provider.dart';
+import 'package:dipalza_movil/src/provider/vendedor_ruta_provider.dart';
 import 'package:dipalza_movil/src/services/connectivity_service.dart';
 import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
@@ -35,7 +36,6 @@ class _LoginPageState extends State<LoginPage> {
 
   final vendedorProvider = VenderdorProvider();
   final prefs = PreferenciasUsuario();
-  RutasModel? _rutaSeleccionada;
 
   // --- NUEVO: Variable de estado para la fecha ---
   DateTime? _fechaFacturacion;
@@ -126,11 +126,6 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20.0),
               AbsorbPointer(
                 absorbing: status != ServerStatus.online,
-                child: _crearSelectorRutas(context, bloc),
-              ),
-              const SizedBox(height: 20.0),
-              AbsorbPointer(
-                absorbing: status != ServerStatus.online,
                 child: _crearSelectorFechaFacturacion(context),
               ),
               const SizedBox(height: 30.0),
@@ -195,44 +190,6 @@ class _LoginPageState extends State<LoginPage> {
           onChanged: bloc.changePassword,
         );
       },
-    );
-  }
-
-  Widget _crearSelectorRutas(BuildContext context, LoginBloc bloc) {
-    return InkWell(
-      onTap: _isLoading
-          ? null
-          : () async {
-              final dynamic resultado = await AppNavigator.pushNamed(AppRoutes.rutas);
-              if (resultado != null && resultado is RutasModel) {
-                setState(() => _rutaSeleccionada = resultado);
-                bloc.changeRuta(_rutaSeleccionada!.codigo);
-              }
-            },
-      borderRadius: BorderRadius.circular(10.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 12.0),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.map_outlined, color: colorRojoBase()),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                _rutaSeleccionada?.descripcion ?? 'Seleccione una ruta',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: _rutaSeleccionada == null ? Colors.grey[700] : Colors.black,
-                ),
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-          ],
-        ),
-      ),
     );
   }
 
@@ -310,16 +267,7 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         TextButton(
           onPressed: () async {
-            final urlAntes = prefs.urlServicio;
             await AppNavigator.pushNamed(AppRoutes.config);
-            if (!mounted) return;
-            if (prefs.urlServicio != urlAntes) {
-              final bloc = context.read<LoginBloc>();
-              setState(() {
-                _rutaSeleccionada = null;
-              });
-              bloc.changeRuta('');
-            }
           },
           child: const Text('Configurar'),
         ),
@@ -386,14 +334,33 @@ class _LoginPageState extends State<LoginPage> {
       prefs.refreshToken = response.refreshToken;
       prefs.tipo = response.tipo;
 
-      if (_rutaSeleccionada != null) prefs.ruta = _rutaSeleccionada!.codigo;
-
       // Se guarda como String en formato ISO 8601 (estándar y robusto)
       if (_fechaFacturacion != null) {
         prefs.fechaFacturacion = _fechaFacturacion!;
       }
 
-      AppNavigator.pushReplacementNamed(AppRoutes.home);
+      try {
+        final rutas = await VendedorRutaProvider()
+            .obtenerRutasAsignadas(response.codigo, response.tipo);
+
+        if (rutas.isEmpty && mounted) {
+          final seleccion = await AppNavigator.pushNamed(
+            AppRoutes.rutas,
+            arguments: {'multiSelect': true, 'obligatorio': true},
+          );
+          final nuevas = List<RutasModel>.from(seleccion);
+          await VendedorRutaProvider().guardarRutasAsignadas(response.codigo,
+              response.tipo, nuevas.map((r) => r.codigo).toList());
+        }
+
+        if (mounted) AppNavigator.pushReplacementNamed(AppRoutes.home);
+      } catch (e) {
+        if (mounted) {
+          alertUtil.showAlertDialog(context,
+              'No se pudieron obtener las rutas del vendedor. Intente nuevamente.',
+              Icons.error_outline);
+        }
+      }
     } else if (mounted) {
       final mensaje = resp.detalle['error']?.toString() ?? 'No se pudo iniciar sesión. Intente nuevamente.';
       alertUtil.showAlertDialog(context, mensaje, Icons.error_outline);
