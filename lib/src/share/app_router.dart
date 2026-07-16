@@ -29,7 +29,13 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) =>  const HomePage());
 
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (_) =>  LoginPage());
+        return MaterialPageRoute(
+          builder: (_) => LoginPage(
+            sinRutasAsignadas: args is Map<String, dynamic>
+                ? (args['sinRutasAsignadas'] as bool? ?? false)
+                : false,
+          ),
+        );
 
     // --- RUTAS PRINCIPALES (Si se navegaran directamente) ---
       case AppRoutes.listadoVentas:

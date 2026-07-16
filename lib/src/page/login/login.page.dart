@@ -24,7 +24,8 @@ import '../../widget/version_widget.dart';
 import '../rutas/rutas.page.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key? key}) : super(key: key);
+  final bool sinRutasAsignadas;
+  LoginPage({Key? key, this.sinRutasAsignadas = false}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -58,6 +59,13 @@ class _LoginPageState extends State<LoginPage> {
         final bloc = context.read<LoginBloc>();
         bloc.changeUsuario(_textUsuarioController.text);
         bloc.changePassword(_textPasswordController.text);
+
+        if (widget.sinRutasAsignadas) {
+          alertUtil.showAlertDialog(
+              context,
+              'No tiene rutas asignadas. Debe iniciar sesión nuevamente para seleccionarlas.',
+              Icons.info_outline);
+        }
       }
     });
   }

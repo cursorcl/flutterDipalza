@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // Para tus permisos
 import 'package:jwt_decoder/jwt_decoder.dart'; // Asegúrate de tener esta dependencia
 
+import '../../provider/vendedor_ruta_provider.dart';
 import '../../services/api_client.dart';
 import '../../share/app.navigator.dart';
 import '../../share/app_routes.dart';
@@ -65,12 +66,36 @@ class _AuthGateState extends State<AuthGate> {
       }
     }
 
-    // 4. Navegación
+    // 4. Verificar rutas asignadas (solo si la sesión sigue siendo válida)
+    bool tieneRutasAsignadas = true;
+    if (isSessionValid) {
+      try {
+        final rutas = await VendedorRutaProvider()
+            .obtenerRutasAsignadas(prefs.vendedor, prefs.tipo);
+        tieneRutasAsignadas = rutas.isNotEmpty;
+      } catch (e) {
+        // Fallo de red/servidor al consultar: no bloqueamos una sesión
+        // válida por un error transitorio ajeno a la asignación de rutas.
+        print("Error al verificar rutas asignadas: $e");
+        tieneRutasAsignadas = true;
+      }
+    }
+
+    // 5. Navegación
     if (!mounted) return; // Seguridad por si el usuario cerró la app
 
-    if (isSessionValid) {
+    if (isSessionValid && tieneRutasAsignadas) {
       // Usamos pushReplacementNamed para que no pueda volver atrás al Splash
       AppNavigator.pushReplacementNamed(AppRoutes.home);
+    } else if (isSessionValid && !tieneRutasAsignadas) {
+      // Sesión válida pero sin rutas: anulamos el refresh token recuperado
+      // y obligamos a reconectar para pasar por la selección de rutas.
+      await prefs.borrarCredenciales();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(
+        AppRoutes.login,
+        arguments: {'sinRutasAsignadas': true},
+      );
     } else {
       await prefs.borrarCredenciales();
       Navigator.of(context).pushReplacementNamed(AppRoutes.login);
