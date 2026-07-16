@@ -117,6 +117,14 @@ class PreferenciasUsuario {
     _prefs.setString('ruta', value);
   }
 
+  List<String> get rutasAsignadas {
+    return _prefs.getStringList('rutasAsignadas') ?? [];
+  }
+
+  set rutasAsignadas(List<String> value) {
+    _prefs.setStringList('rutasAsignadas', value);
+  }
+
   int get reporte {
     return _prefs.getInt('reporte') ?? 300000;
   }
