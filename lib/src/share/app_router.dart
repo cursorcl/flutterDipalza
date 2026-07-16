@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../model/producto_model.dart';
+import '../model/rutas_model.dart';
 import '../model/venta_model.dart';
 import '../page/cliente/clientes.page.dart';
 import '../page/config/preferences.page.dart';
@@ -36,6 +37,16 @@ class AppRouter {
 
     // --- PANTALLAS SECUNDARIAS ---
       case AppRoutes.rutas:
+        if (args is Map<String, dynamic>) {
+          return MaterialPageRoute(
+            builder: (_) => RutasPage(
+              multiSelect: args['multiSelect'] as bool? ?? false,
+              seleccionInicial:
+                  (args['seleccionInicial'] as List<RutasModel>?) ?? const [],
+              obligatorio: args['obligatorio'] as bool? ?? false,
+            ),
+          );
+        }
         return MaterialPageRoute(builder: (_) => const RutasPage());
 
       case AppRoutes.productosSeleccion:

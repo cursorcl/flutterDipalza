@@ -9,7 +9,16 @@ import '../../bloc/rutas_bloc.dart';
 import '../../utils/utils.dart';
 
 class RutasPage extends StatefulWidget {
-  const RutasPage({Key? key}) : super(key: key);
+  final bool multiSelect;
+  final List<RutasModel> seleccionInicial;
+  final bool obligatorio;
+
+  const RutasPage({
+    Key? key,
+    this.multiSelect = false,
+    this.seleccionInicial = const [],
+    this.obligatorio = false,
+  }) : super(key: key);
 
   @override
   _RutasPageState createState() => _RutasPageState();
@@ -21,10 +30,13 @@ class _RutasPageState extends State<RutasPage> {
   late List<RutasModel> _rutasFiltradas;
   final TextEditingController _searchController = TextEditingController();
   bool _verBuscar = false;
+  late Set<String> _codigosSeleccionados;
 
   @override
   void initState() {
     super.initState();
+    _codigosSeleccionados =
+        widget.seleccionInicial.map((r) => r.codigo).toSet();
     _searchController.addListener(_filtrarRutas);
 
     // Reintenta si no hay datos
@@ -45,7 +57,25 @@ class _RutasPageState extends State<RutasPage> {
     rutasBloc.filtrarRutas(query);
   }
 
+  void _guardarSeleccion() {
+    final seleccionadas = rutasBloc.listaRutas
+        .where((r) => _codigosSeleccionados.contains(r.codigo))
+        .toList();
+    AppNavigator.pop(seleccionadas);
+  }
+
+  void _alternarSeleccion(String codigo) {
+    setState(() {
+      if (_codigosSeleccionados.contains(codigo)) {
+        _codigosSeleccionados.remove(codigo);
+      } else {
+        _codigosSeleccionados.add(codigo);
+      }
+    });
+  }
+
   _card(RutasModel ruta) {
+    final seleccionada = _codigosSeleccionados.contains(ruta.codigo);
     return Card(
       child: ListTile(
         leading: CircleAvatar(
@@ -68,25 +98,41 @@ class _RutasPageState extends State<RutasPage> {
                     color: Colors.grey)),
           ],
         ),
-        trailing: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios),
-            onPressed: () {
-              AppNavigator.pop(ruta);
-            }),
-        onTap: () {
-          AppNavigator.pop(ruta);
-        },
+        trailing: widget.multiSelect
+            ? Checkbox(
+                value: seleccionada,
+                onChanged: (_) => _alternarSeleccion(ruta.codigo),
+              )
+            : IconButton(
+                icon: const Icon(Icons.arrow_forward_ios),
+                onPressed: () {
+                  AppNavigator.pop(ruta);
+                }),
+        onTap: widget.multiSelect
+            ? () => _alternarSeleccion(ruta.codigo)
+            : () {
+                AppNavigator.pop(ruta);
+              },
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final scaffold = Scaffold(
         appBar: AppBar(
           backgroundColor: colorRojoBase(),
-          title: const Text('Seleccionar Ruta'),
+          automaticallyImplyLeading: !widget.obligatorio,
+          title: Text(widget.multiSelect ? 'Seleccionar Rutas' : 'Seleccionar Ruta'),
           actions: <Widget>[
+            if (widget.multiSelect)
+              IconButton(
+                icon: const Icon(Icons.check),
+                tooltip: 'Guardar',
+                onPressed: (widget.obligatorio && _codigosSeleccionados.isEmpty)
+                    ? null
+                    : _guardarSeleccion,
+              ),
             IconButton(
               icon: const Icon(Icons.search),
               tooltip: 'Buscar',
@@ -196,5 +242,10 @@ class _RutasPageState extends State<RutasPage> {
             },
           ),
         ));
+
+    if (widget.obligatorio) {
+      return PopScope(canPop: false, child: scaffold);
+    }
+    return scaffold;
   }
 }
