@@ -24,7 +24,7 @@ void main() {
       expect(cliente.telefono, '+56912345678');
       expect(cliente.ciudad, 'Santiago');
       expect(cliente.giro, 'Comercial');
-      expect(cliente.ruta, '');
+      expect(cliente.ruta, 'R01');
     });
 
     test('fromJson handles null values', () {

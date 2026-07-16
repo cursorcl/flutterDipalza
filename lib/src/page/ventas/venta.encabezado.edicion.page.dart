@@ -247,7 +247,7 @@ class _VentaEncabezadoEdicionPageState
         codigoCliente: _clienteSeleccionado!.codigo,
         codigoVendedor: pref.vendedor,
         tipoVendedor: pref.tipo,
-        codigoRuta: pref.ruta,
+        codigoRuta: _clienteSeleccionado!.ruta,
         codigoCondicionVenta: _condicionSeleccionada!.codigo,
         detalles: ventaParaEditar?.detalles ?? [],
         estadoVenta: EstadoVenta.OPENED);
