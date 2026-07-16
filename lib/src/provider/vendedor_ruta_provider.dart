@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:dipalza_movil/src/model/rutas_model.dart';
 
 import '../services/api_client.dart';
@@ -15,7 +16,8 @@ class VendedorRutaProvider {
   Future<List<RutasModel>> guardarRutasAsignadas(
       String codigo, String tipo, List<String> codigosRuta) async {
     final res = await _dio.put('/api/vendedores/$codigo/$tipo/rutas',
-        data: codigosRuta);
+        data: codigosRuta,
+        options: Options(contentType: Headers.jsonContentType));
     final List<dynamic> data = res.data;
     return data.map((j) => RutasModel.fromJson(j)).toList();
   }
