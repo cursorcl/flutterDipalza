@@ -52,10 +52,16 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
   }
 
   Future<void> _cargarRutasAsignadas() async {
-    final rutas = await VendedorRutaProvider()
-        .obtenerRutasAsignadas(_prefs.vendedor, _prefs.tipo);
-    if (!mounted) return;
-    setState(() => _rutasAsignadas = rutas);
+    try {
+      final rutas = await VendedorRutaProvider()
+          .obtenerRutasAsignadas(_prefs.vendedor, _prefs.tipo);
+      if (!mounted) return;
+      setState(() => _rutasAsignadas = rutas);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('No se pudieron cargar las rutas asignadas')));
+    }
   }
 
   bool get _canShowLogout {
@@ -97,8 +103,15 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
       final nuevas = List<RutasModel>.from(seleccion);
       setState(() => _rutasAsignadas = nuevas);
       _prefs.rutasAsignadas = nuevas.map((r) => r.codigo).toList();
-      await VendedorRutaProvider()
-          .guardarRutasAsignadas(_prefs.vendedor, _prefs.tipo, _prefs.rutasAsignadas);
+      try {
+        await VendedorRutaProvider().guardarRutasAsignadas(
+            _prefs.vendedor, _prefs.tipo, _prefs.rutasAsignadas);
+      } catch (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'No se pudo guardar la selección de rutas, intente nuevamente')));
+      }
     }
   }
 
