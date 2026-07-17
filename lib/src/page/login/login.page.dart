@@ -363,6 +363,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (mounted) AppNavigator.pushReplacementNamed(AppRoutes.home);
       } catch (e) {
+        print("Error al obtener/guardar rutas asignadas: $e");
         if (mounted) {
           alertUtil.showAlertDialog(context,
               'No se pudieron obtener las rutas del vendedor. Intente nuevamente.',
