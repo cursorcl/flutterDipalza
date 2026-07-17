@@ -23,6 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -39,7 +41,7 @@ dependencies:
   connectivity_plus: ^6.0.3
   provider: ^6.1.2
   get_it: ^7.7.0 # Esta es la librería para el Service Locator
-  intl: ^0.19.0 # Paquete para formato de fechas y números
+  intl: ^0.20.2 # Paquete para formato de fechas y números
   flutter_slidable: ^4.0.3
   fluttertoast: ^9.1.0
   dio: ^5.9.0
