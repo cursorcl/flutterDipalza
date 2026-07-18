@@ -15,6 +15,7 @@ import '../producto/productos.page.dart';
 import '../rutas/rutas.page.dart';
 import '../ventas/listado.de.ventas.page.dart';
 import '../ventas/listado.detalle.de.una.venta.dart';
+import '../ventas/resumen.de.ventas.page.dart';
 import '../ventas/venta.encabezado.edicion.page.dart';
 import '../ventas/venta.item.detalle.edicion.dart';
 
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const ListadeDeVentasPage(),
+    const ResumenDeVentasPage(),
     const ProductosPage(),
     const ClientesPage(),
     const ConfiguracionPage(showMenuIcon: true),
@@ -109,23 +111,29 @@ class _HomePageState extends State<HomePage> {
                   onTap: () => _navegar(0),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.inventory_2),
-                  title: const Text('Productos'),
+                  leading: const Icon(Icons.assessment),
+                  title: const Text('Resumen de Venta'),
                   selected: _currentIndex == 1,
                   onTap: () => _navegar(1),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Clientes'),
+                  leading: const Icon(Icons.inventory_2),
+                  title: const Text('Productos'),
                   selected: _currentIndex == 2,
                   onTap: () => _navegar(2),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.person),
+                  title: const Text('Clientes'),
+                  selected: _currentIndex == 3,
+                  onTap: () => _navegar(3),
                 ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.settings),
                   title: const Text('Configuración'),
-                  selected: _currentIndex == 3,
-                  onTap: () => _navegar(3),
+                  selected: _currentIndex == 4,
+                  onTap: () => _navegar(4),
                 ),
               ],
             ),
