@@ -190,6 +190,25 @@ class VentaProvider {
     }
   }
 
+  Future<List<VentaModel>> obtenerUltimasVentasDeCliente(
+      ClientesModel cliente) async {
+    try {
+      final clientIdQuery = {"rut": cliente.rut, "codigo": cliente.codigo};
+      final response = await _dio.post('/api/ventas/ultimasventascliente',
+          data: jsonEncode(clientIdQuery));
+
+      final List<dynamic> data = response.data;
+      return data.map((json) => VentaModel.fromMap(json)).toList();
+    } on DioException catch (e) {
+      developer.log(
+        "Error técnico al obtener últimas ventas de ${cliente.razon}",
+        error: e,
+      );
+      throw Exception(
+          "Error de comunicación con el servidor (Código: ${e.response?.statusCode})");
+    }
+  }
+
   Future<VentaModel> cambiarEstadoVenta(
       VentaModel venta, EstadoVenta estadoVenta) async {
 
