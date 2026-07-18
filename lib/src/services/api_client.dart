@@ -22,8 +22,14 @@ class ApiClient {
   factory ApiClient() => _instance;
 
   ApiClient._internal() {
+    // Dio exige una URL válida al construir BaseOptions, incluso si
+    // 'urlServicio' todavía no se ha configurado (primera vez que corre la
+    // app: ver ServerSetupPage). Se usa un placeholder válido y, una vez
+    // que el usuario guarda la URL real, ServerSetupPage actualiza
+    // `dio.options.baseUrl` sobre esta misma instancia.
+    final urlServicio = pref.urlServicio;
     dio = Dio(BaseOptions(
-      baseUrl: "http://" + pref.urlServicio,
+      baseUrl: urlServicio.isEmpty ? 'http://localhost' : "http://" + urlServicio,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
     ));
