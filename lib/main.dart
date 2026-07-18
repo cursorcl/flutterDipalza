@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dipalza_movil/src/bloc/login_bloc.dart';
+import 'package:dipalza_movil/src/page/config/server_setup.page.dart';
 import 'package:dipalza_movil/src/page/login/auth_gate.dart';
 import 'package:dipalza_movil/src/services/api_client.dart';
 import 'package:dipalza_movil/src/services/connectivity_service.dart';
@@ -144,9 +145,6 @@ void main() async {
 
   final prefs = new PreferenciasUsuario();
   await prefs.initPrefs();
-  if (prefs.urlServicio == '') {
-    prefs.urlServicio = 'ventas.dynalias.net:8080'; // 'cursorcl.dynalias.com:8099';
-  }
 
   // ✅ Solicitar permisos ANTES de inicializar el servicio
   await Permission.notification.request();
@@ -216,7 +214,9 @@ class _MyAppState extends State<MyApp> {
       title: 'Diplaza App.',
       navigatorKey: AppNavigator.navigatorKey,
       onGenerateRoute: AppRouter.generateRoute,
-      home: const AuthGate(),
+      home: PreferenciasUsuario().urlServicio.isEmpty
+          ? const ServerSetupPage()
+          : const AuthGate(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
