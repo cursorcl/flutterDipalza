@@ -132,6 +132,35 @@ class VentaProvider {
     return [];
   }
 
+  Future<List<VentaModel>> obtenerVentasPendientesFacturacion() async {
+    final prefs = PreferenciasUsuario();
+
+    try {
+      final response = await _dio.get(
+        '/api/ventas',
+        queryParameters: {
+          'estados': ['FINISHED']
+        },
+      );
+
+      final List<dynamic> data = response.data;
+      final ventas = data.map((json) => VentaModel.fromMap(json)).toList();
+
+      return ventas
+          .where((venta) => venta.codigoVendedor == prefs.vendedor)
+          .toList();
+    } on DioException catch (e) {
+      developer.log(
+          "No se ha podido obtener el resumen de ventas pendientes de facturación",
+          error: e);
+
+      final statusCode = e.response?.statusCode;
+      throw Exception(
+          "Error al obtener el resumen de ventas pendientes de facturación. "
+          "Status: $statusCode, Mensaje Dio: ${e.message}");
+    }
+  }
+
   /**
    * Obtiene el detalle de productos asociados a una venta.
    * @param ventaId El ID de la venta para la cual se obtendrán los detalles.
