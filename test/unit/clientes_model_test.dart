@@ -50,9 +50,9 @@ void main() {
 
       final json = cliente.toJson();
 
-      expect(json['Rut'], '12345678-5');
-      expect(json['Codigo'], '001');
-      expect(json['Razon'], 'Empresa Test');
+      expect(json['rut'], '12345678-5');
+      expect(json['codigo'], '001');
+      expect(json['razon'], 'Empresa Test');
     });
 
     test('clienteModelFromJson parses string', () {
@@ -73,6 +73,61 @@ void main() {
       expect(clientes.length, 2);
       expect(clientes[0].razon, 'A');
       expect(clientes[1].razon, 'B');
+    });
+
+    test('toJson -> fromJson round trip conserva los datos', () {
+      final original = ClientesModel(
+          rut: '12345678-5',
+          codigo: '001',
+          razon: 'Empresa Test',
+          direccion: 'Calle 123',
+          telefono: '+56912345678',
+          ciudad: 'Santiago',
+          giro: 'Comercial',
+          ruta: 'R01');
+
+      final reconstruido = ClientesModel.fromJson(original.toJson());
+
+      expect(reconstruido.rut, original.rut);
+      expect(reconstruido.codigo, original.codigo);
+      expect(reconstruido.razon, original.razon);
+      expect(reconstruido.direccion, original.direccion);
+      expect(reconstruido.telefono, original.telefono);
+      expect(reconstruido.ciudad, original.ciudad);
+      expect(reconstruido.giro, original.giro);
+      expect(reconstruido.ruta, original.ruta);
+    });
+
+    test('clientesModelToJson -> clientesModelFromJson round trip conserva los datos', () {
+      final originales = [
+        ClientesModel(
+            rut: '1',
+            codigo: '01',
+            razon: 'A',
+            direccion: 'a',
+            telefono: '1',
+            ciudad: 'S',
+            giro: 'C',
+            ruta: 'R1'),
+        ClientesModel(
+            rut: '2',
+            codigo: '02',
+            razon: 'B',
+            direccion: 'b',
+            telefono: '2',
+            ciudad: 'S',
+            giro: 'C',
+            ruta: 'R2'),
+      ];
+
+      final jsonString = clientesModelToJson(originales);
+      final reconstruidos = clientesModelFromJson(jsonString);
+
+      expect(reconstruidos.length, 2);
+      expect(reconstruidos[0].razon, 'A');
+      expect(reconstruidos[0].ruta, 'R1');
+      expect(reconstruidos[1].razon, 'B');
+      expect(reconstruidos[1].ruta, 'R2');
     });
   });
 }

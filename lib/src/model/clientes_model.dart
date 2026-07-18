@@ -41,13 +41,13 @@ class ClientesModel {
       ruta: json["codigoRuta"] ?? "");
 
   Map<String, dynamic> toJson() => {
-        "Rut": rut,
-        "Codigo": codigo,
-        "Razon": razon,
-        "Direccion": direccion,
-        "Telefono": telefono,
-        "Ciudad": ciudad,
-        "Giro": giro,
-        "Ruta": ruta
+        "rut": rut,
+        "codigo": codigo,
+        "razon": razon,
+        "direccion": direccion,
+        "telefono": telefono,
+        "ciudad": ciudad,
+        "giro": giro,
+        "codigoRuta": ruta
       };
 }
