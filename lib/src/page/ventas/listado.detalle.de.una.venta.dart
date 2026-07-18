@@ -27,7 +27,9 @@ class ListadoDetalleDeUnaVentaPage extends StatefulWidget {
 }
 
 class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
-  late Future<List<VentaDetalleModel>> _futureBuildeDetallesDeVenta;
+  List<VentaDetalleModel> _detalles = [];
+  bool _cargandoDetalles = true;
+  Object? _errorCargaDetalles;
   late VentaModel _venta;
   int cantidadVentas = 0;
 
@@ -36,7 +38,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
     super.initState();
     _venta = widget.ventaModel;
     _cargarConfiguracionRuta();
-    _futureBuildeDetallesDeVenta = obtenerDetalleDeVenta();
+    _cargarDetalles();
   }
 
   Future<void> _cargarConfiguracionRuta() async {
@@ -112,10 +114,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
           Expanded(
             child: _venta.id != -1
                 ? RefreshIndicator(
-                    onRefresh: () async {
-                      _recargarDetalleDeVentas();
-                      await _futureBuildeDetallesDeVenta;
-                    },
+                    onRefresh: _cargarDetalles,
                     // El hijo del RefreshIndicator es tu lista
                     child: _creaListaVentasDetalle(context),
                   )
@@ -149,36 +148,41 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
   }
 
   Widget _creaListaVentasDetalle(BuildContext context) {
-    return FutureBuilder(
-      future: _futureBuildeDetallesDeVenta,
-      builder: (BuildContext context,
-          AsyncSnapshot<List<VentaDetalleModel>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasData) {
-          return Stack(children: <Widget>[
-            const Positioned.fill(
-              child: FondoWidget(),
+    if (_cargandoDetalles) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_errorCargaDetalles != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 60),
+            const SizedBox(height: 10),
+            Text('Ocurrió un error al cargar: $_errorCargaDetalles',
+                textAlign: TextAlign.center),
+            ElevatedButton(
+              onPressed: _cargarDetalles,
+              child: const Text("Reintentar"),
             ),
-            Positioned.fill(
-                child: Column(
-              children: <Widget>[
-                const ConnectivityBanner(),
-                Expanded(
-                    child: ListView(
-                        children: _createWidgetVentasDetalleItems(
-                            context, snapshot.data!))),
-              ],
-            ))
-          ]);
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
-    );
+          ],
+        ),
+      );
+    }
+    return Stack(children: <Widget>[
+      const Positioned.fill(
+        child: FondoWidget(),
+      ),
+      Positioned.fill(
+          child: Column(
+        children: <Widget>[
+          const ConnectivityBanner(),
+          Expanded(
+              child: ListView(
+                  children: _createWidgetVentasDetalleItems(
+                      context, _detalles))),
+        ],
+      ))
+    ]);
   }
 
   List<Widget> _createWidgetVentasDetalleItems(
@@ -261,7 +265,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
       if (ventaActualizada != null) {
         setState(() {
           _venta = ventaActualizada as VentaModel;
-          _futureBuildeDetallesDeVenta = Future.value(_venta.detalles);
+          _detalles = _venta.detalles;
         });
       }
     });
@@ -275,8 +279,8 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
         .then((ventaActualizada) {
       if (ventaActualizada != null) {
         setState(() {
-          // haga lo que corresponda con el modelo devuelto
           _venta = ventaActualizada as VentaModel;
+          _detalles = _venta.detalles;
         });
       }
     });
@@ -331,7 +335,7 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
               onPressed: () async {
                 Navigator.of(ctx).pop();
                 await VentaProvider.ventaProvider.removeItemVenta(item.id);
-                _recargarDetalleDeVentas();
+                _cargarDetalles();
               },
             ),
           ],
@@ -340,13 +344,25 @@ class _ListaVentasPageState extends State<ListadoDetalleDeUnaVentaPage> {
     );
   }
 
-  Future<List<VentaDetalleModel>> obtenerDetalleDeVenta() async {
-    return VentaProvider.ventaProvider.obtenerListaVentasDetalle(_venta.id);
-  }
-
-  void _recargarDetalleDeVentas() {
+  Future<void> _cargarDetalles() async {
     setState(() {
-      _futureBuildeDetallesDeVenta = obtenerDetalleDeVenta();
+      _cargandoDetalles = true;
+      _errorCargaDetalles = null;
     });
+    try {
+      final detalles = await VentaProvider.ventaProvider
+          .obtenerListaVentasDetalle(_venta.id);
+      if (!mounted) return;
+      setState(() {
+        _detalles = detalles;
+        _cargandoDetalles = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorCargaDetalles = e;
+        _cargandoDetalles = false;
+      });
+    }
   }
 }
