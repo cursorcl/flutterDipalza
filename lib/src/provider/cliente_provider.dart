@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
 import 'package:dipalza_movil/src/share/prefs_usuario.dart';
-import 'package:flutter/material.dart';
 
 import '../services/api_client.dart';
 
@@ -14,14 +13,14 @@ class ClientesProvider {
   ClientesProvider._() {}
 
   Future<List<ClientesModel>> obtenerListaClientes(
-      String codVendedor, String codRuta, BuildContext context) async {
+      String codVendedor, String codRuta) async {
     try {
       final response = await _dio.get('/api/clientes/vendedor', queryParameters: {'codigoVendedor': codVendedor});
       final List<dynamic> data = response.data;
       return data.map((json) => ClientesModel.fromJson(json)).toList();
     } catch (error) {
       print(error.toString());
-      return [];
+      rethrow;
     }
   }
 

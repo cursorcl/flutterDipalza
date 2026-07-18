@@ -18,7 +18,9 @@ class ProductosProvider {
       final List<dynamic> data = response.data;
       return data.map((json) => ProductosModel.fromJson(json)).toList();
     } catch (error) {
-      return [];
+      log('Error al ejecutar obtenerListaProductos',
+          name: 'ProductosProvider', error: error);
+      rethrow;
     }
   }
 
