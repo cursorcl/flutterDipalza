@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../model/clientes_model.dart';
 import '../model/producto_model.dart';
 import '../model/rutas_model.dart';
 import '../model/venta_model.dart';
@@ -59,7 +60,7 @@ class AppRouter {
         return MaterialPageRoute<ProductosModel?>(builder: (_) => const ProductosPage(isForSelection: true));
 
       case AppRoutes.clientesSeleccion:
-        return MaterialPageRoute(builder: (_) => const ClientesPage(isForSelection: true));
+        return MaterialPageRoute<ClientesModel?>(builder: (_) => const ClientesPage(isForSelection: true));
 
     // --- RUTAS CON ARGUMENTOS (Lógica movida desde tu Home) ---
 
