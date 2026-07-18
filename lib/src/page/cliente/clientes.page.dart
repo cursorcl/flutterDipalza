@@ -1,8 +1,7 @@
+import 'package:dipalza_movil/src/bloc/clientes_bloc.dart';
 import 'package:dipalza_movil/src/model/clientes_model.dart';
-import 'package:dipalza_movil/src/provider/cliente_provider.dart';
 import 'package:dipalza_movil/src/provider/venta_provider.dart';
 import 'package:dipalza_movil/src/share/app_routes.dart';
-import 'package:dipalza_movil/src/share/prefs_usuario.dart';
 import 'package:dipalza_movil/src/utils/utils.dart';
 import 'package:dipalza_movil/src/widget/fondo.widget.dart';
 import 'package:flutter/material.dart';
@@ -21,32 +20,20 @@ class ClientesPage extends StatefulWidget {
 }
 
 class _ClientesPageState extends State<ClientesPage> {
+  final ClientesBloc _clientesBloc = ClientesBloc();
   TextEditingController controller = new TextEditingController();
-  final List<ClientesModel> _searchResult = [];
-  List<ClientesModel> _listaClientes = [];
   bool _verBuscar = false;
-
-  Future<Null> getListaClientes() async {
-    final prefs = new PreferenciasUsuario();
-    _listaClientes = await ClientesProvider.clientesProvider
-        .obtenerListaClientes(prefs.vendedor, prefs.ruta, context);
-    setState(() {});
-  }
-
-  Future<void> getListaClientesRefrescar() async {
-    getListaClientes();
-    onSearchTextChanged(controller.text);
-  }
 
   @override
   void initState() {
     super.initState();
-    getListaClientes();
+    _clientesBloc.ensureFresh();
   }
+
+  Future<void> getListaClientesRefrescar() => _clientesBloc.forceRefresh();
 
   @override
   Widget build(BuildContext context) {
-    bool searchResult = _searchResult.length != 0 || controller.text.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -88,14 +75,34 @@ class _ClientesPageState extends State<ClientesPage> {
               const ConnectivityBanner(),
               _verBuscar ? _creaInputBuscar(context) : Container(),
               Expanded(
-                  child: searchResult
-                      ? _creaListaClientes(context, _searchResult)
-                      : _creaListaClientes(context, _listaClientes))
+                child: StreamBuilder<List<ClientesModel>>(
+                  stream: _clientesBloc.clientesStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting &&
+                        !snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+                    final listaCompleta = snapshot.data ?? [];
+                    final listaAMostrar = _filtrarLista(listaCompleta);
+                    return _creaListaClientes(context, listaAMostrar);
+                  },
+                ),
+              ),
             ],
           ),
         ),
       ]),
     );
+  }
+
+  List<ClientesModel> _filtrarLista(List<ClientesModel> listaCompleta) {
+    if (controller.text.isEmpty) return listaCompleta;
+    return listaCompleta
+        .where((cliente) => cliente.razon.contains(controller.text))
+        .toList();
   }
 
   Widget _creaInputBuscar(BuildContext context) {
@@ -132,17 +139,7 @@ class _ClientesPageState extends State<ClientesPage> {
     );
   }
 
-  onSearchTextChanged(String text) async {
-    _searchResult.clear();
-    if (text.isEmpty) {
-      setState(() {});
-      return;
-    }
-
-    _listaClientes.forEach((clientes) {
-      if (clientes.razon.contains(text)) _searchResult.add(clientes);
-    });
-
+  onSearchTextChanged(String text) {
     setState(() {});
   }
 
