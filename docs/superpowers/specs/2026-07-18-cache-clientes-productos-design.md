@@ -14,7 +14,8 @@
 1. **Las rutas no filtran clientes hoy.** `prefs.ruta` (singular) nunca se escribe en el código; `obtenerListaClientesv2()` (que sí usa una ruta) no se llama desde ninguna pantalla. El fetch activo (`obtenerListaClientes`) solo envía `codigoVendedor` al backend, y el backend (`ClienteController.getClienteByVendedor`) filtra únicamente por esa columna, ignorando `codigoRuta`. Conclusión: la única dimensión de invalidación real para clientes es el vendedor — no hace falta considerar rutas.
 2. **El catálogo de productos es global.** `ProductoController.getAllProductos()` no filtra por vendedor ni por ningún dato de usuario — es el mismo catálogo para todos. La key de su caché no necesita estar scopeada por vendedor.
 3. **`prefs.vendedor` se escribe en un solo lugar:** `lib/src/page/login/login.page.dart:337` (`prefs.vendedor = response.codigo`), en cada login. El logout (`borrarCredenciales()`) no toca `vendedor` — persiste entre sesiones hasta el próximo login.
-4. **Bug latente en `ClientesModel.toJson()`** (`lib/src/model/clientes_model.dart:41-49`): escribe las keys capitalizadas (`"Rut"`, `"Codigo"`, `"Razon"`, `"Ruta"`...) mientras `fromJson()` las lee en minúscula (`json["rut"]`, `json["codigo"]`, ..., `json["codigoRuta"]` para `ruta`). Hoy nadie lo nota porque `clientesModelToJson` no se usa en ningún punto de la app (grep confirma cero llamadas). Como el caché depende de un round-trip correcto (`toJson` → `SharedPreferences` → `fromJson`), este bug se corrige como parte de este trabajo: alinear las keys de `toJson()` a minúscula, igual que `fromJson()` ya las espera. `ProductosModel` y `NumeradoModel` no tienen este problema (sus keys ya coinciden en ambas direcciones).
+4. **Los providers hoy tragan los errores de red.** Tanto `ClientesProvider.obtenerListaClientes` (`lib/src/provider/cliente_provider.dart:18-25`) como `ProductosProvider.obtenerListaProductos` (`lib/src/provider/productos_provider.dart:15-23`) capturan cualquier excepción y devuelven `[]` en vez de propagarla. Con ese contrato, el bloc no puede distinguir "la red falló, hay que mantener el caché anterior" de "la lista legítimamente está vacía" (p. ej. un vendedor sin clientes) — ambos casos se ven igual: una lista vacía sin excepción. Como el manejo de errores de este diseño depende de poder distinguir ambos casos (ver más abajo), ambos métodos dejan de capturar-y-devolver-`[]` y en cambio propagan la excepción (`rethrow` o directamente sin `try/catch`). El único call site de cada uno hoy es justamente el que este mismo plan reescribe (`ClientesPage`/`ClientesBloc` y `ProductsBloc` respectivamente), así que no hay otros consumidores que dependan del contrato actual de "nunca lanza, devuelve `[]` en error".
+5. **Bug latente en `ClientesModel.toJson()`** (`lib/src/model/clientes_model.dart:41-49`): escribe las keys capitalizadas (`"Rut"`, `"Codigo"`, `"Razon"`, `"Ruta"`...) mientras `fromJson()` las lee en minúscula (`json["rut"]`, `json["codigo"]`, ..., `json["codigoRuta"]` para `ruta`). Hoy nadie lo nota porque `clientesModelToJson` no se usa en ningún punto de la app (grep confirma cero llamadas). Como el caché depende de un round-trip correcto (`toJson` → `SharedPreferences` → `fromJson`), este bug se corrige como parte de este trabajo: alinear las keys de `toJson()` a minúscula, igual que `fromJson()` ya las espera. `ProductosModel` y `NumeradoModel` no tienen este problema (sus keys ya coinciden en ambas direcciones).
 
 ## Arquitectura
 
@@ -73,6 +74,11 @@ class CachedListStore<M> {
 ### `lib/src/provider/cliente_provider.dart` (modificado)
 
 - `obtenerListaClientes` pierde el parámetro `BuildContext context` (no se usa dentro del método — es dead code, y le impide a un bloc singleton invocarlo sin depender de un widget montado).
+- `obtenerListaClientes` deja de capturar la excepción y devolver `[]`; ahora la propaga (ver hallazgo 4).
+
+### `lib/src/provider/productos_provider.dart` (modificado)
+
+- `obtenerListaProductos` deja de capturar la excepción y devolver `[]`; ahora la propaga (ver hallazgo 4). `obtenerProducto` y `obtenerPesoPromedioProducto` no cambian — quedan fuera de alcance.
 
 ### `lib/src/model/clientes_model.dart` (modificado)
 
