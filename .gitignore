@@ -45,3 +45,5 @@ app.*.map.json
 # Caché generada por la herramienta graphify (no es código fuente)
 /graphify-out/
 .worktrees/
+
+node_modules/
