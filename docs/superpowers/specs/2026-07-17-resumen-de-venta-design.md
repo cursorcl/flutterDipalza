@@ -64,6 +64,15 @@ En `lib/src/page/home/home.page.dart`:
 - No se toca `AppRoutes` ni `AppRouter.generateRoute()`: estas pestañas del `Drawer` no navegan por rutas con nombre, se intercambian directamente vía `_currentIndex` dentro de `HomePage`, igual que las demás.
 - `HomePageBarraInferior` (variante con barra inferior) no está enrutada en `AppRouter` (no es la pantalla de inicio activa) — no se modifica.
 
+## Corrección posterior (2026-07-18)
+
+Tras la primera implementación, el usuario pidió que el total del resumen sea **congruente con el listado "Ventas"** que ya se muestra en la app (mismos datos, no un conjunto distinto). Se revirtió el enfoque de "Enfoque" arriba:
+
+- Se eliminó `VentaProvider.obtenerVentasPendientesFacturacion()` (el método que traía ventas `FINISHED` vía `GET /api/ventas` y filtraba por vendedor en el cliente).
+- `ResumenDeVentasPage` ahora llama `VentaProvider.ventaProvider.obtenerListaVentas()`, el mismo método que ya usa `ListadeDeVentasPage` — mismo endpoint (`GET /api/ventas/vendedor/{codigo}/fecha`), mismo alcance (ventas en estado `OPENED` del vendedor autenticado, para la fecha de facturación vigente). Esto también hereda el comportamiento existente de ese método de tragar errores de red y devolver `[]` en vez de relanzar, ya que ahora la pantalla debe comportarse igual que "Ventas" ante un fallo.
+- Las tarjetas del resumen (`_tarjetaResumen` en `resumen.de.ventas.page.dart`) ya no tienen margen vertical entre ellas (`margin: EdgeInsets.zero`), a pedido del usuario.
+- La discusión de arriba sobre por qué se descartó reusar `obtenerListaVentas()` (porque no cubre `FINISHED`) queda como registro histórico de la decisión original; ya no aplica tras esta corrección.
+
 ## Fuera de alcance
 
 - No se modifica el backend Spring Boot.

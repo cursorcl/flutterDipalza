@@ -24,8 +24,7 @@ class _ResumenDeVentasPageState extends State<ResumenDeVentasPage> {
 
   void _cargarResumen() {
     setState(() {
-      _ventasFuture =
-          VentaProvider.ventaProvider.obtenerVentasPendientesFacturacion();
+      _ventasFuture = VentaProvider.ventaProvider.obtenerListaVentas();
     });
   }
 
@@ -109,7 +108,7 @@ class _ResumenDeVentasPageState extends State<ResumenDeVentasPage> {
 
   Widget _tarjetaResumen(String titulo, String valor, IconData icono) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      margin: EdgeInsets.zero,
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: colorRojoBase(),
