@@ -12,7 +12,7 @@ void main() {
         'telefono': '+56912345678',
         'ciudad': 'Santiago',
         'giro': 'Comercial',
-        'ruta': 'R01'
+        'codigoRuta': 'R01'
       };
 
       final cliente = ClientesModel.fromJson(json);
@@ -57,7 +57,7 @@ void main() {
 
     test('clienteModelFromJson parses string', () {
       const jsonString =
-          '{"rut": "12345678-5", "codigo": "001", "razon": "Test", "direccion": "Calle 1", "telefono": "123", "ciudad": "Santiago", "giro": "Com", "ruta": "R1"}';
+          '{"rut": "12345678-5", "codigo": "001", "razon": "Test", "direccion": "Calle 1", "telefono": "123", "ciudad": "Santiago", "giro": "Com", "codigoRuta": "R1"}';
 
       final cliente = clienteModelFromJson(jsonString);
 
@@ -66,7 +66,7 @@ void main() {
 
     test('clientesModelFromJson parses list', () {
       const jsonString =
-          '[{"rut": "1", "codigo": "1", "razon": "A", "direccion": "a", "telefono": "1", "ciudad": "S", "giro": "C", "ruta": "R"}, {"rut": "2", "codigo": "2", "razon": "B", "direccion": "b", "telefono": "2", "ciudad": "S", "giro": "C", "ruta": "R"}]';
+          '[{"rut": "1", "codigo": "1", "razon": "A", "direccion": "a", "telefono": "1", "ciudad": "S", "giro": "C", "codigoRuta": "R"}, {"rut": "2", "codigo": "2", "razon": "B", "direccion": "b", "telefono": "2", "ciudad": "S", "giro": "C", "codigoRuta": "R"}]';
 
       final clientes = clientesModelFromJson(jsonString);
 

@@ -38,7 +38,7 @@ class ClientesModel {
       telefono: json["telefono"] ?? "",
       ciudad: json["ciudad"] ?? "",
       giro: json["giro"] ?? "",
-      ruta: json["ruta"] ?? "");
+      ruta: json["codigoRuta"] ?? "");
 
   Map<String, dynamic> toJson() => {
         "Rut": rut,
