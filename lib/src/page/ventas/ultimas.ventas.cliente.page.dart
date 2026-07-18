@@ -24,7 +24,13 @@ class _UltimasVentasClientePageState extends State<UltimasVentasClientePage> {
   @override
   void initState() {
     super.initState();
-    _seleccionarCliente();
+    // Se difiere hasta después del primer frame: llamar a Navigator mientras
+    // este widget todavía se está construyendo deja el Navigator en un
+    // estado bloqueado (_debugLocked) que revienta en la próxima operación
+    // de navegación real (ver login.page.dart, que usa el mismo patrón).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _seleccionarCliente();
+    });
   }
 
   Future<void> _seleccionarCliente() async {
