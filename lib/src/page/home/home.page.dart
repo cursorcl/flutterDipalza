@@ -16,6 +16,7 @@ import '../rutas/rutas.page.dart';
 import '../ventas/listado.de.ventas.page.dart';
 import '../ventas/listado.detalle.de.una.venta.dart';
 import '../ventas/resumen.de.ventas.page.dart';
+import '../ventas/ultimas.ventas.cliente.page.dart';
 import '../ventas/venta.encabezado.edicion.page.dart';
 import '../ventas/venta.item.detalle.edicion.dart';
 
@@ -33,6 +34,7 @@ class _HomePageState extends State<HomePage> {
     const ResumenDeVentasPage(),
     const ProductosPage(),
     const ClientesPage(),
+    const UltimasVentasClientePage(),
     const ConfiguracionPage(showMenuIcon: true),
   ];
 
@@ -128,12 +130,18 @@ class _HomePageState extends State<HomePage> {
                   selected: _currentIndex == 3,
                   onTap: () => _navegar(3),
                 ),
+                ListTile(
+                  leading: const Icon(Icons.history),
+                  title: const Text('Últimas Ventas'),
+                  selected: _currentIndex == 4,
+                  onTap: () => _navegar(4),
+                ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.settings),
                   title: const Text('Configuración'),
-                  selected: _currentIndex == 4,
-                  onTap: () => _navegar(4),
+                  selected: _currentIndex == 5,
+                  onTap: () => _navegar(5),
                 ),
               ],
             ),
