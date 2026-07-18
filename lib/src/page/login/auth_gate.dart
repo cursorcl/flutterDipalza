@@ -68,7 +68,14 @@ class _AuthGateState extends State<AuthGate> {
 
     // 4. Verificar rutas asignadas (solo si la sesión sigue siendo válida)
     bool tieneRutasAsignadas = true;
-    if (isSessionValid) {
+    if (isSessionValid && prefs.tipo.isEmpty) {
+      // Sesión restaurada por refresh token sin 'tipo' guardado localmente
+      // (ocurre con sesiones antiguas, de antes de que el login empezara a
+      // persistirlo). Sin 'tipo' la consulta de rutas arma una URL inválida
+      // (.../vendedores/{codigo}//rutas) y el backend responde 400. Forzamos
+      // un login explícito para que 'tipo' quede guardado correctamente.
+      isSessionValid = false;
+    } else if (isSessionValid) {
       try {
         final rutas = await VendedorRutaProvider()
             .obtenerRutasAsignadas(prefs.vendedor, prefs.tipo);
