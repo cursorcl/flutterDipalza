@@ -2,11 +2,20 @@ import 'dart:async';
 
 import 'package:dipalza_movil/src/model/producto_model.dart';
 import 'package:dipalza_movil/src/provider/productos_provider.dart';
+import 'package:dipalza_movil/src/share/cached_list_store.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ProductsBloc {
   static final ProductsBloc _singleton = new ProductsBloc._internal();
   final _productsController = BehaviorSubject<List<ProductosModel>>();
+
+  static const _ttl = Duration(minutes: 15);
+
+  final _store = CachedListStore<ProductosModel>(
+    key: 'cache_productos_list',
+    toJsonString: productosModelToJson,
+    fromJsonString: productosModelFromJson,
+  );
 
   // --- 1. AÑADIMOS UN FUTURE PARA CONTROLAR LA CARGA INICIAL ---
   late Future<void> _initialLoad;
@@ -19,7 +28,7 @@ class ProductsBloc {
   }
 
   ProductsBloc._internal() {
-    _initialLoad = obtainProducts();
+    _initialLoad = ensureFresh();
   }
 
   // Acá deben conectarse los interesados en escuchar los productos
@@ -28,13 +37,30 @@ class ProductsBloc {
   // Obtiene el valor que recuerda _productosController.
   List<ProductosModel> get productList => _productsController.value;
 
-  // Inicializa los productos en el controlador
-  Future<void> obtainProducts() async {
+  /// TTL-aware: si hay caché lo emite de inmediato; si está vencido (o no
+  /// había caché), refresca desde la red en segundo plano.
+  Future<void> ensureFresh() async {
+    final cached = await _store.read();
+    if (cached != null) {
+      _productsController.sink.add(cached.items);
+      if (!cached.isStale(_ttl)) return;
+    }
+    await _refrescarDesdeRed();
+  }
+
+  /// Bypassa el TTL: siempre refresca desde la red. Usado por pull-to-refresh.
+  Future<void> forceRefresh() => _refrescarDesdeRed();
+
+  Future<void> _refrescarDesdeRed() async {
     try {
-      _productsController.sink.add(
-          await ProductosProvider.productosProvider.obtenerListaProductos());
+      final lista =
+          await ProductosProvider.productosProvider.obtenerListaProductos();
+      _productsController.sink.add(lista);
+      await _store.write(lista);
     } catch (e) {
-      _productsController.addError(e);
+      if (_productsController.valueOrNull == null) {
+        _productsController.addError(e);
+      }
     }
   }
 

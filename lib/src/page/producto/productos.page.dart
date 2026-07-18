@@ -28,7 +28,7 @@ class _ProductosPageState extends State<ProductosPage> {
   @override
   void initState() {
     super.initState();
-    _productsBloc.obtainProducts();
+    _productsBloc.ensureFresh();
   }
 
 
@@ -273,6 +273,6 @@ class _ProductosPageState extends State<ProductosPage> {
 
   Future<void> getListaProductosRefrescar() async {
     // Solo le decimos al BLoC que recargue. El StreamBuilder se encargará del resto.
-    await _productsBloc.obtainProducts();
+    await _productsBloc.forceRefresh();
   }
 }
