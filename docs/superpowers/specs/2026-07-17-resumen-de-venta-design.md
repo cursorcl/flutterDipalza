@@ -59,8 +59,8 @@ Nuevo archivo `lib/src/page/ventas/resumen.de.ventas.page.dart` (seguir la conve
 ### Menú lateral (`Drawer` de `HomePage`)
 
 En `lib/src/page/home/home.page.dart`:
-- Se agrega `const ResumenDeVentasPage()` a la lista `_pages` (índice 4).
-- Se agrega un `ListTile` nuevo al `Drawer`, con ícono `Icons.assessment`, texto "Resumen de Venta", `selected: _currentIndex == 4`, `onTap: () => _navegar(4)` — mismo patrón que las entradas existentes (Ventas, Productos, Clientes), colocado después de "Ventas" y antes del `Divider()` que precede a "Configuración".
+- Se agrega `const ResumenDeVentasPage()` a la lista `_pages` en índice 1 (justo después de `ListadeDeVentasPage`), lo que desplaza `ProductosPage`, `ClientesPage` y `ConfiguracionPage` una posición (a índices 2, 3 y 4 respectivamente).
+- Se agrega un `ListTile` nuevo al `Drawer`, con ícono `Icons.assessment`, texto "Resumen de Venta", `selected: _currentIndex == 1`, `onTap: () => _navegar(1)` — mismo patrón que las entradas existentes (Ventas, Productos, Clientes), colocado después de "Ventas" y antes de "Productos". Los `ListTile` de Productos, Clientes y Configuración se renumeran acorde al desplazamiento anterior.
 - No se toca `AppRoutes` ni `AppRouter.generateRoute()`: estas pestañas del `Drawer` no navegan por rutas con nombre, se intercambian directamente vía `_currentIndex` dentro de `HomePage`, igual que las demás.
 - `HomePageBarraInferior` (variante con barra inferior) no está enrutada en `AppRouter` (no es la pantalla de inicio activa) — no se modifica.
 
