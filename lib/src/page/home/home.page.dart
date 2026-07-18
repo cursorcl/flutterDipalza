@@ -32,9 +32,9 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     const ListadeDeVentasPage(),
     const ResumenDeVentasPage(),
+    const UltimasVentasClientePage(),
     const ProductosPage(),
     const ClientesPage(),
-    const UltimasVentasClientePage(),
     const ConfiguracionPage(showMenuIcon: true),
   ];
 
@@ -119,20 +119,20 @@ class _HomePageState extends State<HomePage> {
                   onTap: () => _navegar(1),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.inventory_2),
-                  title: const Text('Productos'),
+                  leading: const Icon(Icons.history),
+                  title: const Text('Últimas Ventas'),
                   selected: _currentIndex == 2,
                   onTap: () => _navegar(2),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Clientes'),
+                  leading: const Icon(Icons.inventory_2),
+                  title: const Text('Productos'),
                   selected: _currentIndex == 3,
                   onTap: () => _navegar(3),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.history),
-                  title: const Text('Últimas Ventas'),
+                  leading: const Icon(Icons.person),
+                  title: const Text('Clientes'),
                   selected: _currentIndex == 4,
                   onTap: () => _navegar(4),
                 ),
