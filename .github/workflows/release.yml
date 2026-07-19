@@ -22,6 +22,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # PAT de una cuenta admin: permite que el push del bump de versión
+          # (@semantic-release/git) bypasee "Require PR" en main. El
+          # GITHUB_TOKEN por defecto no es admin y ese push es rechazado
+          # (GH006: Protected branch update failed).
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
