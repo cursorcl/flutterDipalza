@@ -1,3 +1,15 @@
+# [2.2.0](https://github.com/cursorcl/dipalza_mobile/compare/v2.1.0...v2.2.0) (2026-07-19)
+
+
+### Bug Fixes
+
+* **ci:** usa PAT admin en checkout para permitir push de versión a main ([#10](https://github.com/cursorcl/dipalza_mobile/issues/10)) ([cbbfbc6](https://github.com/cursorcl/dipalza_mobile/commit/cbbfbc6193948ecaa4f6ddfef0a2e56584c17cfa))
+
+
+### Features
+
+* diferencia visualmente Precio 1 y Precio 2 en edición de detalle de venta ([#9](https://github.com/cursorcl/dipalza_mobile/issues/9)) ([5d1584e](https://github.com/cursorcl/dipalza_mobile/commit/5d1584e820a6ed90800ebf6967ea1abd6c48a588))
+
 # Changelog
 
 ## [2.1.0](https://github.com/cursorcl/dipalza_mobile/compare/v2.0.1...v2.1.0) (2026-07-18)
