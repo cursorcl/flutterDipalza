@@ -461,6 +461,7 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
 
     // Si _precioLista2 es nulo o negativo, lo tratamos como 0.
     final precio2 = _precioLista2 > 0 ? _precioLista2 : 0.0;
+    final bool precio2Habilitado = precio2 > 0;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -473,52 +474,114 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
           ),
           const SizedBox(height: 6),
 
-          // MODIFICADO: Envolvemos el SegmentedButton en Row y Expanded
-          Row( // 1. Row crea un contexto de layout horizontal.
-            children: [
-              Expanded( // 2. Expanded le dice a su hijo que ocupe todo el espacio disponible en la Row.
-                child: SegmentedButton<int>(
-                  style: SegmentedButton.styleFrom(
-                    selectedBackgroundColor: Colors.redAccent,
-                    selectedForegroundColor: Colors.white,
-                    disabledForegroundColor: Colors.grey,
-                    disabledBackgroundColor: Colors.grey.withOpacity(0.1),
-                    // AÑADIDO: Un poco más de padding vertical para que se vea mejor al estirarse.
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+          // MODIFICADO: control propio de dos segmentos para poder darle a
+          // cada uno su propio color de fondo a todo lo ancho (SegmentedButton
+          // solo permite un único color de "seleccionado" compartido).
+          Container(
+            height: 56,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black26),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildPrecioSegmento(
+                    titulo: 'Precio 1',
+                    precio: formatPrice(_precioLista1),
+                    seleccionado: _listaPrecio == 1,
+                    habilitado: true,
+                    colorFondo: Colors.red[100]!,
+                    colorTexto: Colors.red[900]!,
+                    colorFondoSeleccionado: Colors.redAccent,
+                    colorTextoSeleccionado: Colors.white,
+                    onTap: () => _seleccionarListaPrecio(1),
                   ),
-                  segments: <ButtonSegment<int>>[
-                    ButtonSegment<int>(
-                      value: 1,
-                      label: Text(
-                        'Precio 1\n${formatPrice(_precioLista1)}',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    ButtonSegment<int>(
-                      value: 2,
-                      label: Text(
-                        'Precio 2\n${formatPrice(precio2)}',
-                        textAlign: TextAlign.center,
-                      ),
-                      enabled: precio2 > 0,
-                    ),
-                  ],
-                  selected: {_listaPrecio},
-                  onSelectionChanged: (Set<int> newSelection) {
-                    setState(() {
-                      _listaPrecio = newSelection.first;
-                      _precioUnitario =
-                      _listaPrecio == 1 ? _precioLista1 : _precioLista2;
-                    });
-                    _recalcularTotal();
-                  },
                 ),
-              ),
-            ],
+                Container(width: 1, color: Colors.black26),
+                Expanded(
+                  child: _buildPrecioSegmento(
+                    titulo: 'Precio 2',
+                    precio: formatPrice(precio2),
+                    seleccionado: _listaPrecio == 2,
+                    habilitado: precio2Habilitado,
+                    colorFondo: Colors.green[200]!,
+                    colorTexto: Colors.green[900]!,
+                    colorFondoSeleccionado: Colors.green[500]!,
+                    colorTextoSeleccionado: Colors.white,
+                    onTap: precio2Habilitado
+                        ? () => _seleccionarListaPrecio(2)
+                        : null,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
+  }
+
+  // AÑADIDO: segmento individual del selector de precio, con fondo a todo
+  // lo ancho igual al del segmento "Precio 1" (antes solo un chip pequeño).
+  Widget _buildPrecioSegmento({
+    required String titulo,
+    required String precio,
+    required bool seleccionado,
+    required bool habilitado,
+    required Color colorFondo,
+    required Color colorTexto,
+    required Color colorFondoSeleccionado,
+    required Color colorTextoSeleccionado,
+    required VoidCallback? onTap,
+  }) {
+    final Color fondo = !habilitado
+        ? Colors.grey.withOpacity(0.1)
+        : (seleccionado ? colorFondoSeleccionado : colorFondo);
+    final Color texto = !habilitado
+        ? Colors.grey
+        : (seleccionado ? colorTextoSeleccionado : colorTexto);
+
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        color: fondo,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (seleccionado) ...[
+                  Icon(Icons.check, size: 14, color: texto),
+                  const SizedBox(width: 4),
+                ],
+                Text(
+                  titulo,
+                  style: TextStyle(color: texto, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            Text(
+              precio,
+              style: TextStyle(color: texto, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _seleccionarListaPrecio(int lista) {
+    setState(() {
+      _listaPrecio = lista;
+      _precioUnitario = _listaPrecio == 1 ? _precioLista1 : _precioLista2;
+    });
+    _recalcularTotal();
   }
   void _buscarProducto() async {
     productoEnVenta = await AppNavigator.pushNamed<ProductosModel?>(
