@@ -178,13 +178,18 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
         backgroundColor: Colors.redAccent,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
             child: TextButton.icon(
               onPressed: enabled ? _guardar : null,
-              icon: const Icon(Icons.check, color: Colors.white),
-              label: const Text(
-                'Guardar',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              icon: const Icon(Icons.check_circle_outline, size: 20),
+              label: const Text('Guardar'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.white.withOpacity(0.15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
           ),
