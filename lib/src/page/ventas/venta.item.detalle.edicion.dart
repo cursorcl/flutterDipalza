@@ -404,11 +404,6 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
               valueColor:
               _valorDescuento > 0 ? Colors.orange[700]! : Colors.grey[700]!,
             ),
-            _buildResumenRow(
-              '% ILA asociado:',
-              '${formatNumber(_porcentajeILA)}%',
-              fontSize: 13,
-            ),
             const Divider(height: 12, thickness: 0.8),
             _buildResumenRow(
               'Total Item:',
@@ -416,6 +411,12 @@ class _VentaEdicionItemDetalleState extends State<VentaEdicionItemDetalle> {
               valueColor: Colors.green[700]!,
               isBold: true,
               fontSize: 16,
+            ),
+            const Divider(height: 12, thickness: 0.8),
+            _buildResumenRow(
+              'ILA ${formatNumber(_porcentajeILA)}%:',
+              formatCurrency(_valorFinal * _porcentajeILA / 100),
+              fontSize: 13,
             ),
           ],
         ),
