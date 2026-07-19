@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/cursorcl/dipalza_mobile/compare/v2.2.0...v2.3.0) (2026-07-19)
+
+
+### Features
+
+* muestra monto calculado de ILA en detalle de venta ([#11](https://github.com/cursorcl/dipalza_mobile/issues/11)) ([cc1aab3](https://github.com/cursorcl/dipalza_mobile/commit/cc1aab3ecbdde966f72731825784a187210b95fa))
+
 # [2.2.0](https://github.com/cursorcl/dipalza_mobile/compare/v2.1.0...v2.2.0) (2026-07-19)
 
 
