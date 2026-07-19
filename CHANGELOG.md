@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/cursorcl/dipalza_mobile/compare/v2.3.0...v2.4.0) (2026-07-19)
+
+
+### Features
+
+* unifica estilo del botón Guardar con Finalizar ([#12](https://github.com/cursorcl/dipalza_mobile/issues/12)) ([be775f8](https://github.com/cursorcl/dipalza_mobile/commit/be775f83cd05408fdd7916e3f22d35f9e4125904))
+
 # [2.3.0](https://github.com/cursorcl/dipalza_mobile/compare/v2.2.0...v2.3.0) (2026-07-19)
 
 
