@@ -1,10 +1,13 @@
 // ignore_for_file: unused_import
 
+import 'dart:async';
+
 import 'package:dipalza_movil/src/page/login/login.page.dart';
 import 'package:dipalza_movil/src/page/ventas/listado.ultima.venta.page.dart';
 import 'package:dipalza_movil/src/services/location_permission_service.dart';
 import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart' show openAppSettings;
 
 import '../../model/venta_model.dart';
 import '../../share/app_scaffold_key.dart';
@@ -26,8 +29,10 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   int _currentIndex = 0;
+  bool _permisoUbicacionSiempreOk = true;
+  Timer? _recordatorioPermisoTimer;
   final List<Widget> _pages = [
     const ListadeDeVentasPage(),
     const ResumenDeVentasPage(),
@@ -40,9 +45,58 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) solicitarPermisoUbicacionSiempre(context);
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await solicitarPermisoUbicacionSiempre(context);
+      _verificarPermisoUbicacion();
     });
+    _recordatorioPermisoTimer = Timer.periodic(
+      const Duration(minutes: 5),
+      (_) => _recordarPermisoSiFalta(),
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _recordatorioPermisoTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // El usuario puede desactivar el permiso desde Ajustes mientras la app
+    // está en segundo plano; se re-evalúa cada vez que vuelve a primer plano.
+    if (state == AppLifecycleState.resumed) {
+      _verificarPermisoUbicacion();
+    }
+  }
+
+  Future<void> _verificarPermisoUbicacion() async {
+    final ok = await tienePermisoUbicacionSiempre();
+    if (mounted) setState(() => _permisoUbicacionSiempreOk = ok);
+  }
+
+  Future<void> _recordarPermisoSiFalta() async {
+    final ok = await tienePermisoUbicacionSiempre();
+    if (!mounted) return;
+    setState(() => _permisoUbicacionSiempreOk = ok);
+    if (ok) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'La ubicación permanente está desactivada. El equipo de '
+          'logística no puede ver tu recorrido.',
+        ),
+        duration: Duration(seconds: 6),
+        action: SnackBarAction(
+          label: 'Ajustes',
+          onPressed: openAppSettings,
+        ),
+      ),
+    );
   }
 
   @override
@@ -105,6 +159,16 @@ class _HomePageState extends State<HomePage> {
                   selected: _currentIndex == 5,
                   onTap: () => _navegar(5),
                 ),
+                if (!_permisoUbicacionSiempreOk)
+                  ListTile(
+                    leading: const Icon(Icons.location_off, color: Colors.red),
+                    title: const Text('Ubicación desactivada'),
+                    subtitle: const Text('Toca para activarla en Ajustes'),
+                    onTap: () {
+                      Navigator.pop(context); // cierra el drawer
+                      openAppSettings();
+                    },
+                  ),
               ],
             ),
           ),
