@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../model/rutas_model.dart';
 import '../../provider/vendedor_ruta_provider.dart';
 import '../../services/api_client.dart';
+import '../../services/background_location_service.dart';
 import '../../share/app.navigator.dart';
 import '../../share/app_routes.dart';
 import '../../share/app_scaffold_key.dart';
@@ -615,6 +616,7 @@ class _ConfiguracionPageState extends State<ConfiguracionPage> {
                 if (salir == true && mounted) {
                   // Limpia tokens/estado y navega a login
                   _prefs.access_token = '';
+                  await detenerServicioUbicacion();
                   AppNavigator.goToLogin();
                 }
               },

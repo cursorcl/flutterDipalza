@@ -2,10 +2,9 @@
 
 import 'package:dipalza_movil/src/page/login/login.page.dart';
 import 'package:dipalza_movil/src/page/ventas/listado.ultima.venta.page.dart';
+import 'package:dipalza_movil/src/services/location_permission_service.dart';
 import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../model/venta_model.dart';
 import '../../share/app_scaffold_key.dart';
@@ -41,46 +40,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      _gestionarPermisosUbicacion();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) solicitarPermisoUbicacionSiempre(context);
     });
-  }
-
-  Future<void> _gestionarPermisosUbicacion() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // 1. ¿Está el GPS encendido en el emulador?
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      print('El GPS está desactivado en el emulador.');
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('El usuario rechazó el permiso básico.');
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      print('Permisos bloqueados permanentemente en ajustes.');
-      return;
-    }
-
-    if (permission == LocationPermission.whileInUse) {
-      print('Solicitando permiso de fondo...');
-      permission = await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.always) {
-        print('Permiso de background concedido con éxito.');
-      } else {
-        print('El usuario no activó "Permitir siempre".');
-      }
-    }
   }
 
   @override

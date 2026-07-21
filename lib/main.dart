@@ -4,8 +4,10 @@ import 'package:dipalza_movil/src/bloc/login_bloc.dart';
 import 'package:dipalza_movil/src/page/config/server_setup.page.dart';
 import 'package:dipalza_movil/src/page/login/auth_gate.dart';
 import 'package:dipalza_movil/src/services/api_client.dart';
+import 'package:dipalza_movil/src/services/background_location_service.dart';
 import 'package:dipalza_movil/src/services/connectivity_service.dart';
 import 'package:dipalza_movil/src/services/locator.dart';
+import 'package:dipalza_movil/src/services/posicion_queue.dart';
 import 'package:dipalza_movil/src/share/app.navigator.dart';
 import 'package:dipalza_movil/src/share/app_router.dart';
 import 'package:dipalza_movil/src/share/app_routes.dart';
@@ -18,13 +20,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
 import 'package:provider/provider.dart';
 
 import 'src/bloc/condicion_venta_bloc.dart';
-
-Timer? _timerPosicion;
-late Position _ultimaPosicionConocida;
 
 // 1. Función global para el servicio
 @pragma('vm:entry-point')
@@ -32,6 +31,11 @@ Future<bool> onStart(ServiceInstance service) async {
   final prefs = PreferenciasUsuario();
   await prefs.initPrefs();
   final apiClient = ApiClient();
+
+  // Reenvía a la UI (isolate principal) la sesión expirada detectada acá:
+  // el ApiClient de este isolate es una instancia independiente, su stream
+  // onSessionExpired no llega solo al listener de MyApp.
+  apiClient.onSessionExpired.listen((_) => service.invoke(kMensajeSesionExpirada));
 
   if (defaultTargetPlatform == TargetPlatform.iOS) {
     // iOS: stream de ubicación
@@ -42,17 +46,38 @@ Future<bool> onStart(ServiceInstance service) async {
       showBackgroundLocationIndicator: true,
       allowBackgroundLocationUpdates: true,
     );
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return true; // sale de onStart limpiamente
-    Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-      (Position position) {
-        _ultimaPosicionConocida = position;
-        _enviarAlServidor(apiClient, position);
-      },
-      onError: (e) => debugPrint('[BG] Error en stream GPS: $e'),
-    );
+
+    StreamSubscription<Position>? posicionSub;
+
+    void iniciarStream() {
+      posicionSub?.cancel();
+      posicionSub = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+        (Position position) => _procesarPosicion(apiClient, position),
+        onError: (e) {
+          debugPrint('[BG] Error en stream GPS: $e');
+          posicionSub = null;
+        },
+      );
+    }
+
+    if (await Geolocator.isLocationServiceEnabled()) {
+      iniciarStream();
+    }
+
+    // Si el GPS estaba apagado al iniciar (o se apaga/enciende después),
+    // este stream avisa el cambio y permite (re)iniciar la captura sin
+    // esperar a que el servicio se reinicie.
+    Geolocator.getServiceStatusStream().listen((status) {
+      if (status == ServiceStatus.enabled && posicionSub == null) {
+        iniciarStream();
+      } else if (status == ServiceStatus.disabled) {
+        posicionSub?.cancel();
+        posicionSub = null;
+        debugPrint('[BG] GPS desactivado, deteniendo stream');
+      }
+    });
   } else {
-    // Android: timer cada 5 minutos
+    // Android: timer cada 1 minuto
     final locationSettings = AndroidSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 500,
@@ -75,10 +100,10 @@ Future<bool> onStart(ServiceInstance service) async {
       }
 
       try {
-        _ultimaPosicionConocida = await Geolocator.getCurrentPosition(
+        final posicion = await Geolocator.getCurrentPosition(
           locationSettings: locationSettings,
         );
-        await _enviarAlServidor(apiClient, _ultimaPosicionConocida);
+        await _procesarPosicion(apiClient, posicion);
       } catch (e) {
         debugPrint('[BG] Error obteniendo posición: $e');
       }
@@ -88,19 +113,46 @@ Future<bool> onStart(ServiceInstance service) async {
   return true;
 }
 
-Future<void> _enviarAlServidor(ApiClient _apiClient, Position position) async {
+/// Envía la posición actual (reintentando antes lo que haya quedado
+/// pendiente de ciclos anteriores). Si el envío falla por falta de
+/// conectividad u otro error, la posición se encola localmente en vez de
+/// perderse.
+Future<void> _procesarPosicion(ApiClient apiClient, Position position) async {
+  final prefs = PreferenciasUsuario();
+  await prefs.initPrefs();
+  if (prefs.access_token.isEmpty || prefs.vendedor.isEmpty) return;
+
+  await _vaciarColaPendiente(apiClient);
+
+  final actual = PosicionPendiente(
+    vendedorId: prefs.vendedor,
+    latitud: position.latitude,
+    longitud: position.longitude,
+    fechaHora: DateTime.now().toIso8601String(),
+  );
+
+  final enviado = await _enviarPosicion(apiClient, actual);
+  if (!enviado) {
+    await PosicionQueueDB.instance.encolar(actual);
+  }
+}
+
+Future<bool> _enviarPosicion(ApiClient apiClient, PosicionPendiente posicion) async {
   try {
-    final prefs = PreferenciasUsuario();
-    await prefs.initPrefs();
-    if (prefs.access_token.isEmpty || prefs.vendedor.isEmpty) return;
-    await _apiClient.dio.post('/api/posicion', data: {
-      'vendedorId': prefs.vendedor,
-      'latitud': position.latitude,
-      'longitud': position.longitude,
-      'fechaHora': DateTime.now().toIso8601String(),
-    });
+    await apiClient.dio.post('/api/posicion', data: posicion.toMap());
+    return true;
   } catch (e) {
-    debugPrint("Error en envío periódico: $e");
+    debugPrint('Error en envío de posición: $e');
+    return false;
+  }
+}
+
+Future<void> _vaciarColaPendiente(ApiClient apiClient) async {
+  final pendientes = await PosicionQueueDB.instance.obtenerPendientes();
+  for (final pendiente in pendientes) {
+    final enviado = await _enviarPosicion(apiClient, pendiente);
+    if (!enviado) break; // el servidor sigue sin responder, se reintenta en el próximo ciclo
+    await PosicionQueueDB.instance.eliminar(pendiente.id!);
   }
 }
 
@@ -146,10 +198,10 @@ void main() async {
   final prefs = new PreferenciasUsuario();
   await prefs.initPrefs();
 
-  // ✅ Solicitar permisos ANTES de inicializar el servicio
+  // ✅ Solicitar permiso de notificación (requerido por el foreground
+  // service en Android 13+). El permiso de ubicación se pide más adelante,
+  // en Home, con una explicación previa (ver location_permission_service.dart).
   await Permission.notification.request();
-  await Permission.location.request();
-  await Permission.locationAlways.request();
 
   setupLocator();
   await initializeService();
@@ -180,6 +232,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late StreamSubscription _sessionSub;
+  StreamSubscription? _sessionExpiradaBackgroundSub;
 
   @override
   void initState() {
@@ -189,17 +242,28 @@ class _MyAppState extends State<MyApp> {
         _handleSessionExpired();
       }
     });
+
+    // La sesión también puede expirar dentro del isolate del servicio de
+    // ubicación en segundo plano; ese ApiClient reenvía el evento acá.
+    _sessionExpiradaBackgroundSub =
+        FlutterBackgroundService().on(kMensajeSesionExpirada).listen((_) {
+      if (mounted) {
+        _handleSessionExpired();
+      }
+    });
   }
 
   @override
   void dispose() {
     _sessionSub.cancel();
+    _sessionExpiradaBackgroundSub?.cancel();
     super.dispose();
   }
 
   void _handleSessionExpired() async {
     final prefs = PreferenciasUsuario();
     await prefs.borrarCredenciales();
+    await detenerServicioUbicacion();
     AppNavigator.goToLogin();
   }
 

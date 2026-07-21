@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // Para tus permisos
 import 'package:jwt_decoder/jwt_decoder.dart'; // Asegúrate de tener esta dependencia
 
 import '../../provider/vendedor_ruta_provider.dart';
@@ -31,10 +30,7 @@ class _AuthGateState extends State<AuthGate> {
     // 1. (Opcional) Pequeña pausa para que se vea tu logo y no sea un parpadeo
     await Future.delayed(const Duration(seconds: 2));
 
-    // 2. Validar Permisos (Movemos tu lógica aquí para no congelar el main)
-    await _validaPermisos();
-
-    // 3. Verificar Sesión
+    // 2. Verificar Sesión
     final prefs = PreferenciasUsuario();
     final refreshToken = prefs.refreshToken;
 
@@ -106,17 +102,6 @@ class _AuthGateState extends State<AuthGate> {
     } else {
       await prefs.borrarCredenciales();
       Navigator.of(context).pushReplacementNamed(AppRoutes.login);
-    }
-  }
-
-  Future<void> _validaPermisos() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Intento secundario
-        await Geolocator.requestPermission();
-      }
     }
   }
 
