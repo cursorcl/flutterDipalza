@@ -47,3 +47,7 @@ app.*.map.json
 .worktrees/
 
 node_modules/
+
+# Cobertura de tests y archivos efímeros de iOS generados por Flutter
+coverage/
+ios/Flutter/ephemeral/
