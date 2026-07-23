@@ -1,3 +1,11 @@
+## [2.4.1](https://github.com/cursorcl/dipalza_mobile/compare/v2.4.0...v2.4.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* mejora confiabilidad del reporte de posición GPS y permisos de ubicación ([#13](https://github.com/cursorcl/dipalza_mobile/issues/13)) ([871a044](https://github.com/cursorcl/dipalza_mobile/commit/871a044254423d369826ea1913ea006e3b771b43))
+* renombra la app a "Ventas" en pantalla de inicio ([#14](https://github.com/cursorcl/dipalza_mobile/issues/14)) ([4506967](https://github.com/cursorcl/dipalza_mobile/commit/45069678ac3c861fcc8f6d05d9ccdc405a71658d))
+
 # [2.4.0](https://github.com/cursorcl/dipalza_mobile/compare/v2.3.0...v2.4.0) (2026-07-19)
 
 
