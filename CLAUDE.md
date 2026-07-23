@@ -71,7 +71,7 @@ Páginas UI → BLoCs / Clases de datos Provider → lib/src/provider/ (capa API
 Navigator 1.0 con rutas nombradas. Todas las rutas definidas en `lib/src/share/app_routes.dart`, mapeadas en `AppRouter.generateRoute()` (`lib/src/share/app_router.dart`). La navegación pasa por `AppNavigator` que mantiene una `NavigatorKey` global — esto permite navegar desde fuera del árbol de widgets (p.ej., desde `ApiClient` al expirar la sesión).
 
 ### Servicio GPS en Segundo Plano
-Corre en un **isolate separado** mediante `flutter_background_service`. Al estar aislado, no puede acceder al contenedor DI de la app principal — re-instancia `ApiClient` y `PreferenciasUsuario` de forma independiente. La ubicación se consulta (Android: cada 1 min mediante `Timer.periodic`; iOS: stream continuo con filtro de 500 m) y se envía mediante POST a `/api/posicion`.
+Corre en un **isolate separado** mediante `flutter_background_service`. Al estar aislado, no puede acceder al contenedor DI de la app principal — re-instancia `ApiClient` y `PreferenciasUsuario` de forma independiente. La ubicación se consulta cada 30 segundos mediante `Timer.periodic` (misma lógica en Android e iOS) y se envía mediante POST a `/api/posicion`.
 
 ### Sistema de Logging Local
 `DBLogProvider` (`lib/src/log/db_log_provider.dart`) es un singleton que persiste logs en SQLite (`EmmaLogDB.db`). Usar las funciones de fábrica en `log_util.dart`:
