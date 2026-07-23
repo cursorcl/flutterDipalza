@@ -37,78 +37,44 @@ Future<bool> onStart(ServiceInstance service) async {
   // onSessionExpired no llega solo al listener de MyApp.
   apiClient.onSessionExpired.listen((_) => service.invoke(kMensajeSesionExpirada));
 
-  if (defaultTargetPlatform == TargetPlatform.iOS) {
-    // iOS: stream de ubicación
-    final locationSettings = AppleSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 500,
-      pauseLocationUpdatesAutomatically: false,
-      showBackgroundLocationIndicator: true,
-      allowBackgroundLocationUpdates: true,
-    );
-
-    StreamSubscription<Position>? posicionSub;
-
-    void iniciarStream() {
-      posicionSub?.cancel();
-      posicionSub = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-        (Position position) => _procesarPosicion(apiClient, position),
-        onError: (e) {
-          debugPrint('[BG] Error en stream GPS: $e');
-          posicionSub = null;
-        },
-      );
-    }
-
-    if (await Geolocator.isLocationServiceEnabled()) {
-      iniciarStream();
-    }
-
-    // Si el GPS estaba apagado al iniciar (o se apaga/enciende después),
-    // este stream avisa el cambio y permite (re)iniciar la captura sin
-    // esperar a que el servicio se reinicie.
-    Geolocator.getServiceStatusStream().listen((status) {
-      if (status == ServiceStatus.enabled && posicionSub == null) {
-        iniciarStream();
-      } else if (status == ServiceStatus.disabled) {
-        posicionSub?.cancel();
-        posicionSub = null;
-        debugPrint('[BG] GPS desactivado, deteniendo stream');
-      }
-    });
-  } else {
-    // Android: timer cada 1 minuto
-    final locationSettings = AndroidSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 500,
-      intervalDuration: const Duration(minutes: 1),
-    );
-
-    Timer.periodic(const Duration(minutes: 1), (timer) async {
-      // ✅ Guard antes de pedir posición
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        debugPrint('[BG] GPS desactivado, skip envío');
-        return; // espera al próximo tick
-      }
-
-      final permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        debugPrint('[BG] Permiso de ubicación denegado, skip envío');
-        return;
-      }
-
-      try {
-        final posicion = await Geolocator.getCurrentPosition(
-          locationSettings: locationSettings,
+  // Android e iOS: timer cada 30 segundos. Se usa un timer en ambas
+  // plataformas (en vez de un stream por distancia en iOS) para que la
+  // posición se reporte de forma regular aunque el dispositivo esté quieto.
+  final locationSettings = defaultTargetPlatform == TargetPlatform.iOS
+      ? AppleSettings(
+          accuracy: LocationAccuracy.high,
+          pauseLocationUpdatesAutomatically: false,
+          showBackgroundLocationIndicator: true,
+          allowBackgroundLocationUpdates: true,
+        )
+      : AndroidSettings(
+          accuracy: LocationAccuracy.high,
         );
-        await _procesarPosicion(apiClient, posicion);
-      } catch (e) {
-        debugPrint('[BG] Error obteniendo posición: $e');
-      }
-    });
-  }
+
+  Timer.periodic(const Duration(seconds: 30), (timer) async {
+    // ✅ Guard antes de pedir posición
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      debugPrint('[BG] GPS desactivado, skip envío');
+      return; // espera al próximo tick
+    }
+
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      debugPrint('[BG] Permiso de ubicación denegado, skip envío');
+      return;
+    }
+
+    try {
+      final posicion = await Geolocator.getCurrentPosition(
+        locationSettings: locationSettings,
+      );
+      await _procesarPosicion(apiClient, posicion);
+    } catch (e) {
+      debugPrint('[BG] Error obteniendo posición: $e');
+    }
+  });
 
   return true;
 }
