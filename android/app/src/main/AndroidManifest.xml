@@ -22,7 +22,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="Dipalza"
+        android:label="Ventas"
         android:usesCleartextTraffic="true">
 
         <service
